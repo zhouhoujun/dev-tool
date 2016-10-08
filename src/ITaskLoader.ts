@@ -23,8 +23,10 @@ export interface ITaskLoader {
      * setup task.
      * 
      * @param {TaskConfig} config
-     * 
+     * @param {ITask[]} tasks
+     * @returns {Promise<Array<string|string[]>>}
+     
      * @memberOf ITaskLoader
      */
-    setup(config: TaskConfig);
+    setup(config: TaskConfig, tasks: ITask[]): Promise<Array<string | string[] | Function>>;
 }

@@ -13,7 +13,7 @@ import { Operation }  from './Operation';
 
 export class Development {
     static create(dirname: string, option?: TaskOption) {
-
+        return new Development(dirname, option);
     }
 
     constructor(private dirname: string, protected option: TaskOption) {
@@ -22,17 +22,46 @@ export class Development {
     }
 
     init() {
-        gulp.task('build', (callback: gulp.TaskCallback) => {
+        gulp.task('build', () => {
             var options: EnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development' }
             });
-
-            console.log('begin load task.', options);
-
-            this.loadTasks(options);
-            return this.run(callback);
+            return this.run(options);
         })
+    }
+
+    protected run(env: EnvOption) {
+
+        return Promise.all(
+            _.map(_.isArray(this.option.tasks) ? <TaskConfig[]>this.option.tasks : [<TaskConfig>this.option.tasks], task => {
+                console.log('begin load task.', task.loader);
+                let loader = this.createLoader(task.loader);
+                let oper;
+                if (env.deploy) {
+                    oper = Operation.deploy;
+                } else if (env.release) {
+                    oper = Operation.release;
+                } else if (env.e2e) {
+                    oper = Operation.e2e;
+                } else if (env.test) {
+                    oper = Operation.test;
+                } else {
+                    oper = Operation.build;
+                }
+                return loader.load(oper)
+                    .then(tasks => {
+                        return loader.setup(task, tasks)
+                    })
+                    .then(tasksq => {
+                        return new Promise((reslove, reject) => {
+                            tasksq.push(() => {
+                                reslove();
+                            });
+                            runSequence.call(runSequence, tasksq);
+                        });
+                    });
+            }));
     }
 
     protected createLoader(option: LoaderOption): ITaskLoader {
@@ -47,34 +76,8 @@ export class Development {
         return loader;
     }
 
-    protected loadTasks(env: EnvOption) {
 
-        _.each(_.isArray(this.option.tasks) ? <TaskConfig[]>this.option.tasks : [<TaskConfig>this.option.tasks], task => {
-            let loader = this.createLoader(task.loader);
-            let oper;
-            if (env.deploy) {
-                oper = Operation.deploy;
-            } else if (env.release) {
-                oper = Operation.release;
-            } else if (env.e2e) {
-                oper = Operation.e2e;
-            } else if (env.test) {
-                oper = Operation.test;
-            } else {
-                oper = Operation.build;
-            }
-            loader.load(oper)
-                .then(tasks => {
-                    return loader.setup(task);
-                });
-        });
-    }
-
-    // run(callback: gulp.TaskCallback, taskFactory?: TaskFactory, configFacotry?: ConfigFactory): any {
-
-    // }
-
-    printHelp(help: boolean | string) {
+    protected printHelp(help: boolean | string) {
         if (help === 'en') {
 
             console.log(`

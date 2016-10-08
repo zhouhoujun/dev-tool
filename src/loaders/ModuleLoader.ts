@@ -14,7 +14,7 @@ export class ModuleLoader implements ITaskLoader {
 
     }
 
-    setup(config: TaskConfig) {
+    setup(config: TaskConfig, tasks: ITask[]): Promise<Array<string | string[] | Function>> {
 
     }
 }

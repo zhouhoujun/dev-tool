@@ -1,23 +1,24 @@
 {
   "name": "development-tool",
   "version": "0.1.0",
-  "description": "AngularJS build tools",
+  "description": "development build tools.",
   "main": "./lib/tools.js",
   "typings": "./lib/tools",
   "scripts": {
     "gulp": "gulp",
     "postinstall": "npm prune && typings install",
     "reinstall": "npm cache clean && npm install",
-    "test": "gulp test --color",
-    "prepublish": "gulp build",
+    "test": "gulp build test",
+    "publish": "gulp build --release",
     "e2e": "protractor",
     "e2e.live": "protractor --elementExplorer"
   },
   "keywords": [
-    "jspm",
-    "incremental",
-    "group",
-    "bundle"
+    "development",
+    "tool",
+    "typescript",
+    "node",
+    "babel"
   ],
   "author": "houjun",
   "license": "MIT",
@@ -33,11 +34,10 @@
     "checksum": "^0.1.1",
     "color-console": "^0.0.1",
     "gulp": "^3.9.1",
-    "gulp-ng-annotate": "^2.0.0",
     "gulp-uglify": "^1.5.4",
-    "jspm": "^0.16.39",
-    "jspm-bundle-tool": "^0.1.1",
-    "lodash": "^4.13.1"
+    "lodash": "^4.13.1",
+    "minimist": "^1.2.0",
+    "run-sequence": "^1.2.2"
   },
   "devDependencies": {
     "bluebird": "^3.4.1",

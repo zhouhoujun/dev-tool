@@ -1,4 +1,5 @@
-// export * from 'jspm-bundle-tool';
+import { Operation } from './operation';
+
 export interface EnvOption {
     /**
      * jspm project root.
@@ -67,5 +68,12 @@ export interface TaskConfig {
      * build folder. default 'dist'.
      */
     dist: string;
+
+    /**
+     * external task for 
+     * 
+     * @memberOf TaskConfig
+     */
+    externalTask?: ((oper: Operation) => string | string [] | void)
 }
 
