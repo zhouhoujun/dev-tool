@@ -85,7 +85,7 @@ export class Development {
                  * gulp build [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]\n
                  * @params\n
                  *  --env  development or production;\n
-                 *  --config app setting, name is the words(src/config-*.json)*; default settings: test, produce, beijing; Or you can add youself setting config file at the path and named as "src/config-*.json" /\n
+                 *  --config app setting, name is the words(src/*.json)*; default settings: test, produce; Or you can add youself setting config file at the path and named as "src/config-*.json" /\n
                  *  --root rootPath, set relative path of the app root\n
                  *  --aspnet to set build as aspnet service or not.\n
                  *  --watch  watch src file change or not. if changed will auto update to node service. \n
@@ -106,7 +106,7 @@ export class Development {
                  * gulp build 启动编译工具 [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]\n
                  * @params\n
                  *  --env 发布环境 默认开发环境development;\n
-                 *  --config 设置配置文件， name为配置文件(src/config-*.json)中*的名字; 默认配置有test, produce, beijing; 可以手动添加自己要的配置，配置文件命名路径规则src/config-*.json /\n
+                 *  --config 设置配置文件， name为配置文件(src/*.json)中*的名字; 默认配置有test, produce; 可以手动添加自己要的配置，配置文件命名路径规则src/config-*.json /\n
                  *  --root rootPath, 设置前端APP相对站点路径\n
                  *  --aspnet 是否发布为 aspnet服务环境\n
                  *  --watch  是否需要动态监听文件变化\n
