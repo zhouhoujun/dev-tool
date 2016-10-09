@@ -3,7 +3,7 @@
 This repo is for distribution on `npm`. The source for this module is in the
 [main repo](https://github.com/zhouhoujun/development-tool/src/mastert).
 Please file issues and pull requests against that repo.
-This package use to bundle jspm project by custom group. 
+This package use to develop kit for project development via gulp tasks.
 
 ## Install
 
@@ -21,23 +21,14 @@ You can `import` modules:
 
 ```js
 
-import  { JSPMBuilder } from 'development-tool';
+import  { Development } from 'development-tool';
 
-builder = new JSPMBuilder(options);
-//bundle all ,setting in options.
-builder.bundle();
-//only bundle group1, setting in options .
-builder.bundle('group1');
-//bundle 'group1','group2','group2', setting in options .
-builder.bundle(['group1','group2','group2'])
+Development.create(__dirname, options);
+//or
+new Development(__dirname, options);
 
 ```
 
-### jspm
-
-```shell
-jspm install github:zhouhoujun/development-tool
-```
 https://github.com/zhouhoujun/development-tool.git
 The mocks are then available at `jspm_components/development-tool/development-tool.js`.
 
