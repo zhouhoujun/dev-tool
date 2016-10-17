@@ -1,6 +1,8 @@
-import { ITask } from './ITask';
 import { TaskConfig } from './TaskConfig';
+import { TaskOption } from './TaskOption';
 import { Operation }  from './Operation';
+
+export type Task = (config: TaskConfig, callback?: Function) => string | string[];
 
 /**
  * task loader.
@@ -17,16 +19,16 @@ export interface ITaskLoader {
      * 
      * @memberOf ITaskLoader
      */
-    load(oper: Operation): Promise<ITask[]>;
+    load(oper: Operation): Promise<Task[]>;
 
     /**
-     * setup task.
+     * load config.
      * 
-     * @param {TaskConfig} config
-     * @param {ITask[]} tasks
-     * @returns {Promise<Array<string|string[]>>}
-     
+     * @param {Operation} oper
+     * @returns {Promise<TaskConfig>}
+     * 
      * @memberOf ITaskLoader
      */
-    setup(config: TaskConfig, tasks: ITask[]): Promise<Array<string | string[] | Function>>;
+    loadConfg(oper: Operation, option: TaskOption): Promise<TaskConfig>;
+
 }

@@ -68,12 +68,18 @@ export interface TaskConfig {
      * build folder. default 'dist'.
      */
     dist: string;
-
     /**
      * external task for 
      * 
      * @memberOf TaskConfig
      */
-    externalTask?: ((oper: Operation) => string | string [] | void)
+    externalTask?: ((oper: Operation) => string | string[] | void);
+    /**
+     * run tasks sequence.
+     * 
+     * 
+     * @memberOf TaskConfig
+     */
+    runTasks?: Array<string | string[]> | ((tasks: Array<string | string[]>) => Array<string | string[]>);
 }
 
