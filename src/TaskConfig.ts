@@ -28,6 +28,9 @@ export enum Operation {
     deploy
 }
 
+/**
+ * type task name sequence 
+ */
 export type TaskNameSequence = Array<string | string[] | Function>;
 
 export type Task = (config: TaskConfig, callback?: Function) => string | string[] | void;
@@ -38,6 +41,12 @@ export type tasksInDir = (dirs: string | string[]) => Promise<Task[]>;
 
 export type moduleTaskLoader = (oper: Operation, option: TaskOption, loadFromDir?: tasksInDir) => Task[];
 
+/**
+ * event option
+ * 
+ * @export
+ * @interface EnvOption
+ */
 export interface EnvOption {
     /**
      * jspm project root.
@@ -98,13 +107,6 @@ export interface LoaderOption {
      */
     type: string;
     /**
-     * loader dir
-     * 
-     * @type {string[]}
-     * @memberOf LoaderOption
-     */
-    dir?: string[];
-    /**
      * module name or url
      * 
      * @type {string}
@@ -151,6 +153,37 @@ export interface LoaderOption {
      * @memberOf LoaderOption
      */
     isTaskFunc?: ((name: string) => boolean);
+}
+
+/**
+ * loader to load tasks from directory.
+ * 
+ * @export
+ * @interface DirLoaderOption
+ * @extends {LoaderOption}
+ */
+export interface DirLoaderOption extends LoaderOption {
+    /**
+     * loader dir
+     * 
+     * @type {string[]}
+     * @memberOf LoaderOption
+     */
+    dir?: string[];
+    /**
+     * config in directory. 
+     * 
+     * @type {string}
+     * @memberOf DirLoaderOption
+     */
+    dirConfigFile?: string;
+    /**
+     * dir Config Builder name
+     * 
+     * @type {string}
+     * @memberOf DirLoaderOption
+     */
+    dirConfigBuilderName?: string | string[];
 }
 
 /**
@@ -203,5 +236,5 @@ export interface TaskConfig {
     oper: Operation;
     option: TaskOption;
     runTasks?(): TaskNameSequence;
+    printHelp?(lang: string): void;
 }
-

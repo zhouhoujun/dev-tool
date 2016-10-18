@@ -38,13 +38,14 @@
     "checksum": "^0.1.1",
     "color-console": "^0.0.1",
     "gulp": "^3.9.1",
-    "gulp-ng-annotate": "^2.0.0",
-    "gulp-uglify": "^1.5.4",
-    "jspm": "^0.16.39",
+    "run-sequence": "*",
     "lodash": "^4.13.1"
   },
   "devDependencies": {
     "bluebird": "^3.4.1",
+    "gulp-typescript": "^3.0.2",
+    "merge2": "^1.0.2",
+    "del": "^2.2.1",
     "through2": "^2.0.1",
     "ts-node": "^1.6.0",
     "tslint": "^3.15.1",

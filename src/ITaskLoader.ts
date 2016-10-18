@@ -1,4 +1,4 @@
-import { Operation, Task, TaskOption, TaskConfig } from './TaskConfig';
+import { Operation, Task, TaskConfig } from './TaskConfig';
 
 
 

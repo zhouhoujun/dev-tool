@@ -50,18 +50,31 @@ export class Development {
                 }
                 return loader.loadConfg(oper)
                     .then(cfg => {
-                        return loader.load(oper)
-                            .then(tasks => {
-                                return this.setup(cfg, tasks)
-                            });
+                        if (cfg.env.help) {
+                            if (cfg.printHelp) {
+                                cfg.printHelp(_.isString(cfg.env.help) ? cfg.env.help : '');
+                            } else {
+                                this.printHelp(cfg.env.help);
+                            }
+                            return null;
+                        } else {
+                            return loader.load(oper)
+                                .then(tasks => {
+                                    return this.setup(cfg, tasks)
+                                });
+                        }
                     })
                     .then(tasksq => {
-                        return new Promise((reslove, reject) => {
-                            tasksq.push(() => {
-                                reslove();
+                        if (!tasksq) {
+                            return null;
+                        } else {
+                            return new Promise((reslove, reject) => {
+                                tasksq.push(() => {
+                                    reslove();
+                                });
+                                runSequence.call(runSequence, tasksq);
                             });
-                            runSequence.call(runSequence, tasksq);
-                        });
+                        }
                     });
             }));
     }
