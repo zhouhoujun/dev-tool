@@ -1,6 +1,11 @@
 import { ITaskLoader } from './ITaskLoader';
 import { Task, TaskOption, EnvOption, TaskConfig, TaskNameSequence } from './TaskConfig';
 import { DevelopConfig } from './DevelopConfig';
+export * from './DevelopConfig';
+export * from './TaskConfig';
+export * from './ITaskLoader';
+export * from './LoaderFactory';
+export * from './loaders/BaseLoader';
 export declare class Development {
     private dirname;
     protected option: DevelopConfig;

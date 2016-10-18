@@ -10,6 +10,12 @@ import { Task, TaskOption, Operation, EnvOption, TaskConfig, TaskNameSequence } 
 import defaultConfig, { DevelopConfig } from './DevelopConfig';
 
 
+export * from './DevelopConfig';
+export * from './TaskConfig';
+export * from './ITaskLoader';
+export * from './LoaderFactory';
+export * from './loaders/BaseLoader';
+
 export class Development {
     static create(dirname: string, option?: DevelopConfig) {
         return new Development(dirname, option);
