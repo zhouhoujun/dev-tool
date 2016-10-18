@@ -1,8 +1,6 @@
 import * as _ from 'lodash';
-import { ITask } from '../ITask';
-import { TaskConfig } from '../TaskConfig';
+import { Task, Operation, TaskOption, TaskConfig } from '../TaskConfig';
 import { ITaskLoader }  from '../ITaskLoader';
-import { Operation }  from '../Operation';
 
 export class ModuleLoader implements ITaskLoader {
 
@@ -10,11 +8,11 @@ export class ModuleLoader implements ITaskLoader {
 
     }
 
-    load(oper: Operation): Promise<ITask[]> {
-
+    load(oper: Operation): Promise<Task[]> {
+        return null;
     }
 
-    setup(config: TaskConfig, tasks: ITask[]): Promise<Array<string | string[] | Function>> {
-
+    loadConfg(oper: Operation, option: TaskOption): Promise<TaskConfig> {
+        return null;
     }
 }

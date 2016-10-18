@@ -1,8 +1,6 @@
-import { TaskConfig } from './TaskConfig';
-import { TaskOption } from './TaskOption';
-import { Operation }  from './Operation';
+import { Operation, Task, TaskOption, TaskConfig } from './TaskConfig';
 
-export type Task = (config: TaskConfig, callback?: Function) => string | string[];
+
 
 /**
  * task loader.

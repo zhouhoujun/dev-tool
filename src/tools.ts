@@ -1,22 +1,21 @@
 import * as _ from 'lodash';
 import * as gulp from 'gulp';
-import { existsSync, readdirSync, lstatSync } from 'fs';
-import * as path from 'path';
+import { readdirSync, lstatSync } from 'fs';
+// import * as path from 'path';
 import * as runSequence from 'run-sequence';
 import * as minimist from 'minimist';
-import { Task, ITaskLoader } from './ITaskLoader';
+import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { EnvOption, TaskConfig, LoaderOption } from './TaskConfig';
-import defaultConfig, { TaskOption } from './TaskOption';
-import { Operation } from './Operation';
+import { Task, TaskOption, Operation, EnvOption, TaskConfig, LoaderOption } from './TaskConfig';
+import defaultConfig, { DevelopConfig } from './DevelopConfig';
 
 
 export class Development {
-    static create(dirname: string, option?: TaskOption) {
+    static create(dirname: string, option?: DevelopConfig) {
         return new Development(dirname, option);
     }
 
-    constructor(private dirname: string, protected option: TaskOption) {
+    constructor(private dirname: string, protected option: DevelopConfig) {
         this.option = _.defaultsDeep(option || {}, defaultConfig);
         this.init();
     }
@@ -34,9 +33,9 @@ export class Development {
     protected run(env: EnvOption) {
 
         return Promise.all(
-            _.map(_.isArray(this.option.tasks) ? <TaskConfig[]>this.option.tasks : [<TaskConfig>this.option.tasks], task => {
-                console.log('begin load task.', task.loader);
-                let loader = this.createLoader(task.loader);
+            _.map(_.isArray(this.option.tasks) ? <TaskOption[]>this.option.tasks : [<TaskOption>this.option.tasks], optask => {
+                console.log('begin load task.', optask.loader);
+                let loader = this.createLoader(optask.loader);
                 let oper;
                 if (env.deploy) {
                     oper = Operation.deploy;
@@ -49,9 +48,12 @@ export class Development {
                 } else {
                     oper = Operation.build;
                 }
-                return loader.load(oper)
-                    .then(tasks => {
-                        return this.setup(task, tasks)
+                return loader.loadConfg(oper, optask)
+                    .then(cfg => {
+                        return loader.load(oper)
+                            .then(tasks => {
+                                return this.setup(cfg, tasks)
+                            });
                     })
                     .then(tasksq => {
                         return new Promise((reslove, reject) => {
@@ -70,11 +72,11 @@ export class Development {
         }))
             .then(ts => {
                 let tsqs = ts;
-                if (config.runTasks) {
-                    if (_.isArray(config.runTasks)) {
-                        tsqs = config.runTasks;
-                    } else if (_.isFunction(config.runTasks)) {
-                        tsqs = config.runTasks(ts);
+                if (config.option.runTasks) {
+                    if (_.isArray(config.option.runTasks)) {
+                        tsqs = config.option.runTasks;
+                    } else if (_.isFunction(config.option.runTasks)) {
+                        tsqs = config.option.runTasks(ts);
                     }
                 }
                 return tsqs;

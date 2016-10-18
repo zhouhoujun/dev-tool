@@ -1,13 +1,10 @@
 import * as _ from 'lodash';
-import * as gulp from 'gulp';
 import * as path from 'path';
 import { existsSync } from 'fs';
 
-import { TaskConfig } from '../TaskConfig';
-import { Task, ITaskLoader } from '../ITaskLoader';
-import { TaskOption } from '../TaskOption';
+import { Task, Operation, TaskOption, TaskConfig } from '../TaskConfig';
+import { ITaskLoader } from '../ITaskLoader';
 
-import { Operation } from '../Operation';
 const requireDir = require('require-dir');
 
 export interface OperateTask {
@@ -61,12 +58,12 @@ export class DirLoader implements ITaskLoader {
     }
 
     loadConfg(oper: Operation, option: TaskOption): Promise<TaskConfig> {
-        if (option.taskConfig) {
-            if (_.isFunction(option.taskConfig)) {
-                let tsfac = option.taskConfig();
+        if (option.loader.taskConfig) {
+            if (_.isFunction(option.loader.taskConfig)) {
+                let tsfac = option.loader.taskConfig();
                 return Promise.resolve(tsfac(oper));
-            } else if (_.isString(option.taskConfig)) {
-                let confmdl = require(option.taskConfig);
+            } else if (_.isString(option.loader.taskConfig)) {
+                let confmdl = require(option.loader.taskConfig);
                 return Promise.resolve(this.execFunc(confmdl, oper, option))
                     .then(tscf => {
                         return <TaskConfig>tscf;
@@ -102,7 +99,7 @@ export class DirLoader implements ITaskLoader {
     }
 
     private getConfigBuilder(oper: Operation, option: TaskOption, dir: string) {
-        let cfn = option.taskConfigFileName || './config';
+        let cfn = option.loader.taskConfigFileName || './config';
         let fpath = path.join(dir, cfn);
         if (/.\S[1,]$/.test(fpath)) {
             return require(fpath);

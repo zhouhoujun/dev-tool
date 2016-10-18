@@ -1,4 +1,38 @@
-import { Operation } from './operation';
+
+/**
+ * project development build operation.
+ * 
+ * @export
+ * @enum {number}
+ */
+export enum Operation {
+    /**
+     * build compile project.
+     */
+    build,
+    /**
+     * test project.
+     */
+    test,
+    /**
+     * e2e test project.
+     */
+    e2e,
+    /**
+     * release project.
+     */
+    release,
+    /**
+     * release and deploy project.
+     */
+    deploy
+}
+
+
+export type Task = (config: TaskConfig, callback?: Function) => string | string[];
+
+export type configBuilder = (oper: Operation) => TaskConfig;
+
 
 export interface EnvOption {
     /**
@@ -45,14 +79,57 @@ export interface EnvOption {
     grp?: string | string[];
 }
 
+/**
+ * task loader option.
+ * 
+ * @export
+ * @interface LoaderOption
+ */
 export interface LoaderOption {
+    /**
+     * loader type.
+     * 
+     * @type {string}
+     * @memberOf LoaderOption
+     */
     type: string;
+    /**
+     * loader dir
+     * 
+     * @type {string[]}
+     * @memberOf LoaderOption
+     */
     dir?: string[];
+    /**
+     * module
+     * 
+     * @type {string}
+     * @memberOf LoaderOption
+     */
     module?: string;
+    /**
+     * task config file name or task config builder.
+     * 
+     * 
+     * @memberOf TaskOption
+     */
+    taskConfig?: string | (() => configBuilder);
+    /**
+     * task config file name
+     * 
+     * @type {string}
+     * @memberOf TaskOption
+     */
+    taskConfigFileName?: string;
 }
 
-export interface TaskConfig {
-    env?: EnvOption;
+/**
+ * task option setting.
+ * 
+ * @export
+ * @interface TaskOption
+ */
+export interface TaskOption {
     /**
      * task loader
      * 
@@ -68,6 +145,7 @@ export interface TaskConfig {
      * build folder. default 'dist'.
      */
     dist: string;
+
     /**
      * external task for 
      * 
@@ -81,5 +159,12 @@ export interface TaskConfig {
      * @memberOf TaskConfig
      */
     runTasks?: Array<string | string[]> | ((tasks: Array<string | string[]>) => Array<string | string[]>);
+}
+
+
+
+export interface TaskConfig {
+    env: EnvOption;
+    option: TaskOption;
 }
 
