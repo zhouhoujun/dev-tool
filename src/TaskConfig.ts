@@ -28,11 +28,15 @@ export enum Operation {
     deploy
 }
 
+export type TaskNameSequence = Array<string | string[] | Function>;
 
-export type Task = (config: TaskConfig, callback?: Function) => string | string[];
+export type Task = (config: TaskConfig, callback?: Function) => string | string[] | void;
 
-export type configBuilder = (oper: Operation) => TaskConfig;
+export type configBuilder = (oper: Operation, option: TaskOption) => TaskConfig;
 
+export type tasksInDir = (dirs: string | string[]) => Promise<Task[]>;
+
+export type moduleTaskLoader = (oper: Operation, option: TaskOption, loadFromDir?: tasksInDir) => Task[];
 
 export interface EnvOption {
     /**
@@ -101,26 +105,52 @@ export interface LoaderOption {
      */
     dir?: string[];
     /**
-     * module
+     * module name or url
      * 
      * @type {string}
      * @memberOf LoaderOption
      */
     module?: string;
+
     /**
-     * task config file name or task config builder.
-     * 
-     * 
-     * @memberOf TaskOption
-     */
-    taskConfig?: string | (() => configBuilder);
-    /**
-     * task config file name
+     * config module name or url.
      * 
      * @type {string}
+     * @memberOf LoaderOption
+     */
+    configModule?: string;
+
+    /**
+     * config module name or url.
+     * 
+     * @type {string}
+     * @memberOf LoaderOption
+     */
+    taskModule?: string;
+
+    /**
+     * task config method name in module or task custom config builder.
+     * 
+     * 
      * @memberOf TaskOption
      */
-    taskConfigFileName?: string;
+    moduleTaskConfig?: string | configBuilder;
+
+    /**
+     * the task loader method name in module, or custom loader
+     * 
+     * @type {(string | moduleTaskLoader)}
+     * @memberOf LoaderOption
+     */
+    moduleTaskloader?: string | moduleTaskLoader;
+
+    /**
+     * custom external judage the name is right task name, that method of module object.
+     * 
+     * 
+     * @memberOf LoaderOption
+     */
+    isTaskFunc?: ((name: string) => boolean);
 }
 
 /**
@@ -151,20 +181,27 @@ export interface TaskOption {
      * 
      * @memberOf TaskConfig
      */
-    externalTask?: ((oper: Operation) => string | string[] | void);
+    externalTask?: Task;
     /**
-     * run tasks sequence.
+     * custom set run tasks sequence.
      * 
      * 
      * @memberOf TaskConfig
      */
-    runTasks?: Array<string | string[]> | ((tasks: Array<string | string[]>) => Array<string | string[]>);
+    runTasks?: TaskNameSequence | ((oper: Operation, tasks: TaskNameSequence) => TaskNameSequence);
 }
 
 
-
+/**
+ * run time task config for setup task.
+ * 
+ * @export
+ * @interface TaskConfig
+ */
 export interface TaskConfig {
     env: EnvOption;
+    oper: Operation;
     option: TaskOption;
+    runTasks?(): TaskNameSequence;
 }
 

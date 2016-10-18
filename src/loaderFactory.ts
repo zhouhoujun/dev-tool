@@ -1,6 +1,6 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from  './loaders/DirLoader';
-import { LoaderOption } from './TaskConfig';
+import { TaskOption } from './TaskConfig';
 import { ModuleLoader } from  './loaders/ModuleLoader';
 
 /**
@@ -10,7 +10,7 @@ import { ModuleLoader } from  './loaders/ModuleLoader';
  * @interface ILoaderFactory
  */
 export interface ILoaderFactory {
-    create(option: LoaderOption): ITaskLoader;
+    create(option: TaskOption): ITaskLoader;
 }
 
 
@@ -25,16 +25,16 @@ export class LoaderFactory implements ILoaderFactory {
 
     constructor() {
     }
-    create(option: LoaderOption): ITaskLoader {
+    create(option: TaskOption): ITaskLoader {
         let loader = null;
-        switch (option.type) {
+        switch (option.loader.type) {
             case 'dir':
-                loader = new DirLoader(option.dir);
+                loader = new DirLoader(option);
                 break;
 
             case 'module':
             default:
-                loader = new ModuleLoader(option.module);
+                loader = new ModuleLoader(option);
                 break;
         }
         return loader;

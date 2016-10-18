@@ -27,6 +27,6 @@ export interface ITaskLoader {
      * 
      * @memberOf ITaskLoader
      */
-    loadConfg(oper: Operation, option: TaskOption): Promise<TaskConfig>;
+    loadConfg(oper: Operation): Promise<TaskConfig>;
 
 }

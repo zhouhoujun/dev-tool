@@ -6,7 +6,7 @@
   "typings": "./lib/tools",
   "scripts": {
     "gulp": "gulp",
-    "postinstall": "npm prune && typings install",
+    "postinstall": "npm prune",
     "reinstall": "npm cache clean && npm install",
     "test": "gulp build test",
     "publish": "gulp build --release",

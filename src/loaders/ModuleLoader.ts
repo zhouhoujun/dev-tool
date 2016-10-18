@@ -1,18 +1,10 @@
 import * as _ from 'lodash';
 import { Task, Operation, TaskOption, TaskConfig } from '../TaskConfig';
-import { ITaskLoader }  from '../ITaskLoader';
+import { BaseLoader } from './BaseLoader';
 
-export class ModuleLoader implements ITaskLoader {
+export class ModuleLoader extends BaseLoader {
 
-    constructor(private moduleName: string) {
-
-    }
-
-    load(oper: Operation): Promise<Task[]> {
-        return null;
-    }
-
-    loadConfg(oper: Operation, option: TaskOption): Promise<TaskConfig> {
-        return null;
+    constructor(option: TaskOption) {
+        super(option);
     }
 }

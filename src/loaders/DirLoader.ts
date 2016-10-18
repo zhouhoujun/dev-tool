@@ -2,10 +2,10 @@ import * as _ from 'lodash';
 import * as path from 'path';
 import { existsSync } from 'fs';
 
-import { Task, Operation, TaskOption, TaskConfig } from '../TaskConfig';
-import { ITaskLoader } from '../ITaskLoader';
+import { Task, Operation, TaskOption, TaskConfig, configBuilder } from '../TaskConfig';
+import { BaseLoader } from './BaseLoader';
 
-const requireDir = require('require-dir');
+
 
 export interface OperateTask {
     folder: string;
@@ -15,75 +15,36 @@ export interface Operates {
 
 }
 
-export class DirLoader implements ITaskLoader {
+export class DirLoader extends BaseLoader {
 
-    constructor(private taskDirs: string[]) {
-
+    constructor(option: TaskOption) {
+        super(option);
     }
+
     load(oper: Operation): Promise<Task[]> {
-        return Promise.all(_.map(this.taskDirs, dir => {
-            console.log('begin load task from', dir);
-            let tasks = requireDir(dir, { recurse: true });
-
-            // console.log(tasks);
-            let taskfuns: Task[] = [];
-            _.each(_.keys(tasks), (key: string) => {
-                console.log('register task from:', key);
-                if (key === 'task-config') {
-                    return;
-                }
-
-                let taskMdl = tasks[key];
-                if (_.isFunction(taskMdl)) {
-                    taskfuns.push(taskMdl);
-                } else if (taskMdl) {
-                    _.each(_.keys(taskMdl), k => {
-                        let subMdl = taskMdl[k];
-                        if (_.isArray(subMdl)) {
-                            _.each(<Task[]>subMdl, r => {
-                                if (_.isFunction(r)) {
-                                    taskfuns.push(r);
-                                }
-                            });
-                        } else if (_.isFunction(subMdl)) {
-                            taskfuns.push(subMdl);
-                        }
-                    });
-                }
-            })
-        }))
-            .then(tasks => {
-                return _.flatten(tasks);
-            });
+        if (this.option.loader.dir) {
+            return this.loadTaskFromDir(this.option.loader.dir);
+        } else {
+            return super.load(oper);
+        }
     }
 
-    loadConfg(oper: Operation, option: TaskOption): Promise<TaskConfig> {
-        if (option.loader.taskConfig) {
-            if (_.isFunction(option.loader.taskConfig)) {
-                let tsfac = option.loader.taskConfig();
-                return Promise.resolve(tsfac(oper));
-            } else if (_.isString(option.loader.taskConfig)) {
-                let confmdl = require(option.loader.taskConfig);
-                return Promise.resolve(this.execFunc(confmdl, oper, option))
-                    .then(tscf => {
-                        return <TaskConfig>tscf;
-                    });
-            } else {
-                return Promise.reject('task config error.');
-            }
-        } else {
-            return Promise.race<TaskConfig>(_.map(this.taskDirs, dir => {
+    protected getConfigModule(): any {
+        return require(this.option.loader.configModule || this.option.loader.module);
+    }
+
+    getConfigBuild(): Promise<configBuilder> {
+        if (this.option.loader.dir) {
+            return Promise.race<TaskConfig>(_.map(this.option.loader.dir, dir => {
                 return new Promise((resolve, reject) => {
-                    let builder = this.getConfigBuilder(oper, option, dir);
-                    if (!builder) {
-                        return null;
-                    }
-                    let config = <TaskConfig>this.execFunc(builder, oper, option);
-                    if (config) {
-                        resolve(config);
+                    let builder = this.getConfigBuilder();
+                    if (builder) {
+                        resolve(builder);
                     }
                 });
             }));
+        } else {
+            return super.getConfigBuild();
         }
     }
 
@@ -99,7 +60,7 @@ export class DirLoader implements ITaskLoader {
     }
 
     private getConfigBuilder(oper: Operation, option: TaskOption, dir: string) {
-        let cfn = option.loader.taskConfigFileName || './config';
+        let cfn = option.loader.configModule || './config';
         let fpath = path.join(dir, cfn);
         if (/.\S[1,]$/.test(fpath)) {
             return require(fpath);

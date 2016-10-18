@@ -6,7 +6,7 @@ import * as runSequence from 'run-sequence';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { Task, TaskOption, Operation, EnvOption, TaskConfig, LoaderOption } from './TaskConfig';
+import { Task, TaskOption, Operation, EnvOption, TaskConfig, TaskNameSequence } from './TaskConfig';
 import defaultConfig, { DevelopConfig } from './DevelopConfig';
 
 
@@ -35,7 +35,7 @@ export class Development {
         return Promise.all(
             _.map(_.isArray(this.option.tasks) ? <TaskOption[]>this.option.tasks : [<TaskOption>this.option.tasks], optask => {
                 console.log('begin load task.', optask.loader);
-                let loader = this.createLoader(optask.loader);
+                let loader = this.createLoader(optask);
                 let oper;
                 if (env.deploy) {
                     oper = Operation.deploy;
@@ -48,7 +48,7 @@ export class Development {
                 } else {
                     oper = Operation.build;
                 }
-                return loader.loadConfg(oper, optask)
+                return loader.loadConfg(oper)
                     .then(cfg => {
                         return loader.load(oper)
                             .then(tasks => {
@@ -66,28 +66,34 @@ export class Development {
             }));
     }
 
-    protected setup(config: TaskConfig, tasks: Task[]): Promise<Array<string | string[] | Function>> {
+    protected toSquence(tasks: Array<string | string[] | void>): TaskNameSequence {
+        return <TaskNameSequence>_.filter(tasks, t => !!t);
+    }
+
+    protected setup(config: TaskConfig, tasks: Task[]): Promise<TaskNameSequence> {
         return Promise.all(_.map(tasks, t => {
             return t(config);
         }))
             .then(ts => {
-                let tsqs = ts;
+
+                let tsqs: TaskNameSequence = config.runTasks ? config.runTasks() : this.toSquence(ts);
                 if (config.option.runTasks) {
                     if (_.isArray(config.option.runTasks)) {
                         tsqs = config.option.runTasks;
                     } else if (_.isFunction(config.option.runTasks)) {
-                        tsqs = config.option.runTasks(ts);
+                        tsqs = config.option.runTasks(config.oper, tsqs);
                     }
                 }
                 return tsqs;
+
             });
     }
 
-    protected createLoader(option: LoaderOption): ITaskLoader {
+    protected createLoader(option: TaskOption): ITaskLoader {
         let loader = null;
         if (!_.isFunction(this.option.loaderFactory)) {
             let factory = new LoaderFactory();
-            this.option.loaderFactory = (opt: LoaderOption) => {
+            this.option.loaderFactory = (opt: TaskOption) => {
                 return factory.create(opt);
             }
         }
