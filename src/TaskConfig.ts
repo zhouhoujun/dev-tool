@@ -29,17 +29,31 @@ export enum Operation {
 }
 
 /**
+ * object map.
+ * 
+ * @export
+ * @interface IMap
+ * @template T
+ */
+export interface IMap<T> {
+    [K: string]: T;
+}
+
+export type Src = string | string[];
+/**
  * type task name sequence 
  */
-export type TaskNameSequence = Array<string | string[] | Function>;
+export type TaskNameSequence = Array<Src | Function>;
 
-export type Task = (config: TaskConfig, callback?: Function) => string | string[] | void;
+export type Task = (config: TaskConfig, callback?: Function) => Src | void;
 
-export type configBuilder = (oper: Operation, option: TaskOption) => TaskConfig;
+export type tasksInDir = (dirs: Src) => Promise<Task[]>;
 
-export type tasksInDir = (dirs: string | string[]) => Promise<Task[]>;
+export type tasksInModule = (dirs: Src) => Promise<Task[]>;
 
-export type moduleTaskLoader = (oper: Operation, option: TaskOption, loadFromDir?: tasksInDir) => Task[];
+export type moduleTaskConfig = (oper: Operation, option: TaskOption, env: EnvOption) => TaskConfig;
+
+export type moduleTaskLoader = (oper: Operation, option: TaskOption, findInModule: tasksInModule, findInDir: tasksInDir) => Promise<Task[]>;
 
 /**
  * event option
@@ -49,12 +63,12 @@ export type moduleTaskLoader = (oper: Operation, option: TaskOption, loadFromDir
  */
 export interface EnvOption {
     /**
-     * jspm project root.
+     * project root.
      * 
      * @type {string}
      * @memberOf EnvOption
      */
-    path?: string;
+    root?: string;
     /**
      * help doc
      * 
@@ -89,7 +103,7 @@ export interface EnvOption {
 
     publish?: boolean | string;
 
-    grp?: string | string[];
+    grp?: Src;
 }
 
 /**
@@ -136,7 +150,7 @@ export interface LoaderOption {
      * 
      * @memberOf TaskOption
      */
-    moduleTaskConfig?: string | configBuilder;
+    moduleTaskConfig?: string | moduleTaskConfig;
 
     /**
      * the task loader method name in module, or custom loader
@@ -149,10 +163,22 @@ export interface LoaderOption {
     /**
      * custom external judage the name is right task name, that method of module object.
      * 
+     * @param {*} mdl
+     * @param {string} name
+     * @returns {boolean}
      * 
      * @memberOf LoaderOption
      */
-    isTaskFunc?: ((name: string) => boolean);
+    isTaskFunc?(mdl: any, name: string): boolean;
+    /**
+     * custom external judage the object is right task define.
+     * 
+     * @param {*} mdl
+     * @returns {boolean}
+     * 
+     * @memberOf LoaderOption
+     */
+    isTaskDefine?(mdl: any): boolean;
 }
 
 /**
@@ -183,7 +209,7 @@ export interface DirLoaderOption extends LoaderOption {
      * @type {string}
      * @memberOf DirLoaderOption
      */
-    dirConfigBuilderName?: string | string[];
+    dirmoduleTaskConfigName?: Src;
 }
 
 /**
@@ -224,6 +250,42 @@ export interface TaskOption {
     runTasks?: TaskNameSequence | ((oper: Operation, tasks: TaskNameSequence) => TaskNameSequence);
 }
 
+/**
+ * modules task define
+ * 
+ * @export
+ * @interface ITaskDefine
+ */
+export interface ITaskDefine {
+    /**
+     * load config in modules
+     * 
+     * @param {Operation} oper
+     * @param {TaskOption} option
+     * @returns {TaskConfig}
+     * 
+     * @memberOf ITaskDefine
+     */
+    moduleTaskConfig(oper: Operation, option: TaskOption, env: EnvOption): TaskConfig
+
+    /**
+     * load task in modules.
+     * 
+     * @param {Operation} oper
+     * @param {TaskOption} option
+     * @param {tasksInModule} findInModule
+     * @param {tasksInDir} findInDir
+     * @returns {Task[]}
+     * 
+     * @memberOf ITaskDefine
+     */
+    moduleTaskLoader?(oper: Operation, option: TaskOption, findInModule: tasksInModule, findInDir: tasksInDir): Promise<Task[]>;
+}
+
+// export interface TaskUtil {
+//     files(directory: string, express?: ((fileName: string) => boolean)): string[];
+//     gulpSrc(directory: string, expresion: Src): Src;
+// }
 
 /**
  * run time task config for setup task.

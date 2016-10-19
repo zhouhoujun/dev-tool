@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as path from 'path';
 import { existsSync } from 'fs';
-import { Task, Operation, DirLoaderOption, TaskOption, TaskConfig, configBuilder } from '../TaskConfig';
+import { Task, Operation, DirLoaderOption, TaskOption, TaskConfig, moduleTaskConfig } from '../TaskConfig';
 import { BaseLoader } from './BaseLoader';
 
 export class DirLoader extends BaseLoader {
@@ -19,7 +19,7 @@ export class DirLoader extends BaseLoader {
         }
     }
 
-    protected getConfigBuild(): Promise<configBuilder> {
+    protected getConfigBuild(): Promise<moduleTaskConfig> {
         let loader: DirLoaderOption = this.option.loader;
         if (!loader.moduleTaskConfig
             && !loader.module && loader.dir) {
@@ -27,9 +27,9 @@ export class DirLoader extends BaseLoader {
                 return new Promise((resolve, reject) => {
                     let mdl = this.getDirConfigModule(loader, dir);
                     if (mdl) {
-                        let builder = this.findMethod(mdl, loader.dirConfigBuilderName || this.taskLoaderMethods);
+                        let builder = this.findTaskDefine(mdl);
                         if (builder) {
-                            resolve(builder);
+                            resolve(builder.moduleTaskConfig);
                         }
                     }
                 });

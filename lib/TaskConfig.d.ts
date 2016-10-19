@@ -5,13 +5,18 @@ export declare enum Operation {
     release = 3,
     deploy = 4,
 }
-export declare type TaskNameSequence = Array<string | string[] | Function>;
-export declare type Task = (config: TaskConfig, callback?: Function) => string | string[] | void;
-export declare type configBuilder = (oper: Operation, option: TaskOption) => TaskConfig;
-export declare type tasksInDir = (dirs: string | string[]) => Promise<Task[]>;
-export declare type moduleTaskLoader = (oper: Operation, option: TaskOption, loadFromDir?: tasksInDir) => Task[];
+export interface IMap<T> {
+    [K: string]: T;
+}
+export declare type Src = string | string[];
+export declare type TaskNameSequence = Array<Src | Function>;
+export declare type Task = (config: TaskConfig, callback?: Function) => Src | void;
+export declare type tasksInDir = (dirs: Src) => Promise<Task[]>;
+export declare type tasksInModule = (dirs: Src) => Promise<Task[]>;
+export declare type moduleTaskConfig = (oper: Operation, option: TaskOption, env: EnvOption) => TaskConfig;
+export declare type moduleTaskLoader = (oper: Operation, option: TaskOption, findInModule: tasksInModule, findInDir: tasksInDir) => Promise<Task[]>;
 export interface EnvOption {
-    path?: string;
+    root?: string;
     help?: boolean | string;
     test?: boolean | string;
     serve?: boolean | string;
@@ -27,21 +32,22 @@ export interface EnvOption {
     dist?: string;
     lang?: string;
     publish?: boolean | string;
-    grp?: string | string[];
+    grp?: Src;
 }
 export interface LoaderOption {
     type: string;
     module?: string;
     configModule?: string;
     taskModule?: string;
-    moduleTaskConfig?: string | configBuilder;
+    moduleTaskConfig?: string | moduleTaskConfig;
     moduleTaskloader?: string | moduleTaskLoader;
-    isTaskFunc?: ((name: string) => boolean);
+    isTaskFunc?(mdl: any, name: string): boolean;
+    isTaskDefine?(mdl: any): boolean;
 }
 export interface DirLoaderOption extends LoaderOption {
     dir?: string[];
     dirConfigFile?: string;
-    dirConfigBuilderName?: string | string[];
+    dirmoduleTaskConfigName?: Src;
 }
 export interface TaskOption {
     loader: LoaderOption;
@@ -49,6 +55,10 @@ export interface TaskOption {
     dist: string;
     externalTask?: Task;
     runTasks?: TaskNameSequence | ((oper: Operation, tasks: TaskNameSequence) => TaskNameSequence);
+}
+export interface ITaskDefine {
+    moduleTaskConfig(oper: Operation, option: TaskOption, env: EnvOption): TaskConfig;
+    moduleTaskLoader?(oper: Operation, option: TaskOption, findInModule: tasksInModule, findInDir: tasksInDir): Promise<Task[]>;
 }
 export interface TaskConfig {
     env: EnvOption;

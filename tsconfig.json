@@ -1,5 +1,5 @@
 {
-  "name": "jspm-incremental-bundler",
+  "name": "development-tool",
   "compilerOptions": {
     "module": "commonjs",
     "target":"es2015",
@@ -21,10 +21,10 @@
     "moduleResolution": "node",
     "suppressImplicitAnyIndexErrors": true
   },
-  // "exclude": [
-  //   "test",
-  //   "lib",
-  //   "node_modules"    
-  // ],
+  "exclude": [
+    "test",
+    "lib",
+    "node_modules"    
+  ],
   "compileOnSave": false
 }

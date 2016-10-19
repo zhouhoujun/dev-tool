@@ -1,4 +1,4 @@
-import { Operation, Task, TaskConfig } from './TaskConfig';
+import { Operation, Task, EnvOption, TaskConfig } from './TaskConfig';
 
 
 
@@ -23,10 +23,11 @@ export interface ITaskLoader {
      * load config.
      * 
      * @param {Operation} oper
+     * @param {EnvOption} env
      * @returns {Promise<TaskConfig>}
      * 
      * @memberOf ITaskLoader
      */
-    loadConfg(oper: Operation): Promise<TaskConfig>;
+    loadConfg(oper: Operation, env: EnvOption): Promise<TaskConfig>;
 
 }

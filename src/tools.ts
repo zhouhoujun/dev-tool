@@ -6,8 +6,8 @@ import * as runSequence from 'run-sequence';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { Task, TaskOption, Operation, EnvOption, TaskConfig, TaskNameSequence } from './TaskConfig';
-import defaultConfig, { DevelopConfig } from './DevelopConfig';
+import { Src, Task, TaskOption, Operation, EnvOption, TaskConfig, TaskNameSequence } from './TaskConfig';
+import { DevelopConfig } from './DevelopConfig';
 
 
 export * from './DevelopConfig';
@@ -17,27 +17,28 @@ export * from './LoaderFactory';
 export * from './loaders/BaseLoader';
 
 export class Development {
-    static create(dirname: string, option?: DevelopConfig) {
-        return new Development(dirname, option);
-    }
-
-    constructor(private dirname: string, protected option: DevelopConfig) {
-        this.option = _.defaultsDeep(option || {}, defaultConfig);
-        this.init();
-    }
-
-    init() {
+    static create(dirname: string, option?: DevelopConfig): Development {
+        let devtool = new Development(dirname, option);
         gulp.task('build', () => {
             var options: EnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development' }
             });
-            return this.run(options);
-        })
+            return devtool.run(options);
+        });
+
+        gulp.task('default', ['build']);
+        return devtool;
     }
 
-    protected run(env: EnvOption) {
+    private constructor(private dirname: string, protected option: DevelopConfig) {
+    }
 
+    run(env: EnvOption) {
+
+        if (!env.root) {
+            env.root = this.dirname;
+        }
         return Promise.all(
             _.map(_.isArray(this.option.tasks) ? <TaskOption[]>this.option.tasks : [<TaskOption>this.option.tasks], optask => {
                 console.log('begin load task.', optask.loader);
@@ -54,7 +55,7 @@ export class Development {
                 } else {
                     oper = Operation.build;
                 }
-                return loader.loadConfg(oper)
+                return loader.loadConfg(oper, env)
                     .then(cfg => {
                         if (cfg.env.help) {
                             if (cfg.printHelp) {
@@ -85,7 +86,7 @@ export class Development {
             }));
     }
 
-    protected toSquence(tasks: Array<string | string[] | void>): TaskNameSequence {
+    protected toSquence(tasks: Array<Src | void>): TaskNameSequence {
         return <TaskNameSequence>_.filter(tasks, t => !!t);
     }
 
@@ -166,7 +167,6 @@ export class Development {
                  **/\n`);
 
         }
-
     }
 }
 
