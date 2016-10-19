@@ -1,7 +1,8 @@
 import * as _ from 'lodash';
-import { Src, Task, EnvOption, Operation, TaskOption, TaskConfig, ITaskDefine, moduleTaskLoader, moduleTaskConfig } from '../TaskConfig';
+import { Src, Task, EnvOption, Operation, TaskOption, TaskConfig, ITaskDefine } from '../TaskConfig';
 import { ITaskLoader } from '../ITaskLoader';
 const requireDir = require('require-dir');
+import { isAbsolute } from 'path';
 
 export abstract class BaseLoader implements ITaskLoader {
 
@@ -10,18 +11,22 @@ export abstract class BaseLoader implements ITaskLoader {
         this.option = option;
     }
 
-    load(oper: Operation): Promise<Task[]> {
-        return this.getModuleTaskLoader()
-            .then(load => {
-                return load(
-                    oper,
-                    this.option,
-                    (mdl) => {
-                        return this.loadTaskFromModule(mdl);
-                    },
-                    (dirs) => {
-                        return this.loadTaskFromDir(dirs)
-                    });
+    load(cfg: TaskConfig): Promise<Task[]> {
+        return this.getTaskDefine()
+            .then(def => {
+                if (def.moduleTaskLoader) {
+                    return def.moduleTaskLoader(
+                        cfg,
+                        (mdl) => {
+                            return this.loadTaskFromModule(mdl);
+                        },
+                        (dirs) => {
+                            return this.loadTaskFromDir(dirs)
+                        });
+                } else {
+                    let mdl = this.getTaskModule();
+                    return this.loadTaskFromModule(mdl);
+                }
             })
             .catch(err => {
                 console.error(err);
@@ -29,78 +34,49 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     loadConfg(oper: Operation, env: EnvOption): Promise<TaskConfig> {
-        return this.getConfigBuild()
-            .then(builder => {
-                return builder(oper, this.option, env);
+
+        return this.getTaskDefine()
+            .then(def => {
+                return def.moduleTaskConfig(oper, this.option, env);
             })
             .catch(err => {
                 console.error(err);
             });
     }
 
-    protected getConfigBuild(): Promise<moduleTaskConfig> {
-        let method: string, builder = null;
-        if (this.option.loader.moduleTaskConfig) {
-            if (_.isFunction(this.option.loader.moduleTaskConfig)) {
-                builder = this.option.loader.moduleTaskConfig;
-            } else if (_.isString(this.option.loader.moduleTaskConfig)) {
-                method = this.option.loader.moduleTaskConfig;
-            }
+    protected getTaskDefine(): Promise<ITaskDefine> {
+        let tsdef: ITaskDefine = null;
+        if (this.option.loader.taskDefine) {
+            tsdef = this.option.loader.taskDefine;
         }
-        if (!builder) {
-
+        if (!tsdef) {
             let mdl = this.getConfigModule();
-            let tdef = this.findTaskDefine(mdl);
-            if (tdef) {
-                builder = (oper, option, env) => {
-                    return tdef.moduleTaskConfig(oper, option, env);
-                };
-            } else {
-                console.error('can not found task config builder method in module {0}.', mdl);
-                return Promise.reject('can not found task config builder method in module');
-            }
+            tsdef = this.findTaskDefine(mdl);
         }
-
-        return Promise.resolve(builder);
+        if (tsdef) {
+            return Promise.resolve(tsdef);
+        } else {
+            // console.error('can not found task config builder method in module {0}.', mdl);
+            return Promise.reject('can not found task define.');
+        }
     }
 
     protected getConfigModule(): any {
-        return require(this.option.loader.configModule || this.option.loader.module);
-    }
-
-    protected getModuleTaskLoader(): Promise<moduleTaskLoader> {
-        let loader: moduleTaskLoader = null;
-        if (this.option.loader.moduleTaskloader) {
-            if (_.isFunction(this.option.loader.moduleTaskloader)) {
-                loader = this.option.loader.moduleTaskloader;
-            }
+        let ml = this.option.loader.configModule || this.option.loader.module;
+        if (_.isString(ml)) {
+            return require(ml);
+        } else {
+            return ml;
         }
-        if (!loader) {
-            let mdl = this.getTaskModule();
-            let tdef = this.findTaskDefine(mdl);
-            if (tdef && tdef.moduleTaskLoader) {
-                loader = (oper, option) => {
-                    return tdef.moduleTaskLoader(
-                        oper,
-                        option,
-                        (mdl) => {
-                            return this.loadTaskFromModule(mdl);
-                        },
-                        (dirs) => {
-                            return this.loadTaskFromDir(dirs)
-                        });
-                };
-            } else {
-                loader = (oper, option) => {
-                    return this.loadTaskFromModule(mdl);
-                };
-            }
-        }
-        return Promise.resolve(loader);
     }
 
     protected getTaskModule(): any {
-        return require(this.option.loader.taskModule || this.option.loader.module);
+        let ml = this.option.loader.taskModule || this.option.loader.module;
+        if (_.isString(ml)) {
+            return require(ml);
+        } else {
+            return ml;
+        }
     }
 
     protected findTaskDefine(mdl: any): ITaskDefine {
@@ -135,77 +111,56 @@ export abstract class BaseLoader implements ITaskLoader {
         return _.isFunction(mdl['moduleTaskConfig']);
     }
 
-    protected isTaskFunc(mdl: any, name: string): boolean {
+    protected isTaskFunc(mdl: any, exceptObj = false): boolean {
         if (!mdl) {
-            return false;
-        }
-        let field = mdl[name];
-        if (!field) {
             return false;
         }
 
         if (this.option.loader.isTaskFunc) {
-            return this.option.loader.isTaskFunc(mdl, name);
+            return this.option.loader.isTaskFunc(mdl);
         }
 
-        let flag = true;
-        if (_.isString(this.option.loader.moduleTaskConfig)) {
-            flag = name !== this.option.loader.moduleTaskConfig;
+        if (_.isFunction(mdl)) {
+            return true;
         }
 
-        if (flag && _.isString(this.option.loader.moduleTaskloader)) {
-            flag = name !== this.option.loader.moduleTaskloader;
+        return exceptObj;
+    }
+
+    private findTasks(mdl: any): Task[] {
+        let tasks = [];
+        if (!mdl) {
+            return tasks;
         }
-
-        if (flag && _.isFunction(field['moduleTaskloader']) && _.isFunction(field['moduleTaskConfig'])) {
-            flag = false;
+        if (this.isTaskFunc(mdl)) {
+            tasks.push(mdl);
+        } else if (!this.isTaskDefine(mdl)) {
+            if (_.isArray(mdl)) {
+                _.each(mdl, sm => {
+                    tasks.concat(this.findTasks(sm));
+                });
+            } else {
+                _.each(_.keys(mdl), key => {
+                    console.log('register task from:', key);
+                    tasks.concat(this.findTasks(mdl[key]));
+                });
+            }
         }
-
-
-
-        return flag;
-
+        return tasks;
     }
 
     protected loadTaskFromModule(mdl: any): Promise<Task[]> {
-        let taskfuns: Task[] = [];
-        if (!mdl) {
-            return Promise.reject('module is un');
+        let taskfuns: Task[] = this.findTasks(mdl);
+        if (!taskfuns || taskfuns.length < 1) {
+            return Promise.reject('has not found task in ModuleLoader.ts.');
+        } else {
+            return Promise.resolve(taskfuns);
         }
-        let tasks = mdl;
-        _.each(_.keys(tasks), (key: string) => {
-            console.log('register task from:', key);
-            if (!this.isTaskFunc(tasks, key)) {
-                return;
-            }
-
-            let taskMdl = tasks[key];
-            if (_.isFunction(taskMdl)) {
-                taskfuns.push(taskMdl);
-            } else if (taskMdl) {
-                _.each(_.keys(taskMdl), k => {
-                    if (!this.isTaskFunc(taskMdl, key)) {
-                        return;
-                    }
-                    let subMdl = taskMdl[k];
-                    if (_.isArray(subMdl)) {
-                        _.each(<Task[]>subMdl, r => {
-                            if (_.isFunction(r)) {
-                                taskfuns.push(r);
-                            }
-                        });
-                    } else if (_.isFunction(subMdl)) {
-                        taskfuns.push(subMdl);
-                    }
-                });
-            }
-        });
-        return Promise.resolve(taskfuns);
     }
 
     protected loadTaskFromDir(dirs: Src): Promise<Task[]> {
         return Promise.all(_.map(_.isArray(dirs) ? <string[]>dirs : [<string>dirs], dir => {
-            console.log('begin load task from', dir);
+            console.log('begin load task from dir', dir);
             let mdl = requireDir(dir, { recurse: true });
             return this.loadTaskFromModule(mdl);
         }))

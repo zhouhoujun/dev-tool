@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import * as gulp from 'gulp';
+import { Gulp } from 'gulp';
 import { readdirSync, lstatSync } from 'fs';
 // import * as path from 'path';
 import * as runSequence from 'run-sequence';
@@ -17,7 +17,7 @@ export * from './LoaderFactory';
 export * from './loaders/BaseLoader';
 
 export class Development {
-    static create(dirname: string, option?: DevelopConfig): Development {
+    static create(gulp: Gulp, dirname: string, option?: DevelopConfig): Development {
         let devtool = new Development(dirname, option);
         gulp.task('build', () => {
             var options: EnvOption = minimist(process.argv.slice(2), {
@@ -32,10 +32,10 @@ export class Development {
     }
 
     private constructor(private dirname: string, protected option: DevelopConfig) {
+
     }
 
-    run(env: EnvOption) {
-
+    run(env: EnvOption): Promise<any> {
         if (!env.root) {
             env.root = this.dirname;
         }
@@ -65,7 +65,7 @@ export class Development {
                             }
                             return null;
                         } else {
-                            return loader.load(oper)
+                            return loader.load(cfg)
                                 .then(tasks => {
                                     return this.setup(cfg, tasks)
                                 });

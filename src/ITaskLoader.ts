@@ -12,12 +12,12 @@ export interface ITaskLoader {
     /**
      * load task.
      * 
-     * @param {Operation} oper
+     * @param {TaskConfig} cfg
      * @returns {Promise<ITask[]>}
      * 
      * @memberOf ITaskLoader
      */
-    load(oper: Operation): Promise<Task[]>;
+    load(cfg: TaskConfig): Promise<Task[]>;
 
     /**
      * load config.

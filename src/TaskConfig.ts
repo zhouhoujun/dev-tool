@@ -51,10 +51,6 @@ export type tasksInDir = (dirs: Src) => Promise<Task[]>;
 
 export type tasksInModule = (dirs: Src) => Promise<Task[]>;
 
-export type moduleTaskConfig = (oper: Operation, option: TaskOption, env: EnvOption) => TaskConfig;
-
-export type moduleTaskLoader = (oper: Operation, option: TaskOption, findInModule: tasksInModule, findInDir: tasksInDir) => Promise<Task[]>;
-
 /**
  * event option
  * 
@@ -145,23 +141,15 @@ export interface LoaderOption {
     taskModule?: string;
 
     /**
-     * task config method name in module or task custom config builder.
+     * task define.
      * 
-     * 
-     * @memberOf TaskOption
-     */
-    moduleTaskConfig?: string | moduleTaskConfig;
-
-    /**
-     * the task loader method name in module, or custom loader
-     * 
-     * @type {(string | moduleTaskLoader)}
+     * @type {ITaskDefine}
      * @memberOf LoaderOption
      */
-    moduleTaskloader?: string | moduleTaskLoader;
+    taskDefine?: ITaskDefine;
 
     /**
-     * custom external judage the name is right task name, that method of module object.
+     * custom external judage the object is right task func.
      * 
      * @param {*} mdl
      * @param {string} name
@@ -169,7 +157,7 @@ export interface LoaderOption {
      * 
      * @memberOf LoaderOption
      */
-    isTaskFunc?(mdl: any, name: string): boolean;
+    isTaskFunc?(mdl: any): boolean;
     /**
      * custom external judage the object is right task define.
      * 
@@ -271,15 +259,14 @@ export interface ITaskDefine {
     /**
      * load task in modules.
      * 
-     * @param {Operation} oper
-     * @param {TaskOption} option
+     * @param {TaskConfig} config
      * @param {tasksInModule} findInModule
      * @param {tasksInDir} findInDir
      * @returns {Task[]}
      * 
      * @memberOf ITaskDefine
      */
-    moduleTaskLoader?(oper: Operation, option: TaskOption, findInModule: tasksInModule, findInDir: tasksInDir): Promise<Task[]>;
+    moduleTaskLoader?(config: TaskConfig, findInModule: tasksInModule, findInDir: tasksInDir): Promise<Task[]>;
 }
 
 // export interface TaskUtil {

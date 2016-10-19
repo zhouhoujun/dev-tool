@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as path from 'path';
 import { existsSync } from 'fs';
-import { Task, Operation, DirLoaderOption, TaskOption, TaskConfig, moduleTaskConfig } from '../TaskConfig';
+import { Task, DirLoaderOption, TaskOption, TaskConfig, ITaskDefine } from '../TaskConfig';
 import { BaseLoader } from './BaseLoader';
 
 export class DirLoader extends BaseLoader {
@@ -10,39 +10,39 @@ export class DirLoader extends BaseLoader {
         super(option);
     }
 
-    load(oper: Operation): Promise<Task[]> {
+    load(cfg: TaskConfig): Promise<Task[]> {
         let loader: DirLoaderOption = this.option.loader;
         if (loader.dir) {
             return this.loadTaskFromDir(loader.dir);
         } else {
-            return super.load(oper);
+            return super.load(cfg);
         }
     }
 
-    protected getConfigBuild(): Promise<moduleTaskConfig> {
+    protected getTaskDefine(): Promise<ITaskDefine> {
         let loader: DirLoaderOption = this.option.loader;
-        if (!loader.moduleTaskConfig
+        if (!loader.taskDefine && !loader.configModule
             && !loader.module && loader.dir) {
             return Promise.race<TaskConfig>(_.map(loader.dir, dir => {
                 return new Promise((resolve, reject) => {
                     let mdl = this.getDirConfigModule(loader, dir);
                     if (mdl) {
-                        let builder = this.findTaskDefine(mdl);
-                        if (builder) {
-                            resolve(builder.moduleTaskConfig);
+                        let def = this.findTaskDefine(mdl);
+                        if (def) {
+                            resolve(def);
                         }
                     }
                 });
             }));
         } else {
-            return super.getConfigBuild();
+            return super.getTaskDefine();
         }
     }
 
     private getDirConfigModule(loader: DirLoaderOption, dir: string) {
         let cfn = loader.dirConfigFile || './config';
         let fpath = path.join(dir, cfn);
-        if (/.\S[1,]$/.test(fpath)) {
+        if (/.\S+$/.test(fpath)) {
             return require(fpath);
         } else if (existsSync(fpath + '.js')) {
             return require(fpath + '.js');

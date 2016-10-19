@@ -1,3 +1,5 @@
+/// <reference types="gulp" />
+import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
 import { Src, Task, TaskOption, EnvOption, TaskConfig, TaskNameSequence } from './TaskConfig';
 import { DevelopConfig } from './DevelopConfig';
@@ -9,9 +11,9 @@ export * from './loaders/BaseLoader';
 export declare class Development {
     private dirname;
     protected option: DevelopConfig;
-    static create(dirname: string, option?: DevelopConfig): Development;
+    static create(gulp: Gulp, dirname: string, option?: DevelopConfig): Development;
     private constructor(dirname, option);
-    run(env: EnvOption): Promise<{}[]>;
+    run(env: EnvOption): Promise<any>;
     protected toSquence(tasks: Array<Src | void>): TaskNameSequence;
     protected setup(config: TaskConfig, tasks: Task[]): Promise<TaskNameSequence>;
     protected createLoader(option: TaskOption): ITaskLoader;
