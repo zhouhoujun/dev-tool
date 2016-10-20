@@ -21,7 +21,7 @@ You can `import` modules:
 
 ```ts
 import * as gulp from 'gulp';
-import  { Development } from 'development-tool';
+import  { Development, TaskOption } from 'development-tool';
 
 let tasks: TaskOption| TaskOption[];
 Development.create(gulp, __dirname, {
