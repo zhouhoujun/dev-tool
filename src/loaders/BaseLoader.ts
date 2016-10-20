@@ -169,25 +169,4 @@ export abstract class BaseLoader implements ITaskLoader {
                 return _.flatten(tasks);
             });
     }
-
-
-
-    // protected findMethod(mdl: any, methods: Src) {
-    //     if (!mdl) {
-    //         return null;
-    //     }
-    //     let func = null;
-    //     _.each(_.isArray(methods) ? <string[]>methods : [<string>methods], f => {
-    //         if (func) {
-    //             return false;
-    //         }
-    //         if (!f && _.isFunction(mdl)) {
-    //             func = mdl;
-    //         } else if (f && _.isFunction(mdl[f])) {
-    //             func = mdl;
-    //         }
-    //         return true;
-    //     });
-    //     return func;
-    // }
 }
