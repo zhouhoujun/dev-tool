@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Src, Task, EnvOption, Operation, TaskOption, TaskConfig, ITaskDefine } from '../TaskConfig';
 import { ITaskLoader } from '../ITaskLoader';
 const requireDir = require('require-dir');
-import { isAbsolute } from 'path';
+// import { isAbsolute } from 'path';
 
 export abstract class BaseLoader implements ITaskLoader {
 
