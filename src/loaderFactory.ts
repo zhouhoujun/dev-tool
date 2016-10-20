@@ -27,6 +27,7 @@ export class LoaderFactory implements ILoaderFactory {
     }
     create(option: TaskOption): ITaskLoader {
         let loader = null;
+        console.log('create loader via type:', option.loader.type);
         switch (option.loader.type) {
             case 'dir':
                 loader = new DirLoader(option);

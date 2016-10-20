@@ -142,7 +142,7 @@ export abstract class BaseLoader implements ITaskLoader {
             } else {
                 _.each(_.keys(mdl), key => {
                     console.log('register task from:', key);
-                    tasks.concat(this.findTasks(mdl[key]));
+                    tasks = tasks.concat(this.findTasks(mdl[key]));
                 });
             }
         }
@@ -152,7 +152,8 @@ export abstract class BaseLoader implements ITaskLoader {
     protected loadTaskFromModule(mdl: any): Promise<Task[]> {
         let taskfuns: Task[] = this.findTasks(mdl);
         if (!taskfuns || taskfuns.length < 1) {
-            return Promise.reject('has not found task in ModuleLoader.ts.');
+            console.log('error module:', mdl);
+            return Promise.reject('has not found task in module.');
         } else {
             return Promise.resolve(taskfuns);
         }

@@ -1,3 +1,5 @@
+/// <reference types="gulp" />
+import { Gulp } from 'gulp';
 export declare enum Operation {
     build = 0,
     test = 1,
@@ -9,8 +11,8 @@ export interface IMap<T> {
     [K: string]: T;
 }
 export declare type Src = string | string[];
-export declare type TaskNameSequence = Array<Src | Function>;
-export declare type Task = (config: TaskConfig, callback?: Function) => Src | void;
+export declare type TaskNameSequence = Src[];
+export declare type Task = (gulp: Gulp, config: TaskConfig) => Src | void;
 export declare type tasksInDir = (dirs: Src) => Promise<Task[]>;
 export declare type tasksInModule = (dirs: Src) => Promise<Task[]>;
 export interface EnvOption {

@@ -1,3 +1,4 @@
+import { Gulp } from 'gulp';
 
 /**
  * project development build operation.
@@ -43,9 +44,9 @@ export type Src = string | string[];
 /**
  * type task name sequence 
  */
-export type TaskNameSequence = Array<Src | Function>;
+export type TaskNameSequence = Src[];
 
-export type Task = (config: TaskConfig, callback?: Function) => Src | void;
+export type Task = (gulp: Gulp,  config: TaskConfig) => Src | void;
 
 export type tasksInDir = (dirs: Src) => Promise<Task[]>;
 

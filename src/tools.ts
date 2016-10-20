@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
-import { Gulp } from 'gulp';
+import { Gulp, TaskCallback } from 'gulp';
 import { readdirSync, lstatSync } from 'fs';
 // import * as path from 'path';
-import * as runSequence from 'run-sequence';
+// import * as runSequence from 'run-sequence';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
@@ -19,12 +19,12 @@ export * from './loaders/BaseLoader';
 export class Development {
     static create(gulp: Gulp, dirname: string, option?: DevelopConfig): Development {
         let devtool = new Development(dirname, option);
-        gulp.task('build', () => {
+        gulp.task('build', (callback: TaskCallback) => {
             var options: EnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development' }
             });
-            return devtool.run(options);
+            return devtool.run(gulp, options, callback);
         });
 
         gulp.task('default', ['build']);
@@ -35,7 +35,7 @@ export class Development {
 
     }
 
-    run(env: EnvOption): Promise<any> {
+    run(gulp: Gulp, env: EnvOption, callback: TaskCallback): Promise<any> {
         if (!env.root) {
             env.root = this.dirname;
         }
@@ -67,36 +67,83 @@ export class Development {
                         } else {
                             return loader.load(cfg)
                                 .then(tasks => {
-                                    return this.setup(cfg, tasks)
+                                    return this.setup(gulp, cfg, tasks)
                                 });
                         }
                     })
                     .then(tasksq => {
-                        if (!tasksq) {
-                            return null;
-                        } else {
-                            return new Promise((reslove, reject) => {
-                                tasksq.push(() => {
-                                    reslove();
-                                });
-                                runSequence.call(runSequence, tasksq);
-                            });
-                        }
+                        return this.runSequence(gulp, tasksq);
                     });
             }));
+    }
+
+    /**
+     * run task sequence.
+     * 
+     * @protected
+     * @param {Gulp} gulp
+     * @param {TaskNameSequence} tasks
+     * @returns {Promise<any>}
+     * 
+     * @memberOf Development
+     */
+    runSequence(gulp: Gulp, tasks: TaskNameSequence): Promise<any> {
+        let ps = Promise.resolve();
+        if (tasks && tasks.length > 0) {
+            _.each(tasks, task => {
+                ps = ps.then(() => {
+                    let taskErr = null, taskStop = null;
+                    return new Promise((reslove, reject) => {
+                        taskErr = (err) => {
+                            reject(err);
+                        };
+                        taskStop = () => {
+                            reslove();
+                        }
+                        gulp.on('task_stop', () => {
+                            reslove();
+                        }).on('task_err', (err) => {
+                            reject(err);
+                        });
+
+                        gulp.start(task, (err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                reslove();
+                            }
+                        });
+                    })
+                        .then(() => {
+                            if (gulp['removeListener']) {
+                                gulp['removeListener']('task_stop', taskStop);
+                                gulp['removeListener']('task_err', taskErr);
+                            }
+                        })
+                        .catch(err => {
+                            if (gulp['removeListener']) {
+                                gulp['removeListener']('task_stop', taskStop);
+                                gulp['removeListener']('task_err', taskErr);
+                            }
+                            console.error(err);
+                        });
+                });
+            });
+        }
+        return ps;
     }
 
     protected toSquence(tasks: Array<Src | void>): TaskNameSequence {
         return <TaskNameSequence>_.filter(tasks, t => !!t);
     }
 
-    protected setup(config: TaskConfig, tasks: Task[]): Promise<TaskNameSequence> {
+    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[]): Promise<TaskNameSequence> {
         return Promise.all(_.map(tasks, t => {
-            return t(config);
+            return t(gulp, config);
         }))
             .then(ts => {
-
                 let tsqs: TaskNameSequence = config.runTasks ? config.runTasks() : this.toSquence(ts);
+                console.log('run sequenec tasks:', tsqs);
                 if (config.option.runTasks) {
                     if (_.isArray(config.option.runTasks)) {
                         tsqs = config.option.runTasks;
