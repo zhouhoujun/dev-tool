@@ -34,13 +34,11 @@
     "@types/gulp": "^3.8.32",
     "@types/lodash": "^4.14.37",
     "@types/minimist": "^1.1.29",
-    "@types/run-sequence": "0.0.28",
     "checksum": "^0.1.1",
     "color-console": "^0.0.1",
     "gulp": "^3.9.1",
     "lodash": "^4.13.1",
-    "require-dir": "^0.3.1",
-    "run-sequence": "^1.2.2"
+    "require-dir": "^0.3.1"
   },
   "devDependencies": {
     "bluebird": "^3.4.1",
