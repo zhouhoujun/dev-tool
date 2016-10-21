@@ -25,12 +25,12 @@ export class Development {
     private globals: any = {};
     static create(gulp: Gulp, dirname: string, option?: DevelopConfig): Development {
         let devtool = new Development(dirname, option);
-        gulp.task('build', (callback: TaskCallback) => {
+        gulp.task('build', () => {
             var options: EnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development' }
             });
-            return devtool.run(gulp, options, callback);
+            return devtool.run(gulp, options);
         });
 
         gulp.task('default', ['build']);
@@ -50,48 +50,55 @@ export class Development {
             console.log(chalk.grey('\n... main help  ...\n'));
             this.printHelp(env.help);
         }
-        return Promise.all(
-            _.map(_.isArray(this.option.tasks) ? <TaskOption[]>this.option.tasks : [<TaskOption>this.option.tasks], optask => {
-                console.log(chalk.grey('begin load task via loader type:'), chalk.cyan(optask.loader.type || 'module'));
-                let loader = this.createLoader(optask);
-                let oper: Operation;
-                if (env.deploy) {
-                    oper = Operation.deploy;
-                } else if (env.release) {
-                    oper = Operation.release;
-                } else if (env.e2e) {
-                    oper = Operation.e2e;
-                } else if (env.test) {
-                    oper = Operation.test;
-                } else {
-                    oper = Operation.build;
-                }
+        return this.loadTasks(gulp, this.option.tasks, env)
+            .then(tseq => {
+                return this.runSequence(gulp, tseq);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+        // return Promise.all(
+        //     _.map(_.isArray(this.option.tasks) ? <TaskOption[]>this.option.tasks : [<TaskOption>this.option.tasks], optask => {
+        //         console.log(chalk.grey('begin load task via loader type:'), chalk.cyan(optask.loader.type || 'module'));
+        //         let loader = this.createLoader(optask);
+        //         let oper: Operation;
+        //         if (env.deploy) {
+        //             oper = Operation.deploy;
+        //         } else if (env.release) {
+        //             oper = Operation.release;
+        //         } else if (env.e2e) {
+        //             oper = Operation.e2e;
+        //         } else if (env.test) {
+        //             oper = Operation.test;
+        //         } else {
+        //             oper = Operation.build;
+        //         }
 
-                return loader.loadConfg(oper, env)
-                    .then(cfg => {
-                        console.log(chalk.green('task config loaded.\n'));
-                        if (cfg.env.help) {
-                            if (cfg.printHelp) {
-                                console.log(chalk.grey('\n...development default help...\n'));
-                                cfg.printHelp(_.isString(cfg.env.help) ? cfg.env.help : '');
-                            } else {
-                                console.log(chalk.grey('\n...  help  ...\n'));
-                                this.printHelp(cfg.env.help);
-                            }
-                            return null;
-                        } else {
-                            // console.log(chalk.grey('load tasks...'));
-                            return loader.load(this.bindingConfig(cfg))
-                                .then(tasks => {
-                                    console.log(chalk.green('tasks loaded.\n'));
-                                    return this.setup(gulp, cfg, tasks)
-                                });
-                        }
-                    })
-                    .then(tasksq => {
-                        return this.runSequence(gulp, tasksq);
-                    });
-            }));
+        //         return loader.loadConfg(oper, env)
+        //             .then(cfg => {
+        //                 console.log(chalk.green('task config loaded.\n'));
+        //                 if (cfg.env.help) {
+        //                     if (cfg.printHelp) {
+        //                         console.log(chalk.grey('\n...development default help...\n'));
+        //                         cfg.printHelp(_.isString(cfg.env.help) ? cfg.env.help : '');
+        //                     } else {
+        //                         console.log(chalk.grey('\n...  help  ...\n'));
+        //                         this.printHelp(cfg.env.help);
+        //                     }
+        //                     return null;
+        //                 } else {
+        //                     // console.log(chalk.grey('load tasks...'));
+        //                     return loader.load(this.bindingConfig(cfg))
+        //                         .then(tasks => {
+        //                             console.log(chalk.green('tasks loaded.\n'));
+        //                             return this.setup(gulp, cfg, tasks)
+        //                         });
+        //                 }
+        //             })
+        //             .then(tasksq => {
+        //                 return this.runSequence(gulp, tasksq);
+        //             });
+        //     }));
     }
 
     private bindingConfig(cfg: TaskConfig): TaskConfig {
@@ -161,7 +168,7 @@ export class Development {
                                         });
                                         return this.loadTasks(gulp, optask.tasks, env)
                                             .then(subseq => {
-                                                if (subseq.length > 0) {
+                                                if (subseq && subseq.length > 0) {
                                                     let first = _.first(subseq);
                                                     let last = _.last(subseq);
                                                     let frn = _.isArray(first) ? _.first(first) : first;
@@ -175,8 +182,9 @@ export class Development {
                                                     return tsq;
                                                 }
                                             });
+                                    } else {
+                                        return tsq;
                                     }
-                                    return tsq;
                                 });
                         }
                     });

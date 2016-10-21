@@ -32,7 +32,7 @@ export interface EnvOption {
     grp?: Src;
 }
 export interface LoaderOption {
-    type: string;
+    type?: string;
     module?: string;
     configModule?: string;
     taskModule?: string;
@@ -47,16 +47,18 @@ export interface DirLoaderOption extends LoaderOption {
 }
 export interface TaskOption {
     loader: LoaderOption;
-    src: string;
-    dist: string;
+    src?: string;
+    dist?: string;
     externalTask?: Task;
     runTasks?: Src[] | ((oper: Operation, tasks: Src[]) => Src[]);
+    tasks?: TaskOption | TaskOption[];
 }
 export interface ITaskDefine {
     moduleTaskConfig(oper: Operation, option: TaskOption, env: EnvOption): TaskConfig;
     moduleTaskLoader?(config: TaskConfig): Promise<Task[]>;
 }
 export interface TaskConfig {
+    globals?: any;
     env: EnvOption;
     oper: Operation;
     option: TaskOption;

@@ -243,7 +243,7 @@ export interface TaskOption {
      * @type {(TaskOption | TaskOption[])}
      * @memberOf TaskOption
      */
-    tasks: TaskOption | TaskOption[];
+    tasks?: TaskOption | TaskOption[];
 }
 
 /**
