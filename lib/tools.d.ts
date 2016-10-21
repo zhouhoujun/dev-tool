@@ -20,6 +20,7 @@ export declare class Development {
     protected toSquence(tasks: Array<Src | void>): Src[];
     protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]>;
     protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[]): Promise<Src[]>;
+    protected loadSubTask(gulp: Gulp, config: TaskConfig): Promise<Src>;
     protected createLoader(option: TaskOption): ITaskLoader;
     protected printHelp(help: boolean | string): void;
 }

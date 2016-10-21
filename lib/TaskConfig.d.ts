@@ -50,7 +50,7 @@ export interface TaskOption {
     src?: string;
     dist?: string;
     externalTask?: Task;
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[]) => Src[]);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src) => Src[]);
     tasks?: TaskOption | TaskOption[];
 }
 export interface ITaskDefine {
@@ -62,7 +62,7 @@ export interface TaskConfig {
     env: EnvOption;
     oper: Operation;
     option: TaskOption;
-    runTasks?(): Src[];
+    runTasks?(subGroupTask?: Src): Src[];
     printHelp?(lang: string): void;
     findTasksInModule?(module: string): Promise<Task[]>;
     findTasksInDir?(dirs: Src): Promise<Task[]>;

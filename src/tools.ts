@@ -53,6 +53,7 @@ export class Development {
 
         return this.loadTasks(gulp, this.option.tasks, env)
             .then(tseq => {
+                console.log(chalk.grey('run sequenec tasks:'), tseq);
                 return this.runSequence(gulp, tseq);
             })
             .catch(err => {
@@ -118,32 +119,6 @@ export class Development {
                                 .then(tasks => {
                                     console.log(chalk.green('tasks loaded.\n'));
                                     return this.setup(gulp, cfg, tasks)
-                                })
-                                .then(tsq => {
-                                    if (optask.tasks) {
-                                        _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
-                                            subopt.src = subopt.src || optask.src;
-                                            subopt.dist = subopt.dist || optask.dist;
-                                        });
-                                        return this.loadTasks(gulp, optask.tasks, env)
-                                            .then(subseq => {
-                                                if (subseq && subseq.length > 0) {
-                                                    let first = _.first(subseq);
-                                                    let last = _.last(subseq);
-                                                    let frn = _.isArray(first) ? _.first(first) : first;
-                                                    let lsn = _.isArray(last) ? _.first(last) : last;
-                                                    let subName = frn + '_' + lsn;
-                                                    gulp.task(subName, () => {
-                                                        return runSequence(gulp, subseq);
-                                                    })
-                                                    return tsq.push(subName);
-                                                } else {
-                                                    return tsq;
-                                                }
-                                            });
-                                    } else {
-                                        return tsq;
-                                    }
                                 });
                         }
                     });
@@ -157,18 +132,64 @@ export class Development {
             return t(gulp, config);
         }))
             .then(ts => {
-                let tsqs: Src[] = config.runTasks ? config.runTasks() : this.toSquence(ts);
-                console.log(chalk.grey('run sequenec tasks:'), tsqs);
-                if (config.option.runTasks) {
-                    if (_.isArray(config.option.runTasks)) {
-                        tsqs = config.option.runTasks;
-                    } else if (_.isFunction(config.option.runTasks)) {
-                        tsqs = config.option.runTasks(config.oper, tsqs);
-                    }
-                }
-                return tsqs;
-
+                return this.loadSubTask(gulp, config)
+                    .then(subGroupTask => {
+                        let tsqs: Src[] = this.toSquence(ts);
+                        if (config.option.runTasks) {
+                            if (_.isFunction(config.option.runTasks)) {
+                                tsqs = config.option.runTasks(config.oper, tsqs, subGroupTask);
+                            } else {
+                                tsqs = config.option.runTasks;
+                                subGroupTask && tsqs.push(subGroupTask);
+                            }
+                            return tsqs;
+                        } else if (config.runTasks) {
+                            return config.runTasks(subGroupTask);
+                        } else {
+                            subGroupTask && tsqs.push(subGroupTask);
+                            return tsqs;
+                        }
+                    });
             });
+    }
+
+    /**
+     * load sub tasks as group task.
+     * 
+     * @protected
+     * @param {Gulp} gulp
+     * @param {TaskConfig} config
+     * @returns {Promise<Src>}
+     * 
+     * @memberOf Development
+     */
+    protected loadSubTask(gulp: Gulp, config: TaskConfig): Promise<Src> {
+        let optask = config.option;
+        if (optask.tasks) {
+            _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
+                subopt.src = subopt.src || optask.src;
+                subopt.dist = subopt.dist || optask.dist;
+            });
+            return this.loadTasks(gulp, optask.tasks, config.env)
+                .then(subseq => {
+                    if (subseq && subseq.length > 0) {
+                        let first = _.first(subseq);
+                        let last = _.last(subseq);
+                        let frn = _.isArray(first) ? _.first(first) : first;
+                        let lsn = _.isArray(last) ? _.last(last) : last;
+                        let subName = frn + '_' + lsn;
+                        gulp.task(subName, () => {
+                            return runSequence(gulp, subseq);
+                        })
+                        return subName;
+                    } else {
+                        return null;
+                    }
+                });
+        } else {
+            return Promise.resolve(null);
+        }
+
     }
 
     protected createLoader(option: TaskOption): ITaskLoader {
@@ -247,8 +268,9 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
     if (tasks && tasks.length > 0) {
         _.each(tasks, task => {
             ps = ps.then(() => {
-                let taskErr = null, taskStop = null, len = _.isArray(task) ? (task.length - 1) : 0;
+                let taskErr = null, taskStop = null;
                 return new Promise((reslove, reject) => {
+                    let len = _.isArray(task) ? (task.length - 1) : 0;
                     taskErr = (err) => {
                         reject(err);
                     };
@@ -263,7 +285,6 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
                     }
                     gulp.on('task_stop', taskStop)
                         .on('task_err', taskErr);
-
                     gulp.start(task, (err) => {
                         if (err) {
                             reject(err);

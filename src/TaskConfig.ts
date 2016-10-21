@@ -235,7 +235,7 @@ export interface TaskOption {
      * 
      * @memberOf TaskConfig
      */
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[]) => Src[]);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src) => Src[]);
 
     /**
      * sub tasks.
@@ -317,11 +317,12 @@ export interface TaskConfig {
     /**
      * custom config run tasks sequence in.
      * 
+     * @param {Src} subGroupTask sub tasks group tasks.
      * @returns {Src[]}
      * 
      * @memberOf TaskConfig
      */
-    runTasks?(): Src[];
+    runTasks?(subGroupTask?: Src): Src[];
     /**
      * custom print help.
      * 
