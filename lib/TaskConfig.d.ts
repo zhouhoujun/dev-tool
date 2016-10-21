@@ -11,10 +11,7 @@ export interface IMap<T> {
     [K: string]: T;
 }
 export declare type Src = string | string[];
-export declare type TaskNameSequence = Src[];
 export declare type Task = (gulp: Gulp, config: TaskConfig) => Src | void;
-export declare type tasksInDir = (dirs: Src) => Promise<Task[]>;
-export declare type tasksInModule = (dirs: Src) => Promise<Task[]>;
 export interface EnvOption {
     root?: string;
     help?: boolean | string;
@@ -53,16 +50,20 @@ export interface TaskOption {
     src: string;
     dist: string;
     externalTask?: Task;
-    runTasks?: TaskNameSequence | ((oper: Operation, tasks: TaskNameSequence) => TaskNameSequence);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[]) => Src[]);
 }
 export interface ITaskDefine {
     moduleTaskConfig(oper: Operation, option: TaskOption, env: EnvOption): TaskConfig;
-    moduleTaskLoader?(config: TaskConfig, findInModule: tasksInModule, findInDir: tasksInDir): Promise<Task[]>;
+    moduleTaskLoader?(config: TaskConfig): Promise<Task[]>;
 }
 export interface TaskConfig {
     env: EnvOption;
     oper: Operation;
     option: TaskOption;
-    runTasks?(): TaskNameSequence;
+    runTasks?(): Src[];
     printHelp?(lang: string): void;
+    findTasksInModule?(module: string): Promise<Task[]>;
+    findTasksInDir?(dirs: Src): Promise<Task[]>;
+    fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
+    runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
 }

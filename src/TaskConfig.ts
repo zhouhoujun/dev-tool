@@ -40,17 +40,16 @@ export interface IMap<T> {
     [K: string]: T;
 }
 
-export type Src = string | string[];
 /**
- * type task name sequence 
+ * src
  */
-export type TaskNameSequence = Src[];
+export type Src = string | string[];
 
-export type Task = (gulp: Gulp,  config: TaskConfig) => Src | void;
+export type Task = (gulp: Gulp, config: TaskConfig) => Src | void;
 
-export type tasksInDir = (dirs: Src) => Promise<Task[]>;
+// export type tasksInDir = (dirs: Src) => Promise<Task[]>;
 
-export type tasksInModule = (dirs: Src) => Promise<Task[]>;
+// export type tasksInModule = (dirs: Src) => Promise<Task[]>;
 
 /**
  * event option
@@ -236,7 +235,7 @@ export interface TaskOption {
      * 
      * @memberOf TaskConfig
      */
-    runTasks?: TaskNameSequence | ((oper: Operation, tasks: TaskNameSequence) => TaskNameSequence);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[]) => Src[]);
 }
 
 /**
@@ -267,7 +266,7 @@ export interface ITaskDefine {
      * 
      * @memberOf ITaskDefine
      */
-    moduleTaskLoader?(config: TaskConfig, findInModule: tasksInModule, findInDir: tasksInDir): Promise<Task[]>;
+    moduleTaskLoader?(config: TaskConfig): Promise<Task[]>;
 }
 
 // export interface TaskUtil {
@@ -282,9 +281,80 @@ export interface ITaskDefine {
  * @interface TaskConfig
  */
 export interface TaskConfig {
+    /**
+     * env
+     * 
+     * @type {EnvOption}
+     * @memberOf TaskConfig
+     */
     env: EnvOption;
+    /**
+     * run operation
+     * 
+     * @type {Operation}
+     * @memberOf TaskConfig
+     */
     oper: Operation;
+    /**
+     * task option setting.
+     * 
+     * @type {TaskOption}
+     * @memberOf TaskConfig
+     */
     option: TaskOption;
-    runTasks?(): TaskNameSequence;
+    /**
+     * custom config run tasks sequence in.
+     * 
+     * @returns {Src[]}
+     * 
+     * @memberOf TaskConfig
+     */
+    runTasks?(): Src[];
+    /**
+     * custom print help.
+     * 
+     * @param {string} lang
+     * 
+     * @memberOf TaskConfig
+     */
     printHelp?(lang: string): void;
+
+    /**
+     * find  task in module. default implement by loader.
+     * 
+     * @param {string} module
+     * @returns {Promise<Task[]>}
+     * 
+     * @memberOf TaskConfig
+     */
+    findTasksInModule?(module: string): Promise<Task[]>;
+    /**
+     * find  task in directories. default implement by loader.
+     * 
+     * @param {Src} dirs
+     * @returns {Promise<Task[]>}
+     * 
+     * @memberOf TaskConfig
+     */
+    findTasksInDir?(dirs: Src): Promise<Task[]>;
+    /**
+     * filter file in directory.  default implement in tools.
+     * 
+     * @param {string} directory
+     * @param {((fileName: string) => boolean)} [express]
+     * @returns {string[]}
+     * 
+     * @memberOf TaskConfig
+     */
+    fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
+    /**
+     * filter file in directory.  default implement in tools.
+     * 
+     * @param {Gulp} gulp
+     * @param {Src[]} tasks
+     * @returns {Promise<any>}
+     * 
+     * @memberOf TaskConfig
+     */
+    runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
 }

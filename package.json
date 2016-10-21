@@ -1,6 +1,6 @@
 {
   "name": "development-tool",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "development build tools.",
   "main": "./lib/tools.js",
   "typings": "./lib/tools",
@@ -31,11 +31,12 @@
     "url": "https://github.com/zhouhoujun/development-tool.git"
   },
   "dependencies": {
+    "@types/chalk": "^0.4.31",
     "@types/gulp": "^3.8.32",
     "@types/lodash": "^4.14.37",
     "@types/minimist": "^1.1.29",
+    "chalk": "^1.1.3",
     "checksum": "^0.1.1",
-    "color-console": "^0.0.1",
     "gulp": "^3.9.1",
     "lodash": "^4.13.1",
     "require-dir": "^0.3.1"

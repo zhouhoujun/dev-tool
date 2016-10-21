@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import { Src, Task, EnvOption, Operation, TaskOption, TaskConfig, ITaskDefine } from '../TaskConfig';
 import { ITaskLoader } from '../ITaskLoader';
 const requireDir = require('require-dir');
+import * as chalk from 'chalk';
 // import { isAbsolute } from 'path';
 
 export abstract class BaseLoader implements ITaskLoader {
@@ -15,14 +16,7 @@ export abstract class BaseLoader implements ITaskLoader {
         return this.getTaskDefine()
             .then(def => {
                 if (def.moduleTaskLoader) {
-                    return def.moduleTaskLoader(
-                        cfg,
-                        (mdl) => {
-                            return this.loadTaskFromModule(mdl);
-                        },
-                        (dirs) => {
-                            return this.loadTaskFromDir(dirs)
-                        });
+                    return def.moduleTaskLoader(cfg);
                 } else {
                     let mdl = this.getTaskModule();
                     return this.loadTaskFromModule(mdl);
@@ -39,9 +33,22 @@ export abstract class BaseLoader implements ITaskLoader {
             .then(def => {
                 return def.moduleTaskConfig(oper, this.option, env);
             })
+            .then(config => {
+                return this.bindingConfig(config);
+            })
             .catch(err => {
                 console.error(err);
             });
+    }
+
+    protected bindingConfig(cfg: TaskConfig): TaskConfig {
+        cfg.findTasksInDir = cfg.findTasksInDir || ((dirs) => {
+            return this.loadTaskFromDir(dirs);
+        });
+        cfg.findTasksInModule = cfg.findTasksInModule || ((mdl) => {
+            return this.loadTaskFromModule(mdl);
+        });
+        return cfg;
     }
 
     protected getTaskDefine(): Promise<ITaskDefine> {
@@ -141,7 +148,7 @@ export abstract class BaseLoader implements ITaskLoader {
                 });
             } else {
                 _.each(_.keys(mdl), key => {
-                    console.log('register task from:', key);
+                    console.log(chalk.grey('register task from:'), chalk.cyan(key));
                     tasks = tasks.concat(this.findTasks(mdl[key]));
                 });
             }
@@ -152,7 +159,7 @@ export abstract class BaseLoader implements ITaskLoader {
     protected loadTaskFromModule(mdl: any): Promise<Task[]> {
         let taskfuns: Task[] = this.findTasks(mdl);
         if (!taskfuns || taskfuns.length < 1) {
-            console.log('error module:', mdl);
+            console.log(chalk.red('error module:'), mdl);
             return Promise.reject('has not found task in module.');
         } else {
             return Promise.resolve(taskfuns);
@@ -161,7 +168,7 @@ export abstract class BaseLoader implements ITaskLoader {
 
     protected loadTaskFromDir(dirs: Src): Promise<Task[]> {
         return Promise.all(_.map(_.isArray(dirs) ? <string[]>dirs : [<string>dirs], dir => {
-            console.log('begin load task from dir', dir);
+            console.log(chalk.grey('begin load task from dir'), chalk.cyan(dir));
             let mdl = requireDir(dir, { recurse: true });
             return this.loadTaskFromModule(mdl);
         }))

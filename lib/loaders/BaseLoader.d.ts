@@ -5,6 +5,7 @@ export declare abstract class BaseLoader implements ITaskLoader {
     constructor(option: TaskOption);
     load(cfg: TaskConfig): Promise<Task[]>;
     loadConfg(oper: Operation, env: EnvOption): Promise<TaskConfig>;
+    protected bindingConfig(cfg: TaskConfig): TaskConfig;
     protected getTaskDefine(): Promise<ITaskDefine>;
     protected getConfigModule(): any;
     protected getTaskModule(): any;
