@@ -25,7 +25,7 @@ export class Development {
     private globals: any = {};
     static create(gulp: Gulp, dirname: string, option?: DevelopConfig): Development {
         let devtool = new Development(dirname, option);
-        gulp.task('build', () => {
+        gulp.task('build', (callback: TaskCallback) => {
             var options: EnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development' }
@@ -50,6 +50,7 @@ export class Development {
             console.log(chalk.grey('\n... main help  ...\n'));
             this.printHelp(env.help);
         }
+
         return this.loadTasks(gulp, this.option.tasks, env)
             .then(tseq => {
                 return this.runSequence(gulp, tseq);
@@ -57,48 +58,6 @@ export class Development {
             .catch(err => {
                 console.error(err);
             });
-        // return Promise.all(
-        //     _.map(_.isArray(this.option.tasks) ? <TaskOption[]>this.option.tasks : [<TaskOption>this.option.tasks], optask => {
-        //         console.log(chalk.grey('begin load task via loader type:'), chalk.cyan(optask.loader.type || 'module'));
-        //         let loader = this.createLoader(optask);
-        //         let oper: Operation;
-        //         if (env.deploy) {
-        //             oper = Operation.deploy;
-        //         } else if (env.release) {
-        //             oper = Operation.release;
-        //         } else if (env.e2e) {
-        //             oper = Operation.e2e;
-        //         } else if (env.test) {
-        //             oper = Operation.test;
-        //         } else {
-        //             oper = Operation.build;
-        //         }
-
-        //         return loader.loadConfg(oper, env)
-        //             .then(cfg => {
-        //                 console.log(chalk.green('task config loaded.\n'));
-        //                 if (cfg.env.help) {
-        //                     if (cfg.printHelp) {
-        //                         console.log(chalk.grey('\n...development default help...\n'));
-        //                         cfg.printHelp(_.isString(cfg.env.help) ? cfg.env.help : '');
-        //                     } else {
-        //                         console.log(chalk.grey('\n...  help  ...\n'));
-        //                         this.printHelp(cfg.env.help);
-        //                     }
-        //                     return null;
-        //                 } else {
-        //                     // console.log(chalk.grey('load tasks...'));
-        //                     return loader.load(this.bindingConfig(cfg))
-        //                         .then(tasks => {
-        //                             console.log(chalk.green('tasks loaded.\n'));
-        //                             return this.setup(gulp, cfg, tasks)
-        //                         });
-        //                 }
-        //             })
-        //             .then(tasksq => {
-        //                 return this.runSequence(gulp, tasksq);
-        //             });
-        //     }));
     }
 
     private bindingConfig(cfg: TaskConfig): TaskConfig {
@@ -288,19 +247,22 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
     if (tasks && tasks.length > 0) {
         _.each(tasks, task => {
             ps = ps.then(() => {
-                let taskErr = null, taskStop = null;
+                let taskErr = null, taskStop = null, len = _.isArray(task) ? (task.length - 1) : 0;
                 return new Promise((reslove, reject) => {
                     taskErr = (err) => {
                         reject(err);
                     };
-                    taskStop = () => {
-                        reslove();
+                    taskStop = (e: any) => {
+                        if (len <= 0) {
+                            reslove();
+                        } else {
+                            if ((<string[]>task).indexOf(e.task) >= 0) {
+                                len--;
+                            }
+                        }
                     }
-                    gulp.on('task_stop', () => {
-                        reslove();
-                    }).on('task_err', (err) => {
-                        reject(err);
-                    });
+                    gulp.on('task_stop', taskStop)
+                        .on('task_err', taskErr);
 
                     gulp.start(task, (err) => {
                         if (err) {
