@@ -270,28 +270,22 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
             ps = ps.then(() => {
                 let taskErr = null, taskStop = null;
                 return new Promise((reslove, reject) => {
-                    let len = _.isArray(task) ? (task.length - 1) : 0;
+                    let tskmap: any = {};
+                    _.each(_.isArray(task) ? task : [task], t => {
+                        tskmap[t] = false;
+                    });
                     taskErr = (err) => {
                         reject(err);
                     };
                     taskStop = (e: any) => {
-                        if (len <= 0) {
+                        tskmap[e.task] = true;
+                        if (!_.some(_.values(tskmap), it => !it)) {
                             reslove();
-                        } else {
-                            if ((<string[]>task).indexOf(e.task) >= 0) {
-                                len--;
-                            }
                         }
                     }
                     gulp.on('task_stop', taskStop)
                         .on('task_err', taskErr);
-                    gulp.start(task, (err) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            reslove();
-                        }
-                    });
+                    gulp.start(task);
                 })
                     .then(() => {
                         if (gulp['removeListener']) {
