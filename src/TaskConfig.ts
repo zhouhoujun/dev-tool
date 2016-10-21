@@ -110,12 +110,12 @@ export interface EnvOption {
  */
 export interface LoaderOption {
     /**
-     * loader type.
+     * loader type, default module.
      * 
      * @type {string}
      * @memberOf LoaderOption
      */
-    type: string;
+    type?: string;
     /**
      * module name or url
      * 
@@ -217,11 +217,11 @@ export interface TaskOption {
     /**
      * the project src root folder. default 'src'.
      */
-    src: string;
+    src?: string;
     /**
      * build folder. default 'dist'.
      */
-    dist: string;
+    dist?: string;
 
     /**
      * external task for 
@@ -236,6 +236,14 @@ export interface TaskOption {
      * @memberOf TaskConfig
      */
     runTasks?: Src[] | ((oper: Operation, tasks: Src[]) => Src[]);
+
+    /**
+     * sub tasks.
+     * 
+     * @type {(TaskOption | TaskOption[])}
+     * @memberOf TaskOption
+     */
+    tasks: TaskOption | TaskOption[];
 }
 
 /**
@@ -281,6 +289,10 @@ export interface ITaskDefine {
  * @interface TaskConfig
  */
 export interface TaskConfig {
+    /**
+     * custom global data cache.
+     */
+    globals?: any;
     /**
      * env
      * 

@@ -15,6 +15,14 @@ export * from './LoaderFactory';
 export * from './loaders/BaseLoader';
 
 export class Development {
+    /**
+     * global data.
+     * 
+     * @private
+     * @type {*}
+     * @memberOf Development
+     */
+    private globals: any = {};
     static create(gulp: Gulp, dirname: string, option?: DevelopConfig): Development {
         let devtool = new Development(dirname, option);
         gulp.task('build', (callback: TaskCallback) => {
@@ -33,13 +41,18 @@ export class Development {
 
     }
 
-    run(gulp: Gulp, env: EnvOption, callback: TaskCallback): Promise<any> {
+    run(gulp: Gulp, env: EnvOption): Promise<any> {
         if (!env.root) {
             env.root = this.dirname;
         }
+
+        if (env.help) {
+            console.log(chalk.grey('\n... main help  ...\n'));
+            this.printHelp(env.help);
+        }
         return Promise.all(
             _.map(_.isArray(this.option.tasks) ? <TaskOption[]>this.option.tasks : [<TaskOption>this.option.tasks], optask => {
-                console.log(chalk.grey('begin load task via loader type:'), chalk.cyan(optask.loader.type));
+                console.log(chalk.grey('begin load task via loader type:'), chalk.cyan(optask.loader.type || 'module'));
                 let loader = this.createLoader(optask);
                 let oper: Operation;
                 if (env.deploy) {
@@ -82,6 +95,7 @@ export class Development {
     }
 
     private bindingConfig(cfg: TaskConfig): TaskConfig {
+        cfg.globals = this.globals;
         cfg.fileFilter = cfg.fileFilter || files;
         cfg.runSequence = cfg.runSequence || runSequence;
         return cfg;
@@ -103,6 +117,72 @@ export class Development {
 
     protected toSquence(tasks: Array<Src | void>): Src[] {
         return <Src[]>_.filter(tasks, t => !!t);
+    }
+
+    protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]> {
+        return Promise.all<Src[]>(
+            _.map(_.isArray(tasks) ? <TaskOption[]>tasks : [<TaskOption>tasks], optask => {
+                console.log(chalk.grey('begin load task via loader type:'), chalk.cyan(optask.loader.type || 'module'));
+                let loader = this.createLoader(optask);
+                let oper: Operation;
+                if (env.deploy) {
+                    oper = Operation.deploy;
+                } else if (env.release) {
+                    oper = Operation.release;
+                } else if (env.e2e) {
+                    oper = Operation.e2e;
+                } else if (env.test) {
+                    oper = Operation.test;
+                } else {
+                    oper = Operation.build;
+                }
+
+                return loader.loadConfg(oper, env)
+                    .then(cfg => {
+                        console.log(chalk.green('task config loaded.\n'));
+                        if (cfg.env.help) {
+                            if (cfg.printHelp) {
+                                console.log(chalk.grey('\n...development default help...\n'));
+                                cfg.printHelp(_.isString(cfg.env.help) ? cfg.env.help : '');
+                            }
+                            return [];
+                        } else {
+                            // console.log(chalk.grey('load tasks...'));
+                            return loader.load(this.bindingConfig(cfg))
+                                .then(tasks => {
+                                    console.log(chalk.green('tasks loaded.\n'));
+                                    return this.setup(gulp, cfg, tasks)
+                                })
+                                .then(tsq => {
+                                    if (optask.tasks) {
+                                        _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
+                                            subopt.src = subopt.src || optask.src;
+                                            subopt.dist = subopt.dist || optask.dist;
+                                        });
+                                        return this.loadTasks(gulp, optask.tasks, env)
+                                            .then(subseq => {
+                                                if (subseq.length > 0) {
+                                                    let first = _.first(subseq);
+                                                    let last = _.last(subseq);
+                                                    let frn = _.isArray(first) ? _.first(first) : first;
+                                                    let lsn = _.isArray(last) ? _.first(last) : last;
+                                                    let subName = frn + '_' + lsn;
+                                                    gulp.task(subName, () => {
+                                                        return runSequence(gulp, subseq);
+                                                    })
+                                                    return tsq.push(subName);
+                                                } else {
+                                                    return tsq;
+                                                }
+                                            });
+                                    }
+                                    return tsq;
+                                });
+                        }
+                    });
+            })).then(tsq => {
+                return _.flatten(tsq);
+            });
     }
 
     protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[]): Promise<Src[]> {
