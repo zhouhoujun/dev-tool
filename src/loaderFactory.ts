@@ -2,7 +2,7 @@ import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
 import { TaskOption } from './TaskConfig';
 import { ModuleLoader } from './loaders/ModuleLoader';
-
+import * as _ from 'lodash';
 /**
  * loader factory.
  * 
