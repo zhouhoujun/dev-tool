@@ -4,7 +4,7 @@ import { readdirSync, lstatSync } from 'fs';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { Src, Task, TaskOption, Operation, EnvOption, TaskConfig } from './TaskConfig';
+import { Src, Asserts, Task, TaskOption, Operation, EnvOption, TaskConfig } from './TaskConfig';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
@@ -65,6 +65,26 @@ export class Development {
         cfg.globals = this.globals;
         cfg.fileFilter = cfg.fileFilter || files;
         cfg.runSequence = cfg.runSequence || runSequence;
+        cfg.getDist = cfg.getDist || (function(asserts: Asserts){
+            let dist: string;
+            switch (this.oper) {
+                case Operation.build:
+                case Operation.test:
+                case Operation.e2e:
+                    dist = asserts.build || asserts.dist;
+                    break;
+                case Operation.release:
+                    dist = asserts.release || asserts.dist;
+                    break;
+                case Operation.deploy:
+                    dist = asserts.deploy || asserts.dist;
+                    break;
+                default:
+                    dist = '';
+                    break;
+            }
+            return dist;
+        }).bind(cfg);
         return cfg;
     }
 
@@ -89,6 +109,7 @@ export class Development {
     protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]> {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <TaskOption[]>tasks : [<TaskOption>tasks], optask => {
+                optask.dist = optask.dist || 'dist';
                 console.log(chalk.grey('begin load task via loader:'), optask.loader);
                 let loader = this.createLoader(optask);
                 let oper: Operation;

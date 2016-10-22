@@ -201,12 +201,53 @@ export interface DirLoaderOption extends LoaderOption {
 }
 
 /**
+ * asserts to be dealt with.
+ * 
+ * @export
+ * @interface Asserts
+ */
+export interface Asserts {
+    /**
+     * the src file filter string. default 'src'.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    src: Src;
+    /**
+     * default folder. if empty use parent setting, or ues 'dist'.
+     */
+    dist?: string;
+    /**
+     * build folder. if empty use parent setting, or ues 'dist'.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    build?: string;
+    /**
+     * release folder. if empty use parent setting, or ues 'dist'.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    release?: string;
+    /**
+     * deploy folder. if empty use parent setting, or ues 'dist'.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    deploy?: string;
+}
+
+/**
  * task option setting.
  * 
  * @export
  * @interface TaskOption
  */
-export interface TaskOption {
+export interface TaskOption extends Asserts {
     /**
      * task loader
      * 
@@ -214,14 +255,6 @@ export interface TaskOption {
      * @memberOf TaskOption
      */
     loader: string | LoaderOption;
-    /**
-     * the project src root folder. default 'src'.
-     */
-    src?: string;
-    /**
-     * build folder. default 'dist'.
-     */
-    dist?: string;
 
     /**
      * external task for 
@@ -314,6 +347,7 @@ export interface TaskConfig {
      * @memberOf TaskConfig
      */
     option: TaskOption;
+
     /**
      * custom config run tasks sequence in.
      * 
@@ -350,6 +384,16 @@ export interface TaskConfig {
      * @memberOf TaskConfig
      */
     findTasksInDir?(dirs: Src): Promise<Task[]>;
+
+    /**
+     * get dist of current state.  default implement in tools.
+     * 
+     * @param {Asserts} asserts
+     * @returns {string}
+     * 
+     * @memberOf TaskConfig
+     */
+    getDist?(asserts: Asserts): string;
     /**
      * filter file in directory.  default implement in tools.
      * 

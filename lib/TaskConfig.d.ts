@@ -45,10 +45,15 @@ export interface DirLoaderOption extends LoaderOption {
     dirConfigFile?: string;
     dirmoduleTaskConfigName?: Src;
 }
-export interface TaskOption {
-    loader: string | LoaderOption;
-    src?: string;
+export interface Asserts {
+    src: Src;
     dist?: string;
+    build?: string;
+    release?: string;
+    deploy?: string;
+}
+export interface TaskOption extends Asserts {
+    loader: string | LoaderOption;
     externalTask?: Task;
     runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src) => Src[]);
     tasks?: TaskOption | TaskOption[];
@@ -66,6 +71,7 @@ export interface TaskConfig {
     printHelp?(lang: string): void;
     findTasksInModule?(module: string): Promise<Task[]>;
     findTasksInDir?(dirs: Src): Promise<Task[]>;
+    getDist?(asserts: Asserts): string;
     fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
 }

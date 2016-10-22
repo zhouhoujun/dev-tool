@@ -40,7 +40,7 @@ let tasks: TaskOption| TaskOption[]= [
                 loader:'development-tool-*' //the module must implement ITaskDefine.
             },
             {
-                src: 'src/**/*.css',
+                src: ['src/apath/**/*.css', 'src/bpath/**/*.css'],
                 dist: 'dist',
                 loader: {
                     configModule: path.join(__dirname, './src/task.ts'), //the module must implement ITaskDefine.
