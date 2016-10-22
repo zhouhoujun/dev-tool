@@ -37,7 +37,7 @@ let tasks: TaskOption| TaskOption[]= [
         },
         tasks: [
             {
-                src: 'files be dealt with'',
+                src: 'files be dealt with',
                 dist: 'dist',
                 loader:{
                     module:'development-tool-*' //the module must implement ITaskDefine.
