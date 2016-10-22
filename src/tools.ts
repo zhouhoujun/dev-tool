@@ -89,7 +89,7 @@ export class Development {
     protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]> {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <TaskOption[]>tasks : [<TaskOption>tasks], optask => {
-                console.log(chalk.grey('begin load task via loader type:'), chalk.cyan(optask.loader.type || 'module'));
+                console.log(chalk.grey('begin load task via loader:'), optask.loader);
                 let loader = this.createLoader(optask);
                 let oper: Operation;
                 if (env.deploy) {

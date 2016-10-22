@@ -32,16 +32,12 @@ let tasks: TaskOption| TaskOption[]= [
             json: 'src/**/*.json',
             css: {src: 'src/**/*.css', dist:'lib/style'}
         },
-        loader: {
-            module: 'development-tool-node' //the module must implement ITaskDefine.
-        },
+        loader: 'development-tool-node', //the module must implement ITaskDefine.
         tasks: [
             {
                 src: 'files be dealt with',
                 dist: 'dist',
-                loader:{
-                    module:'development-tool-*' //the module must implement ITaskDefine.
-                }
+                loader:'development-tool-*' //the module must implement ITaskDefine.
             },
             {
                 src: 'src/**/*.css',

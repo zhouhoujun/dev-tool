@@ -210,10 +210,10 @@ export interface TaskOption {
     /**
      * task loader
      * 
-     * @type {string}
-     * @memberOf TaskConfig
+     * @type {(string | LoaderOption)}
+     * @memberOf TaskOption
      */
-    loader: LoaderOption;
+    loader: string | LoaderOption;
     /**
      * the project src root folder. default 'src'.
      */

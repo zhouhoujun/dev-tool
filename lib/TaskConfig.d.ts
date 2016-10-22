@@ -46,7 +46,7 @@ export interface DirLoaderOption extends LoaderOption {
     dirmoduleTaskConfigName?: Src;
 }
 export interface TaskOption {
-    loader: LoaderOption;
+    loader: string | LoaderOption;
     src?: string;
     dist?: string;
     externalTask?: Task;

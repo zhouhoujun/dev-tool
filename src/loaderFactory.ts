@@ -31,17 +31,21 @@ export class LoaderFactory implements ILoaderFactory {
             return new DirLoader(option);
         }
 
-        let loader = null;
-        switch (option.loader.type) {
-            case 'dir':
-                loader = new DirLoader(option);
-                break;
+        if (_.isString(option.loader)) {
+            return new ModuleLoader(option);
+        } else {
+            let loader = null;
+            switch (option.loader.type) {
+                case 'dir':
+                    loader = new DirLoader(option);
+                    break;
 
-            case 'module':
-            default:
-                loader = new ModuleLoader(option);
-                break;
+                case 'module':
+                default:
+                    loader = new ModuleLoader(option);
+                    break;
+            }
+            return loader;
         }
-        return loader;
     }
 }

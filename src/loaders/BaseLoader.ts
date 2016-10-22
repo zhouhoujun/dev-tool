@@ -53,8 +53,10 @@ export abstract class BaseLoader implements ITaskLoader {
 
     protected getTaskDefine(): Promise<ITaskDefine> {
         let tsdef: ITaskDefine = null;
-        if (this.option.loader.taskDefine) {
-            tsdef = this.option.loader.taskDefine;
+        if (!_.isString(this.option.loader)) {
+            if (this.option.loader.taskDefine) {
+                tsdef = this.option.loader.taskDefine;
+            }
         }
         if (!tsdef) {
             let mdl = this.getConfigModule();
@@ -69,7 +71,13 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     protected getConfigModule(): any {
-        let ml = this.option.loader.configModule || this.option.loader.module;
+        let ml: string;
+        if (_.isString(this.option.loader)) {
+            ml = this.option.loader
+        } else {
+            ml = this.option.loader.configModule || this.option.loader.module;
+        }
+
         if (_.isString(ml)) {
             return require(ml);
         } else {
@@ -78,7 +86,13 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     protected getTaskModule(): any {
-        let ml = this.option.loader.taskModule || this.option.loader.module;
+        let ml: string;
+        if (_.isString(this.option.loader)) {
+            ml = this.option.loader
+        } else {
+            ml = this.option.loader.taskModule || this.option.loader.module;
+        }
+
         if (_.isString(ml)) {
             return require(ml);
         } else {
@@ -112,7 +126,7 @@ export abstract class BaseLoader implements ITaskLoader {
         if (!mdl) {
             return false;
         }
-        if (this.option.loader.isTaskDefine) {
+        if (!_.isString(this.option.loader) && this.option.loader.isTaskDefine) {
             return this.option.loader.isTaskDefine(mdl);
         }
         return _.isFunction(mdl['moduleTaskConfig']);
@@ -123,7 +137,7 @@ export abstract class BaseLoader implements ITaskLoader {
             return false;
         }
 
-        if (this.option.loader.isTaskFunc) {
+        if (!_.isString(this.option.loader) && this.option.loader.isTaskFunc) {
             return this.option.loader.isTaskFunc(mdl);
         }
 
