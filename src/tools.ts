@@ -114,11 +114,14 @@ export class Development {
                             }
                             return [];
                         } else {
-                            // console.log(chalk.grey('load tasks...'));
-                            return loader.load(this.bindingConfig(cfg))
-                                .then(tasks => {
-                                    console.log(chalk.green('tasks loaded.\n'));
-                                    return this.setup(gulp, cfg, tasks)
+                            cfg = this.bindingConfig(cfg);
+                            return this.loadSubTask(gulp, cfg)
+                                .then(subtask => {
+                                    return loader.load(cfg)
+                                        .then(tasks => {
+                                            console.log(chalk.green('tasks loaded.\n'));
+                                            return this.setup(gulp, cfg, tasks, subtask)
+                                        });
                                 });
                         }
                     });
@@ -127,29 +130,26 @@ export class Development {
             });
     }
 
-    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[]): Promise<Src[]> {
+    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], subGroupTask: Src): Promise<Src[]> {
         return Promise.all(_.map(tasks, t => {
             return t(gulp, config);
         }))
             .then(ts => {
-                return this.loadSubTask(gulp, config)
-                    .then(subGroupTask => {
-                        let tsqs: Src[] = this.toSquence(ts);
-                        if (config.option.runTasks) {
-                            if (_.isFunction(config.option.runTasks)) {
-                                tsqs = config.option.runTasks(config.oper, tsqs, subGroupTask);
-                            } else {
-                                tsqs = config.option.runTasks;
-                                subGroupTask && tsqs.push(subGroupTask);
-                            }
-                            return tsqs;
-                        } else if (config.runTasks) {
-                            return config.runTasks(subGroupTask);
-                        } else {
-                            subGroupTask && tsqs.push(subGroupTask);
-                            return tsqs;
-                        }
-                    });
+                let tsqs: Src[] = this.toSquence(ts);
+                if (config.option.runTasks) {
+                    if (_.isFunction(config.option.runTasks)) {
+                        tsqs = config.option.runTasks(config.oper, tsqs, subGroupTask);
+                    } else {
+                        tsqs = config.option.runTasks;
+                        subGroupTask && tsqs.push(subGroupTask);
+                    }
+                    return tsqs;
+                } else if (config.runTasks) {
+                    return config.runTasks(subGroupTask);
+                } else {
+                    subGroupTask && tsqs.push(subGroupTask);
+                    return tsqs;
+                }
             });
     }
 
