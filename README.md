@@ -28,20 +28,36 @@ let tasks: TaskOption| TaskOption[]= [
     <NodeBuildOption>{
         src: 'src',
         dist: 'lib',
+        // build:'build path',
+        // release: 'release path',
+        // depoly: 'depoly path'
+
         asserts: {
             json: 'src/**/*.json',
-            css: {src: 'src/**/*.css', dist:'lib/style'}
+            css: {
+                src: 'src/**/*.css',
+                dist:'lib/style',
+                // build:'build path',
+                // release: 'release path',
+                // depoly: 'depoly path'
+                }
         },
         loader: 'development-tool-node', //the module must implement ITaskDefine.
         tasks: [
             {
                 src: 'files be dealt with',
-                dist: 'dist',
+                dist: 'dist path',
+                // build:'build path',
+                // release: 'release path',
+                // depoly: 'depoly path',
                 loader:'development-tool-*' //the module must implement ITaskDefine.
             },
             {
                 src: ['src/apath/**/*.css', 'src/bpath/**/*.css'],
-                dist: 'dist',
+                dist: 'dist path',
+                // build:'build path',
+                // release: 'release path',
+                // depoly: 'depoly path',
                 loader: {
                     configModule: path.join(__dirname, './src/task.ts'), //the module must implement ITaskDefine.
                     dir: [path.join(__dirname, './src/mytasks')]
@@ -49,7 +65,10 @@ let tasks: TaskOption| TaskOption[]= [
                 tasks: [
                     {
                         src: 'files be dealt with',
-                        dist: 'dist',
+                        dist: 'dist path',
+                        // build:'build path',
+                        // release: 'release path',
+                        // depoly: 'depoly path',
                         loader: {
                             //./src/mytasks folder must has module implement ITaskDefine.
                             dir: path.join(__dirname, './src/mytasks')
@@ -57,7 +76,10 @@ let tasks: TaskOption| TaskOption[]= [
                     },
                     {
                         src: 'files be dealt with',
-                        dist: 'dist',
+                        dist: 'dist path',
+                        // build:'build path',
+                        // release: 'release path',
+                        // depoly: 'depoly path',
                         loader: {
                             module: path.join(__dirname, './src/mytasks/dosomething'),
                             configModule: path.join(__dirname, './src/mytasks/config') //the module must implement ITaskDefine.
