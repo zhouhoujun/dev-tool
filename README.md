@@ -23,7 +23,7 @@ You can `import` modules:
 import * as gulp from 'gulp';
 import  { Development, TaskOption } from 'development-tool';
 import  { NodeBuildOption } from 'development-tool-node';
-import 'development-tool-*';
+// import 'development-tool-*';
 let tasks: TaskOption| TaskOption[]= [
     <NodeBuildOption>{
         src: 'src',
