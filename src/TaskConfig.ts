@@ -200,6 +200,17 @@ export interface DirLoaderOption extends LoaderOption {
     dirmoduleTaskConfigName?: Src;
 }
 
+
+/**
+ * the option for loader dynamic build task.
+ * 
+ * @export
+ * @interface DynamicLoaderOption
+ * @extends {LoaderOption}
+ */
+export interface DynamicLoaderOption extends LoaderOption {
+}
+
 /**
  * asserts to be dealt with.
  * 
