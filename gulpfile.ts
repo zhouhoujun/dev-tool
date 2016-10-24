@@ -24,8 +24,8 @@ Development.create(gulp, __dirname, {
                     tsProject
                 ],
                 output: [
-                    (tsmap, config) => tsmap['dts'].pipe(gulp.dest(config.getDist())),
-                    (tsmap, config) => tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                    (tsmap, config) => tsmap.dts.pipe(gulp.dest(config.getDist())),
+                    (tsmap, config) => tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
                 ]
             },
             {

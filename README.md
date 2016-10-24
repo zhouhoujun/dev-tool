@@ -153,8 +153,8 @@ Development.create(gulp, __dirname, {
                 ],
                 // set muti-output. no setting default output default one to "dist: 'lib'" .
                 output: [
-                    (tsmap:IMap<NodeJS.ReadWriteStream>, config) =>  tsmap['dts'].pipe(gulp.dest(config.getDist())),
-                    (tsmap: IMap<NodeJS.ReadWriteStream>, config: TaskConfig) =>  tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                    (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
+                    (tsmap, config: TaskConfig) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
                 ]
             },
             {

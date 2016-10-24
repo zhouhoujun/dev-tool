@@ -198,9 +198,24 @@ export interface DirLoaderOption extends LoaderOption {
  * @extends {NodeJS.ReadWriteStream}
  */
 export interface ITransform extends NodeJS.ReadWriteStream {
-    pipe(stream: NodeJS.ReadWriteStream): NodeJS.ReadWriteStream;
+    /**
+     * transform pipe
+     * 
+     * @param {NodeJS.ReadWriteStream} stream
+     * @returns {ITransform}
+     * 
+     * @memberOf ITransform
+     */
+    pipe(stream: NodeJS.ReadWriteStream): ITransform;
 }
 
+/**
+ * output transform. support typescript output.
+ * 
+ * @export
+ * @interface Output
+ * @extends {ITransform}
+ */
 export interface Output extends ITransform {
     dts?: ITransform;
     js?: ITransform
