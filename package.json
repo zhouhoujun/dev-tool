@@ -43,8 +43,11 @@
   },
   "devDependencies": {
     "bluebird": "^3.4.1",
-    "development-tool-node": "^0.1.0",
+    "del": "^2.2.1",
     "through2": "^2.0.1",
+    "gulp-cached": "^1.1.0",
+    "gulp-sourcemaps": "^2.1.1",
+    "gulp-typescript": "^3.0.2",
     "ts-node": "^1.6.0",
     "tslint": "^3.15.1",
     "tslint-stylish": "^2.1.0-beta",

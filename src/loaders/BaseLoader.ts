@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Src, Task, EnvOption, Operation, TaskOption, TaskConfig, ITaskDefine } from '../TaskConfig';
+import { Src, Task, EnvOption, Operation, TaskOption, LoaderOption, TaskConfig, ITaskDefine } from '../TaskConfig';
 import { ITaskLoader } from '../ITaskLoader';
 const requireDir = require('require-dir');
 import * as chalk from 'chalk';
@@ -53,15 +53,15 @@ export abstract class BaseLoader implements ITaskLoader {
 
     protected getTaskDefine(): Promise<ITaskDefine> {
         let tsdef: ITaskDefine = null;
-        if (!_.isString(this.option.loader)) {
-            if (this.option.loader.taskDefine) {
-                tsdef = this.option.loader.taskDefine;
-            }
-        }
-        if (!tsdef) {
+        let loader: LoaderOption = this.option.loader;
+
+        if (loader.taskDefine) {
+            tsdef = loader.taskDefine;
+        } else {
             let mdl = this.getConfigModule();
             tsdef = this.findTaskDefine(mdl);
         }
+
         if (tsdef) {
             return Promise.resolve(tsdef);
         } else {
@@ -71,12 +71,9 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     protected getConfigModule(): any {
-        let ml: string;
-        if (_.isString(this.option.loader)) {
-            ml = this.option.loader
-        } else {
-            ml = this.option.loader.configModule || this.option.loader.module;
-        }
+
+        let loader: LoaderOption = this.option.loader;
+        let ml = loader.configModule || loader.module;
 
         if (_.isString(ml)) {
             return require(ml);
@@ -86,12 +83,9 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     protected getTaskModule(): any {
-        let ml: string;
-        if (_.isString(this.option.loader)) {
-            ml = this.option.loader
-        } else {
-            ml = this.option.loader.taskModule || this.option.loader.module;
-        }
+
+        let loader: LoaderOption = this.option.loader;
+        let ml = loader.taskModule || loader.module;
 
         if (_.isString(ml)) {
             return require(ml);
@@ -126,8 +120,9 @@ export abstract class BaseLoader implements ITaskLoader {
         if (!mdl) {
             return false;
         }
-        if (!_.isString(this.option.loader) && this.option.loader.isTaskDefine) {
-            return this.option.loader.isTaskDefine(mdl);
+        let loader: LoaderOption = this.option.loader;
+        if (loader.isTaskDefine) {
+            return loader.isTaskDefine(mdl);
         }
         return _.isFunction(mdl['moduleTaskConfig']);
     }
@@ -136,9 +131,9 @@ export abstract class BaseLoader implements ITaskLoader {
         if (!mdl) {
             return false;
         }
-
-        if (!_.isString(this.option.loader) && this.option.loader.isTaskFunc) {
-            return this.option.loader.isTaskFunc(mdl);
+        let loader: LoaderOption = this.option.loader;
+        if (loader.isTaskFunc) {
+            return loader.isTaskFunc(mdl);
         }
 
         if (_.isFunction(mdl)) {

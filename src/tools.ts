@@ -1,10 +1,10 @@
 import * as _ from 'lodash';
-import { Gulp, TaskCallback } from 'gulp';
+import { Gulp, WatchEvent, TaskCallback } from 'gulp';
 import { readdirSync, lstatSync } from 'fs';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { Src, Asserts, Task, TaskOption, Operation, EnvOption, TaskConfig } from './TaskConfig';
+import { Src, Asserts, Task, TaskOption, Operation, EnvOption, DynamicTask, Pipe, TaskConfig } from './TaskConfig';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
@@ -17,6 +17,7 @@ export * from './loaders/BaseLoader';
 export class Development {
     /**
      * global data.
+     * 
      * 
      * @private
      * @type {*}
@@ -65,9 +66,13 @@ export class Development {
         cfg.globals = this.globals;
         cfg.fileFilter = cfg.fileFilter || files;
         cfg.runSequence = cfg.runSequence || runSequence;
-        cfg.getDist = cfg.getDist || (function(asserts: Asserts){
+        cfg.dynamicTasks = cfg.dynamicTasks || ((tasks: DynamicTask | DynamicTask[]) => {
+            return dynamicTask(tasks, cfg.oper, cfg.env);
+        });
+        cfg.getDist = cfg.getDist || ((asserts?: Asserts) => {
+            asserts = asserts || cfg.option;
             let dist: string;
-            switch (this.oper) {
+            switch (cfg.oper) {
                 case Operation.build:
                 case Operation.test:
                 case Operation.e2e:
@@ -84,7 +89,8 @@ export class Development {
                     break;
             }
             return dist;
-        }).bind(cfg);
+        });
+
         return cfg;
     }
 
@@ -166,7 +172,7 @@ export class Development {
                     }
                     return tsqs;
                 } else if (config.runTasks) {
-                    return config.runTasks(subGroupTask);
+                    return config.runTasks(subGroupTask, tsqs);
                 } else {
                     subGroupTask && tsqs.push(subGroupTask);
                     return tsqs;
@@ -350,4 +356,106 @@ export function files(directory: string, express?: ((fileName: string) => boolea
         }
     });
     return res;
+}
+
+
+/**
+ * dynamic build tasks.
+ * 
+ * @export
+ * @param {(DynamicTask | DynamicTask[])} tasks
+ * @param {Operation} oper
+ * @returns {Task[]}
+ */
+export function dynamicTask(tasks: DynamicTask | DynamicTask[], oper: Operation, env: EnvOption): Task[] {
+    let taskseq: Task[] = [];
+    _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
+        if (!(_.isNull(dt.oper) || _.isUndefined(dt.oper)) && dt.oper !== oper) {
+            return;
+        }
+        if (dt.watch) {
+            if (!env.watch) {
+                return;
+            }
+            console.log('register dynamic task:', chalk.cyan(dt.name));
+            taskseq.push((gulp: Gulp, cfg: TaskConfig) => {
+                if (!_.isFunction(_.last(dt.watch))) {
+                    dt.watch.push(<WatchCallback>(event: WatchEvent) => {
+                        dt.watchChanged && dt.watchChanged(event, cfg);
+                    });
+                }
+                gulp.task(dt.name, () => {
+                    gulp.watch(cfg.option.src, dt.watch)
+                });
+
+                return dt.name;
+            })
+            return;
+        }
+        console.log('register dynamic task:', chalk.cyan(dt.name));
+        // custom task.
+        if (_.isFunction(dt.task)) {
+            taskseq.push((gulp: Gulp, cfg: TaskConfig) => {
+                gulp.task(dt.name, () => {
+                    dt.task(cfg, gulp);
+                });
+
+                return dt.name;
+            })
+            return;
+        }
+        // pipe stream task.
+        taskseq.push((gulp: Gulp, cfg: TaskConfig) => {
+            gulp.task(dt.name, () => {
+                let src = Promise.resolve(
+                    gulp.src(cfg.option.src)
+                        .once('error', () => {
+                            process.exit(1);
+                        })
+                        .once('end', () => {
+                            process.exit();
+                        }));
+
+                if (dt.pipes) {
+                    src = src.then(psrc => {
+                        _.each(dt.pipes, (p: Pipe) => {
+                            psrc = psrc.pipe(_.isFunction(p) ? p(cfg) : p);
+                        });
+                        return psrc;
+                    })
+                } else if (dt.pipe) {
+                    src = src.then((src => {
+                        return dt.pipe(src, cfg);
+                    }));
+                }
+                src.then(stream => {
+                    if (dt.output) {
+                        return Promise.all(_.map(_.isArray(dt.output) ? dt.output : [dt.output], output => {
+                            return new Promise((resolve, reject) => {
+                                (_.isFunction(output) ? output(stream, cfg) : stream.pipe(output))
+                                    .on('end', () => {
+                                        resolve();
+                                    })
+                                    .on('error', reject);
+                            });
+                        }));
+                    } else {
+                        return new Promise((resolve, reject) => {
+                            stream.pipe(gulp.dest(cfg.getDist(cfg.option)))
+                                .on('end', () => {
+                                    resolve();
+                                })
+                                .on('error', reject);
+                        });
+                    }
+
+                });
+
+                return src;
+            });
+            return dt.name;
+        });
+    });
+
+    return taskseq;
 }

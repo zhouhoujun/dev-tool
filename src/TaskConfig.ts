@@ -1,4 +1,4 @@
-import { Gulp } from 'gulp';
+import { Gulp, WatchEvent, WatchCallback } from 'gulp';
 
 /**
  * project development build operation.
@@ -119,26 +119,26 @@ export interface LoaderOption {
     /**
      * module name or url
      * 
-     * @type {string}
+     * @type {string | Object}
      * @memberOf LoaderOption
      */
-    module?: string;
+    module?: string | Object;
 
     /**
      * config module name or url.
      * 
-     * @type {string}
+     * @type {string | Object}
      * @memberOf LoaderOption
      */
-    configModule?: string;
+    configModule?: string | Object;
 
     /**
      * config module name or url.
      * 
-     * @type {string}
+     * @type {string | Object}
      * @memberOf LoaderOption
      */
-    taskModule?: string;
+    taskModule?: string | Object;
 
     /**
      * task define.
@@ -191,15 +191,91 @@ export interface DirLoaderOption extends LoaderOption {
      * @memberOf DirLoaderOption
      */
     dirConfigFile?: string;
-    /**
-     * dir Config Builder name
-     * 
-     * @type {string}
-     * @memberOf DirLoaderOption
-     */
-    dirmoduleTaskConfigName?: Src;
 }
 
+
+export type Pipe = NodeJS.ReadWriteStream | ((config?: TaskConfig) => NodeJS.ReadWriteStream);
+
+export type Output = NodeJS.ReadWriteStream | IMap<NodeJS.ReadWriteStream>;
+
+export type OutputPipe = NodeJS.ReadWriteStream | ((map: Output, config?: TaskConfig) => NodeJS.ReadWriteStream);
+/**
+ * dynamic gulp task.
+ * 
+ * @export
+ * @interface DynamicTask
+ */
+export interface DynamicTask {
+    /**
+     * task name
+     * 
+     * @type {string}
+     * @memberOf DynamicTask
+     */
+    name: string;
+    /**
+     * task type.
+     * 
+     * @type {Operation}
+     * @memberOf DynamicTask
+     */
+    oper?: Operation;
+
+    /**
+     * task is watch or not.
+     * 
+     * @type {(boolean|string)}
+     * @memberOf DynamicTask
+     */
+    watch?: Array<string | WatchCallback>;
+    /**
+     * watch changed.
+     * 
+     * @param {WatchEvent} event
+     * @param {TaskConfig} config
+     * 
+     * @memberOf DynamicTask
+     */
+    watchChanged?(event: WatchEvent, config: TaskConfig);
+    /**
+     * stream pipe.
+     * 
+     * @param {NodeJS.ReadWriteStream} gulpsrc
+     * @param {TaskConfig} config
+     * @returns {(NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>)}
+     * 
+     * @memberOf DynamicTask
+     */
+    pipe?(gulpsrc: NodeJS.ReadWriteStream, config: TaskConfig): NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>;
+
+    /**
+     * task pipe works.
+     * 
+     * @type {(Pipe| Pipe[])}
+     * @memberOf DynamicTask
+     */
+    pipes?: Pipe | Pipe[];
+
+    /**
+     * output pipe task
+     * 
+     * 
+     * @memberOf DynamicTask
+     */
+    output?: OutputPipe | OutputPipe[];
+
+    /**
+     * custom task.
+     * 
+     * @param {TaskConfig} config
+     * @param {Gulp} gulp
+     * @returns {(void | Promise<any>)}
+     * 
+     * @memberOf DynamicTask
+     */
+    task?(config: TaskConfig, gulp: Gulp): void | Promise<any>;
+
+}
 
 /**
  * the option for loader dynamic build task.
@@ -209,6 +285,13 @@ export interface DirLoaderOption extends LoaderOption {
  * @extends {LoaderOption}
  */
 export interface DynamicLoaderOption extends LoaderOption {
+    /**
+     * dynamic task
+     * 
+     * @type {(DynamicTask | DynamicTask[])}
+     * @memberOf DynamicLoaderOption
+     */
+    dynamicTasks?: DynamicTask | DynamicTask[];
 }
 
 /**
@@ -262,10 +345,10 @@ export interface TaskOption extends Asserts {
     /**
      * task loader
      * 
-     * @type {(string | LoaderOption)}
+     * @type {(string | LoaderOption | DynamicTask | DynamicTask[])}
      * @memberOf TaskOption
      */
-    loader: string | LoaderOption;
+    loader: string | LoaderOption | DynamicTask | DynamicTask[];
 
     /**
      * external task for 
@@ -362,12 +445,13 @@ export interface TaskConfig {
     /**
      * custom config run tasks sequence in.
      * 
-     * @param {Src} subGroupTask sub tasks group tasks.
+     * @param {Src} [subGroupTask] sub tasks group tasks.
+     * @param {Src[]} [tasks] task name sequence from register tasks.
      * @returns {Src[]}
      * 
      * @memberOf TaskConfig
      */
-    runTasks?(subGroupTask?: Src): Src[];
+    runTasks?(subGroupTask?: Src, tasks?: Src[]): Src[];
     /**
      * custom print help.
      * 
@@ -404,7 +488,7 @@ export interface TaskConfig {
      * 
      * @memberOf TaskConfig
      */
-    getDist?(asserts: Asserts): string;
+    getDist?(asserts?: Asserts): string;
     /**
      * filter file in directory.  default implement in tools.
      * 
@@ -425,4 +509,14 @@ export interface TaskConfig {
      * @memberOf TaskConfig
      */
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
+
+    /**
+     * dynamic register tasks.  default implement in tools.
+     * 
+     * @param {(DynamicTask | DynamicTask[])} tasks
+     * @returns {Task[]}
+     * 
+     * @memberOf TaskConfig
+     */
+    dynamicTasks?(tasks: DynamicTask | DynamicTask[]): Task[]
 }

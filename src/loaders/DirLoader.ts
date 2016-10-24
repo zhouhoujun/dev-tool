@@ -21,7 +21,7 @@ export class DirLoader extends BaseLoader {
 
     protected getTaskDefine(): Promise<ITaskDefine> {
         let loader: DirLoaderOption = this.option.loader;
-        if (!loader.taskDefine && !loader.configModule
+        if (!loader.configModule
             && !loader.module && loader.dir) {
             return Promise.race<TaskConfig>(_.map(loader.dir, dir => {
                 return new Promise((resolve, reject) => {
