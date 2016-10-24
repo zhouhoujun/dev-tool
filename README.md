@@ -19,31 +19,62 @@ npm install development-tool
 
 You can `import` modules:
 
+## import module
+
 ```ts
 import * as gulp from 'gulp';
-import  { Development, TaskOption } from 'development-tool';
-import  { NodeBuildOption } from 'development-tool-node';
-// import 'development-tool-*';
-let tasks: TaskOption| TaskOption[]= [
-    <NodeBuildOption>{
+import  { Development } from 'development-tool';
+import { NodeBuildOption } from 'development-tool-node';
+
+```
+
+## Create development tool
+
+```ts
+
+Development.create(gulp, __dirname, {
+    tasks{src: 'src', dist: 'lib', loader: 'development-tool-*' } // any module implement ITaskDefine
+});
+
+```
+
+```ts
+Development.create(gulp, __dirname, {
+    tasks:[
+        <NodeBuildOption>{
+            src: 'src',
+            dist: 'lib',
+            // build:'build path',
+            // release: 'release path',
+            // depoly: 'depoly path'
+            asserts:{
+                json: 'src/**/*.json',
+                css:'src/common/**/*.css',
+                moduleBcss: ['src/moduleB/**/*.css'],
+                moduleAcss: {
+                    src: ['src/apath/**/*.css', 'src/bpath/**/*.css'],
+                    dist:'dist path',
+                    build:'build path',
+                    release: 'release path',
+                    depoly: 'depoly path'
+                },
+                ...
+            },
+            loader: 'development-tool-node'
+        }
+    ]
+});
+```
+
+## Create development tool with addation sub tasks
+
+```ts
+Development.create(gulp, __dirname, {
+    tasks:{
         src: 'src',
         dist: 'lib',
-        // build:'build path',
-        // release: 'release path',
-        // depoly: 'depoly path'
-
-        asserts: {
-            json: 'src/**/*.json',
-            css: {
-                src: 'src/**/*.css',
-                dist:'lib/style',
-                // build:'build path',
-                // release: 'release path',
-                // depoly: 'depoly path'
-                }
-        },
-        loader: 'development-tool-node', //the module must implement ITaskDefine.
-        tasks: [
+        loader: 'development-tool-node',
+        tasks:[
             {
                 src: 'files be dealt with',
                 dist: 'dist path',
@@ -90,13 +121,49 @@ let tasks: TaskOption| TaskOption[]= [
             ...
         ]
     }
-    ...
-];
-Development.create(gulp, __dirname, {
-    tasks:tasks
 });
+```
 
+## Create development tool with dynamic tasks
 
+```ts
+import * as gulp from 'gulp';
+import { IMap, Development, TaskConfig, DynamicTask } from './src/tools';
+let del = require('del');
+const cache = require('gulp-cached');
+const ts = require('gulp-typescript');
+const sourcemaps = require('gulp-sourcemaps');
+let tsProject = ts.createProject('tsconfig.json');
+
+Development.create(gulp, __dirname, {
+    tasks: {
+        src: 'src/**/*.ts',
+        dist: 'lib',
+        loader: <DynamicTask[]>[
+            {
+                name: 'clean',
+                task: (config) => del(config.option.dist)
+            },
+            {
+                name: 'tscompile',
+                pipes: [
+                    () => cache('typescript'),
+                    sourcemaps.init,
+                    tsProject
+                ],
+                // set muti-output. no setting default output default one to "dist: 'lib'" .
+                output: [
+                    (tsmap:IMap<NodeJS.ReadWriteStream>, config) =>  tsmap['dts'].pipe(gulp.dest(config.getDist())),
+                    (tsmap: IMap<NodeJS.ReadWriteStream>, config: TaskConfig) =>  tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                ]
+            },
+            {
+                name: 'watch',
+                watch: ['tscompile']
+            }
+        ]
+    }
+});
 ```
 
 https://github.com/zhouhoujun/development-tool.git

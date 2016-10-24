@@ -6,7 +6,7 @@ const cache = require('gulp-cached');
 const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
 let tsProject = ts.createProject('tsconfig.json');
-// const merge = require('merge2');
+
 Development.create(gulp, __dirname, {
     tasks: {
         src: 'src/**/*.ts',
@@ -21,9 +21,9 @@ Development.create(gulp, __dirname, {
             {
                 name: 'tscompile',
                 pipes: [
-                    cache('typescript'),
-                    sourcemaps.init(),
-                    tsProject()
+                    () => cache('typescript'),
+                    sourcemaps.init,
+                    tsProject
                 ],
                 output: [
                     (tsmap: IMap<NodeJS.ReadWriteStream>, config: TaskConfig) => {

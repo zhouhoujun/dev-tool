@@ -48,7 +48,7 @@ export class Development {
         }
 
         if (env.help) {
-            console.log(chalk.grey('\n... main help  ...\n'));
+            console.log(chalk.grey('... main help  ...'));
             this.printHelp(env.help);
         }
 
@@ -133,10 +133,10 @@ export class Development {
 
                 return loader.loadConfg(oper, env)
                     .then(cfg => {
-                        console.log(chalk.green('task config loaded.\n'));
+                        console.log(chalk.green('task config loaded.'));
                         if (cfg.env.help) {
                             if (cfg.printHelp) {
-                                console.log(chalk.grey('\n...development default help...\n'));
+                                console.log(chalk.grey('...development default help...'));
                                 cfg.printHelp(_.isString(cfg.env.help) ? cfg.env.help : '');
                             }
                             return [];
@@ -146,7 +146,7 @@ export class Development {
                                 .then(subtask => {
                                     return loader.load(cfg)
                                         .then(tasks => {
-                                            console.log(chalk.green('tasks loaded.\n'));
+                                            console.log(chalk.green('tasks loaded.'));
                                             return this.setup(gulp, cfg, tasks, subtask)
                                         });
                                 });
@@ -236,45 +236,43 @@ export class Development {
         if (help === 'en') {
 
             console.log(`
-                /**\n
-                 * gulp build [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]\n
-                 * @params\n
-                 *  --env  development or production;\n
-                 *  --config app setting, name is the words(src/config-*.json)*; default settings: test, produce, beijing; Or you can add youself setting config file at the path and named as "src/config-*.json" /\n
-                 *  --root rootPath, set relative path of the app root\n
-                 *  --aspnet to set build as aspnet service or not.\n
-                 *  --watch  watch src file change or not. if changed will auto update to node service. \n
-                 *  --release release web app or not. if [--env production], default to release. \n
-                 *  --test  need auto load test file to node service.\n
-                 *  --testdata load test data when release.  \n
-                 *  --serve start node web service or not.\n
-                 * \nn\
-                 * gulp test  start node auto test. Before test you need start anthor commond to watch file changed, and must with "--test" to load test file.\nn\
-                 * gulp language [--localspath language path][--lang en][--csv filepath][--key 0][--value 1]\n
-                 *  auto check and update language config from csv file to json file.\n
-                 **/\n`);
+                /**
+                 * gulp build [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]
+                 * @params
+                 *  --env  development or production;
+                 *  --config app setting
+                 *  --root rootPath, set relative path of the app root
+                 *  --watch  watch src file change or not. if changed will auto update to node service. 
+                 *  --release release web app or not. if [--env production], default to release. 
+                 *  --test  need auto load test file to node service.
+                 *  --testdata load test data when release.  
+                 *  --serve start node web service or not.
+                 *
+                 * gulp test  start node auto test. Before test you need start anthor commond to watch file changed, and must with "--test" to load test file.
+                 * gulp language [--localspath language path][--lang en][--csv filepath][--key 0][--value 1]
+                 *  auto check and update language config from csv file to json file.
+                 **/`);
 
         } else {
 
             console.log(`
-                /**\n
-                 * gulp build 启动编译工具 [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]\n
-                 * @params\n
-                 *  --env 发布环境 默认开发环境development;\n
-                 *  --config 设置配置文件， name为配置文件(src/config-*.json)中*的名字; 默认配置有test, produce, beijing; 可以手动添加自己要的配置，配置文件命名路径规则src/config-*.json /\n
-                 *  --root rootPath, 设置前端APP相对站点路径\n
-                 *  --aspnet 是否发布为 aspnet服务环境\n
-                 *  --watch  是否需要动态监听文件变化\n
-                 *  --release 是否release编译, [--env production] 默认release \n
-                 *  --test  启动自动化测试\n
-                 *  --testdata 是否release编译加载test data。  \n
-                 *  --serve  是否在开发模式下 开启node web服务\n
-                 * \nn\
-                 * gulp tools  启动工具集合\nn\
-                 * @params\n
-                 *  --language [--localspath language path][--lang en][--csv filepath][--key 0][--value 1]\n 设置多语言\n
+                /**
+                 * gulp build 启动编译工具 [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]
+                 * @params
+                 *  --env 发布环境 默认开发环境development;
+                 *  --config 设置配置文件;
+                 *  --root rootPath, 设置前端APP相对站点路径
+                 *  --watch  是否需要动态监听文件变化
+                 *  --release 是否release编译, [--env production] 默认release 
+                 *  --test  启动自动化测试
+                 *  --testdata 是否release编译加载test data。  
+                 *  --serve  是否在开发模式下 开启node web服务
+                 * 
+                 * gulp tools  启动工具集合
+                 * @params
+                 *  --language [--localspath language path][--lang en][--csv filepath][--key 0][--value 1] 设置多语言
                  *  --publish 发布git npm
-                 **/\n`);
+                 **/`);
 
         }
     }
@@ -358,6 +356,99 @@ export function files(directory: string, express?: ((fileName: string) => boolea
     return res;
 }
 
+/**
+ * create dynamic watch task.
+ * 
+ * @param {DynamicTask} dt
+ * @returns
+ */
+function createWatchTask(dt: DynamicTask) {
+    return (gulp: Gulp, cfg: TaskConfig) => {
+        if (!_.isFunction(_.last(dt.watch))) {
+            dt.watch.push(<WatchCallback>(event: WatchEvent) => {
+                dt.watchChanged && dt.watchChanged(event, cfg);
+            });
+        }
+        gulp.task(dt.name, () => {
+            console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src), ' , watch task:', chalk.cyan.call(chalk, dt.watch))
+            gulp.watch(cfg.option.src, dt.watch)
+        });
+
+        return dt.name;
+    };
+}
+
+/**
+ * promise task.
+ * 
+ * @param {DynamicTask} dt
+ * @returns
+ */
+function createTask(dt: DynamicTask) {
+    return (gulp: Gulp, cfg: TaskConfig) => {
+        gulp.task(dt.name, (callback) => {
+            return createTaskWork(gulp, cfg, dt);
+        });
+        return dt.name;
+    };
+}
+function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
+
+    let src = Promise.resolve(gulp.src(cfg.option.src));
+    // gulp.src(cfg.option.src)
+    // .once('error', () => {
+    //     process.exit(1);
+    // })
+    // .once('end', () => {
+    //     process.exit();
+    // }));
+
+    if (dt.pipes) {
+        _.each(dt.pipes, (p: Pipe) => {
+            src = src.then(psrc => {
+                return Promise.resolve((_.isFunction(p) ? p(cfg) : p))
+                    .then(stram => {
+                        psrc = psrc.pipe(stram);
+                        return psrc;
+                    })
+            });
+        })
+    } else if (dt.pipe) {
+        src = src.then((src => {
+            return dt.pipe(src, cfg);
+        }));
+    }
+    src.then(stream => {
+        if (dt.output) {
+            return Promise.all(_.map(_.isArray(dt.output) ? dt.output : [dt.output], output => {
+                return new Promise((resolve, reject) => {
+                    Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg) : output))
+                        .then(output => {
+                            stream.pipe(output)
+                                .on('end', () => {
+                                    resolve();
+                                })
+                                .on('error', (err) => {
+                                    reject(err);
+                                });
+                        })
+
+                });
+            }));
+        } else {
+            return new Promise((resolve, reject) => {
+                stream.pipe(gulp.dest(cfg.getDist(cfg.option)))
+                    .on('end', () => {
+                        resolve();
+                    })
+                    .on('error', reject);
+            });
+        }
+
+    });
+
+    return src;
+}
 
 /**
  * dynamic build tasks.
@@ -377,85 +468,25 @@ export function dynamicTask(tasks: DynamicTask | DynamicTask[], oper: Operation,
             if (!env.watch) {
                 return;
             }
-            console.log('register dynamic task:', chalk.cyan(dt.name));
-            taskseq.push((gulp: Gulp, cfg: TaskConfig) => {
-                if (!_.isFunction(_.last(dt.watch))) {
-                    dt.watch.push(<WatchCallback>(event: WatchEvent) => {
-                        dt.watchChanged && dt.watchChanged(event, cfg);
-                    });
-                }
-                gulp.task(dt.name, () => {
-                    gulp.watch(cfg.option.src, dt.watch)
-                });
-
-                return dt.name;
-            })
-            return;
-        }
-        console.log('register dynamic task:', chalk.cyan(dt.name));
-        // custom task.
-        if (_.isFunction(dt.task)) {
+            console.log('register watch  dynamic task:', chalk.cyan(dt.name));
+            taskseq.push(createWatchTask(dt));
+        } else if (_.isFunction(dt.task)) { // custom task
+            console.log('register custom dynamic task:', chalk.cyan(dt.name));
             taskseq.push((gulp: Gulp, cfg: TaskConfig) => {
                 gulp.task(dt.name, () => {
                     dt.task(cfg, gulp);
                 });
 
                 return dt.name;
-            })
-            return;
-        }
-        // pipe stream task.
-        taskseq.push((gulp: Gulp, cfg: TaskConfig) => {
-            gulp.task(dt.name, () => {
-                let src = Promise.resolve(
-                    gulp.src(cfg.option.src)
-                        .once('error', () => {
-                            process.exit(1);
-                        })
-                        .once('end', () => {
-                            process.exit();
-                        }));
-
-                if (dt.pipes) {
-                    src = src.then(psrc => {
-                        _.each(dt.pipes, (p: Pipe) => {
-                            psrc = psrc.pipe(_.isFunction(p) ? p(cfg) : p);
-                        });
-                        return psrc;
-                    })
-                } else if (dt.pipe) {
-                    src = src.then((src => {
-                        return dt.pipe(src, cfg);
-                    }));
-                }
-                src.then(stream => {
-                    if (dt.output) {
-                        return Promise.all(_.map(_.isArray(dt.output) ? dt.output : [dt.output], output => {
-                            return new Promise((resolve, reject) => {
-                                (_.isFunction(output) ? output(stream, cfg) : stream.pipe(output))
-                                    .on('end', () => {
-                                        resolve();
-                                    })
-                                    .on('error', reject);
-                            });
-                        }));
-                    } else {
-                        return new Promise((resolve, reject) => {
-                            stream.pipe(gulp.dest(cfg.getDist(cfg.option)))
-                                .on('end', () => {
-                                    resolve();
-                                })
-                                .on('error', reject);
-                        });
-                    }
-
-                });
-
-                return src;
             });
-            return dt.name;
-        });
+        } else {
+            console.log('register pipes  dynamic task:', chalk.cyan(dt.name));
+            // pipe stream task.
+            taskseq.push(createTask(dt));
+        }
     });
 
     return taskseq;
 }
+
+

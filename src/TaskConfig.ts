@@ -47,10 +47,6 @@ export type Src = string | string[];
 
 export type Task = (gulp: Gulp, config: TaskConfig) => Src | void;
 
-// export type tasksInDir = (dirs: Src) => Promise<Task[]>;
-
-// export type tasksInModule = (dirs: Src) => Promise<Task[]>;
-
 /**
  * event option
  * 
@@ -194,11 +190,11 @@ export interface DirLoaderOption extends LoaderOption {
 }
 
 
-export type Pipe = NodeJS.ReadWriteStream | ((config?: TaskConfig) => NodeJS.ReadWriteStream);
+export type Pipe = (config?: TaskConfig) => (NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>);
 
 export type Output = NodeJS.ReadWriteStream | IMap<NodeJS.ReadWriteStream>;
 
-export type OutputPipe = NodeJS.ReadWriteStream | ((map: Output, config?: TaskConfig) => NodeJS.ReadWriteStream);
+export type OutputPipe = (map: Output, config?: TaskConfig) => (NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>);
 /**
  * dynamic gulp task.
  * 
