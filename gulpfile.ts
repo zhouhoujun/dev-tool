@@ -1,6 +1,6 @@
 // DynamicTask 
 import * as gulp from 'gulp';
-import { IMap, Development, TaskConfig, DynamicTask } from './src/tools';
+import { Development, DynamicTask, Pipe } from './src/tools';
 let del = require('del');
 const cache = require('gulp-cached');
 const ts = require('gulp-typescript');
@@ -14,9 +14,7 @@ Development.create(gulp, __dirname, {
         loader: <DynamicTask[]>[
             {
                 name: 'clean',
-                task(config: TaskConfig) {
-                    return del(config.getDist());
-                }
+                task: (config) => del(config.getDist())
             },
             {
                 name: 'tscompile',
@@ -26,12 +24,8 @@ Development.create(gulp, __dirname, {
                     tsProject
                 ],
                 output: [
-                    (tsmap: IMap<NodeJS.ReadWriteStream>, config: TaskConfig) => {
-                        return tsmap['dts'].pipe(gulp.dest(config.getDist()))
-                    },
-                    (tsmap: IMap<NodeJS.ReadWriteStream>, config: TaskConfig) => {
-                        return tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
-                    }
+                    (tsmap, config) => tsmap['dts'].pipe(gulp.dest(config.getDist())),
+                    (tsmap, config) => tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
                 ]
             },
             {

@@ -34,7 +34,9 @@ export class Development {
             return devtool.run(gulp, options);
         });
 
-        gulp.task('default', ['build']);
+        gulp.task('default', () => {
+            gulp.start('build');
+        });
         return devtool;
     }
 

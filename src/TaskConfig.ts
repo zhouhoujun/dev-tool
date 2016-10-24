@@ -190,11 +190,26 @@ export interface DirLoaderOption extends LoaderOption {
 }
 
 
-export type Pipe = (config?: TaskConfig) => (NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>);
+/**
+ * transform interface.
+ * 
+ * @export
+ * @interface ITransform
+ * @extends {NodeJS.ReadWriteStream}
+ */
+export interface ITransform extends NodeJS.ReadWriteStream {
+    pipe(stream: NodeJS.ReadWriteStream): NodeJS.ReadWriteStream;
+}
 
-export type Output = NodeJS.ReadWriteStream | IMap<NodeJS.ReadWriteStream>;
+export interface Output extends ITransform {
+    dts?: ITransform;
+    js?: ITransform
+}
 
-export type OutputPipe = (map: Output, config?: TaskConfig) => (NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>);
+export type Pipe = (config?: TaskConfig) => ITransform | Promise<ITransform>;
+
+export type OutputPipe = (map: Output, config?: TaskConfig) => ITransform | Promise<ITransform>;
+
 /**
  * dynamic gulp task.
  * 
@@ -236,13 +251,13 @@ export interface DynamicTask {
     /**
      * stream pipe.
      * 
-     * @param {NodeJS.ReadWriteStream} gulpsrc
+     * @param {ITransform} gulpsrc
      * @param {TaskConfig} config
-     * @returns {(NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>)}
+     * @returns {(ITransform | Promise<ITransform>)}
      * 
      * @memberOf DynamicTask
      */
-    pipe?(gulpsrc: NodeJS.ReadWriteStream, config: TaskConfig): NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>;
+    pipe?(gulpsrc: ITransform, config: TaskConfig): ITransform | Promise<ITransform>;
 
     /**
      * task pipe works.
@@ -255,7 +270,7 @@ export interface DynamicTask {
     /**
      * output pipe task
      * 
-     * 
+     * @type {(OutputPipe | OutputPipe[])}
      * @memberOf DynamicTask
      */
     output?: OutputPipe | OutputPipe[];
@@ -265,11 +280,11 @@ export interface DynamicTask {
      * 
      * @param {TaskConfig} config
      * @param {Gulp} gulp
-     * @returns {(void | Promise<any>)}
+     * @returns {(void | ITransform | Promise<any>)}
      * 
      * @memberOf DynamicTask
      */
-    task?(config: TaskConfig, gulp: Gulp): void | Promise<any>;
+    task?(config: TaskConfig, gulp: Gulp): void | ITransform | Promise<any>;
 
 }
 

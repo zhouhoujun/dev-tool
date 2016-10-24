@@ -45,18 +45,24 @@ export interface DirLoaderOption extends LoaderOption {
     dir?: string[];
     dirConfigFile?: string;
 }
-export declare type Pipe = (config?: TaskConfig) => (NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>);
-export declare type Output = NodeJS.ReadWriteStream | IMap<NodeJS.ReadWriteStream>;
-export declare type OutputPipe = (map: Output, config?: TaskConfig) => (NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>);
+export interface ITransform extends NodeJS.ReadWriteStream {
+    pipe(stream: NodeJS.ReadWriteStream): NodeJS.ReadWriteStream;
+}
+export interface Output extends ITransform {
+    dts?: ITransform;
+    js?: ITransform;
+}
+export declare type Pipe = (config?: TaskConfig) => ITransform | Promise<ITransform>;
+export declare type OutputPipe = (map: Output, config?: TaskConfig) => ITransform | Promise<ITransform>;
 export interface DynamicTask {
     name: string;
     oper?: Operation;
     watch?: Array<string | WatchCallback>;
     watchChanged?(event: WatchEvent, config: TaskConfig): any;
-    pipe?(gulpsrc: NodeJS.ReadWriteStream, config: TaskConfig): NodeJS.ReadWriteStream | Promise<NodeJS.ReadWriteStream>;
+    pipe?(gulpsrc: ITransform, config: TaskConfig): ITransform | Promise<ITransform>;
     pipes?: Pipe | Pipe[];
     output?: OutputPipe | OutputPipe[];
-    task?(config: TaskConfig, gulp: Gulp): void | Promise<any>;
+    task?(config: TaskConfig, gulp: Gulp): void | ITransform | Promise<any>;
 }
 export interface DynamicLoaderOption extends LoaderOption {
     dynamicTasks?: DynamicTask | DynamicTask[];
