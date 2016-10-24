@@ -15,7 +15,7 @@ Development.create(gulp, __dirname, {
             {
                 name: 'clean',
                 task(config: TaskConfig) {
-                    return del(config.option.dist);
+                    return del(config.getDist());
                 }
             },
             {
