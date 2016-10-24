@@ -46,7 +46,7 @@ export interface DirLoaderOption extends LoaderOption {
     dirConfigFile?: string;
 }
 export interface ITransform extends NodeJS.ReadWriteStream {
-    pipe(stream: NodeJS.ReadWriteStream): NodeJS.ReadWriteStream;
+    pipe(stream: NodeJS.ReadWriteStream): ITransform;
 }
 export interface Output extends ITransform {
     dts?: ITransform;
