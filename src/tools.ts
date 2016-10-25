@@ -239,41 +239,32 @@ export class Development {
 
             console.log(`
                 /**
-                 * gulp build [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]
+                 * gulp build [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release]
                  * @params
                  *  --env  development or production;
                  *  --config app setting
-                 *  --root rootPath, set relative path of the app root
+                 *  --root path, set relative path of the development tool root.
                  *  --watch  watch src file change or not. if changed will auto update to node service. 
                  *  --release release web app or not. if [--env production], default to release. 
                  *  --test  need auto load test file to node service.
-                 *  --testdata load test data when release.  
+                 *  --deploy run deploy tasks to deploy project.  
                  *  --serve start node web service or not.
-                 *
-                 * gulp test  start node auto test. Before test you need start anthor commond to watch file changed, and must with "--test" to load test file.
-                 * gulp language [--localspath language path][--lang en][--csv filepath][--key 0][--value 1]
-                 *  auto check and update language config from csv file to json file.
                  **/`);
 
         } else {
 
             console.log(`
                 /**
-                 * gulp build 启动编译工具 [--env production|development] [--config name] [--aspnet] [--root rootPath] [--watch] [--test] [--serve] [--release]
+                 * gulp build 启动编译工具 [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release]
                  * @params
                  *  --env 发布环境 默认开发环境development;
                  *  --config 设置配置文件;
-                 *  --root rootPath, 设置前端APP相对站点路径
+                 *  --root path, 设置编译环境相对路径
                  *  --watch  是否需要动态监听文件变化
                  *  --release 是否release编译, [--env production] 默认release 
                  *  --test  启动自动化测试
-                 *  --testdata 是否release编译加载test data。  
+                 *  --deploy 运行加载deploy tasks, 编译发布项目。  
                  *  --serve  是否在开发模式下 开启node web服务
-                 * 
-                 * gulp tools  启动工具集合
-                 * @params
-                 *  --language [--localspath language path][--lang en][--csv filepath][--key 0][--value 1] 设置多语言
-                 *  --publish 发布git npm
                  **/`);
 
         }
