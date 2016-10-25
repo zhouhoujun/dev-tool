@@ -5,6 +5,15 @@ This repo is for distribution on `npm`. The source for this module is in the
 Please file issues and pull requests against that repo.
 This package use to develop kit for project development via gulp tasks.
 
+
+Development tool can load task from module, directory, object or dynamic tasks.
+dynamic load task and run task by command evn:
+```shell
+
+gulp [build] [--build]  [--test] [--e2e]  [--release] [--depoly] [--server] [--watch]
+
+```
+
 ## Install
 
 You can install this package either with `npm`.

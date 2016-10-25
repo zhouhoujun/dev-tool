@@ -87,14 +87,20 @@ export interface EnvOption {
      */
     config?: string;
 
-    key?: number;
-    value?: number;
-    csv?: string;
-    dist?: string;
-    lang?: string;
+    // key?: number;
+    // value?: number;
+    // csv?: string;
+    // dist?: string;
+    // lang?: string;
 
     publish?: boolean | string;
 
+    /**
+     * group bundle.
+     * 
+     * @type {Src}
+     * @memberOf EnvOption
+     */
     grp?: Src;
 }
 

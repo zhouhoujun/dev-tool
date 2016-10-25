@@ -24,11 +24,6 @@ export interface EnvOption {
     watch?: boolean | string;
     task?: string;
     config?: string;
-    key?: number;
-    value?: number;
-    csv?: string;
-    dist?: string;
-    lang?: string;
     publish?: boolean | string;
     grp?: Src;
 }

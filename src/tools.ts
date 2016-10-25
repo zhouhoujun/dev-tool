@@ -239,7 +239,7 @@ export class Development {
 
             console.log(`
                 /**
-                 * gulp build [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release]
+                 * gulp [build] [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
                  * @params
                  *  --env  development or production;
                  *  --config app setting
@@ -249,13 +249,14 @@ export class Development {
                  *  --test  need auto load test file to node service.
                  *  --deploy run deploy tasks to deploy project.  
                  *  --serve start node web service or not.
+                 *  --task taskname  spruce task taskname
                  **/`);
 
         } else {
 
             console.log(`
                 /**
-                 * gulp build 启动编译工具 [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release]
+                 * gulp [build] [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
                  * @params
                  *  --env 发布环境 默认开发环境development;
                  *  --config 设置配置文件;
@@ -265,6 +266,7 @@ export class Development {
                  *  --test  启动自动化测试
                  *  --deploy 运行加载deploy tasks, 编译发布项目。  
                  *  --serve  是否在开发模式下 开启node web服务
+                 *  --task taskname  运行单独任务taskname
                  **/`);
 
         }
@@ -387,7 +389,10 @@ function createTask(dt: DynamicTask) {
 }
 function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
 
-    let src = Promise.resolve(gulp.src(cfg.option.src));
+    let src = Promise.resolve(gulp.src(cfg.option.src)
+        .on('error', err => {
+            console.log(chalk.red(err));
+        }));
     // gulp.src(cfg.option.src)
     // .once('error', () => {
     //     process.exit(1);
