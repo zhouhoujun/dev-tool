@@ -45,64 +45,19 @@ export interface IMap<T> {
  */
 export type Src = string | string[];
 
-export type Task = (gulp: Gulp, config: TaskConfig) => Src | void;
-
 /**
- * event option
+ * Task return type.
  * 
  * @export
- * @interface EnvOption
+ * @interface ITaskResult
  */
-export interface EnvOption {
-    /**
-     * project root.
-     * 
-     * @type {string}
-     * @memberOf EnvOption
-     */
-    root?: string;
-    /**
-     * help doc
-     * 
-     * @type {(boolean | string)}
-     * @memberOf EnvOption
-     */
-    help?: boolean | string;
-    test?: boolean | string;
-    serve?: boolean | string;
-    e2e?: boolean | string;
-    release?: boolean;
-    deploy?: boolean;
-    watch?: boolean | string;
-    /**
-     * run spruce task.
-     */
-    task?: string;
-
-    /**
-     * project config setting.
-     * 
-     * @type {string}
-     * @memberOf EnvOption
-     */
-    config?: string;
-
-    // key?: number;
-    // value?: number;
-    // csv?: string;
-    // dist?: string;
-    // lang?: string;
-
-    publish?: boolean | string;
-
-    /**
-     * group bundle.
-     * 
-     * @type {Src}
-     * @memberOf EnvOption
-     */
-    grp?: Src;
+export interface ITaskResult {
+    name?: string;
+    oper?: Operation;
 }
+
+export type TaskResult = string | ITaskResult;
+export type Task = (gulp: Gulp, config: TaskConfig) => TaskResult | TaskResult[] | void;
 
 /**
  * task loader option.
@@ -326,68 +281,50 @@ export interface DynamicLoaderOption extends LoaderOption {
     dynamicTasks?: DynamicTask | DynamicTask[];
 }
 
-/**
- * asserts to be dealt with.
- * 
- * @export
- * @interface Asserts
- */
-export interface Asserts {
+export interface OutputDist {
     /**
-     * the src file filter string. default 'src'.
-     * 
-     * @type {string}
-     * @memberOf Asserts
-     */
-    src: Src;
-    /**
-     * default folder. if empty use parent setting, or ues 'dist'.
+     * default output folder. if empty use parent setting, or ues 'dist'.
      */
     dist?: string;
     /**
-     * build folder. if empty use parent setting, or ues 'dist'.
+     * build output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
-     * @memberOf Asserts
+     * @memberOf Dist
      */
     build?: string;
     /**
-     * test folder. if empty use parent setting, or ues 'dist'.
+     * test output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
-     * @memberOf Asserts
+     * @memberOf Dist
      */
     test?: string;
     /**
-     * build folder. if empty use parent setting, or ues 'dist'.
+     * e2e output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
-     * @memberOf Asserts
+     * @memberOf Dist
      */
     e2e?: string;
     /**
-     * e2e folder. if empty use parent setting, or ues 'dist'.
+     * release output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
-     * @memberOf Asserts
+     * @memberOf Dist
      */
     release?: string;
     /**
-     * deploy folder. if empty use parent setting, or ues 'dist'.
+     * deploy output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
-     * @memberOf Asserts
+     * @memberOf Dist
      */
     deploy?: string;
 }
 
-/**
- * task option setting.
- * 
- * @export
- * @interface TaskOption
- */
-export interface TaskOption extends Asserts {
+
+export interface TaskLoaderOption {
     /**
      * task loader
      * 
@@ -408,7 +345,7 @@ export interface TaskOption extends Asserts {
      * 
      * @memberOf TaskConfig
      */
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src) => Src[]);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src, assertsTask?: Src) => Src[]);
 
     /**
      * sub tasks.
@@ -417,6 +354,56 @@ export interface TaskOption extends Asserts {
      * @memberOf TaskOption
      */
     tasks?: TaskOption | TaskOption[];
+}
+
+
+/**
+ * asserts to be dealt with.
+ * 
+ * @export
+ * @interface Asserts
+ */
+export interface Asserts extends OutputDist, TaskLoaderOption {
+    /**
+     * asserts extends name. for register dynamic task.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    name?: string;
+
+    /**
+     * the src file filter string. default 'src'.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    src?: Src;
+
+    /**
+     * tasks to deal with asserts.
+     * 
+     * @type {IMap<Src | Asserts>}
+     * @memberOf Asserts
+     */
+    asserts?: IMap<Src | Asserts>;
+}
+
+
+/**
+ * task option setting.
+ * 
+ * @export
+ * @interface TaskOption
+ */
+export interface TaskOption extends Asserts {
+    /**
+     * the src file filter string. default 'src'.
+     * 
+     * @type {string}
+     * @memberOf TaskOption
+     */
+    src: Src;
 }
 
 /**
@@ -491,13 +478,14 @@ export interface TaskConfig {
     /**
      * custom config run tasks sequence in.
      * 
-     * @param {Src} [subGroupTask] sub tasks group tasks.
-     * @param {Src[]} [tasks] task name sequence from register tasks.
+     * @param {Src} [subGroupTask]
+     * @param {Src[]} [tasks]
+     * @param {Src} [assertTasks]
      * @returns {Src[]}
      * 
      * @memberOf TaskConfig
      */
-    runTasks?(subGroupTask?: Src, tasks?: Src[]): Src[];
+    runTasks?(subGroupTask?: Src, tasks?: Src[], assertTasks?: Src): Src[];
     /**
      * custom print help.
      * 
@@ -565,4 +553,61 @@ export interface TaskConfig {
      * @memberOf TaskConfig
      */
     dynamicTasks?(tasks: DynamicTask | DynamicTask[]): Task[]
+}
+
+/**
+ * event option
+ * 
+ * @export
+ * @interface EnvOption
+ */
+export interface EnvOption {
+    /**
+     * project root.
+     * 
+     * @type {string}
+     * @memberOf EnvOption
+     */
+    root?: string;
+    /**
+     * help doc
+     * 
+     * @type {(boolean | string)}
+     * @memberOf EnvOption
+     */
+    help?: boolean | string;
+    test?: boolean | string;
+    serve?: boolean | string;
+    e2e?: boolean | string;
+    release?: boolean;
+    deploy?: boolean;
+    watch?: boolean | string;
+    /**
+     * run spruce task.
+     */
+    task?: string;
+
+    /**
+     * project config setting.
+     * 
+     * @type {string}
+     * @memberOf EnvOption
+     */
+    config?: string;
+
+    // key?: number;
+    // value?: number;
+    // csv?: string;
+    // dist?: string;
+    // lang?: string;
+
+    publish?: boolean | string;
+
+    /**
+     * group bundle.
+     * 
+     * @type {Src}
+     * @memberOf EnvOption
+     */
+    grp?: Src;
 }

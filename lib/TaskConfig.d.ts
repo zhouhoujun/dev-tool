@@ -12,21 +12,12 @@ export interface IMap<T> {
     [K: string]: T;
 }
 export declare type Src = string | string[];
-export declare type Task = (gulp: Gulp, config: TaskConfig) => Src | void;
-export interface EnvOption {
-    root?: string;
-    help?: boolean | string;
-    test?: boolean | string;
-    serve?: boolean | string;
-    e2e?: boolean | string;
-    release?: boolean;
-    deploy?: boolean;
-    watch?: boolean | string;
-    task?: string;
-    config?: string;
-    publish?: boolean | string;
-    grp?: Src;
+export interface ITaskResult {
+    name?: string;
+    oper?: Operation;
 }
+export declare type TaskResult = string | ITaskResult;
+export declare type Task = (gulp: Gulp, config: TaskConfig) => TaskResult | TaskResult[] | void;
 export interface LoaderOption {
     type?: string;
     module?: string | Object;
@@ -62,8 +53,7 @@ export interface DynamicTask {
 export interface DynamicLoaderOption extends LoaderOption {
     dynamicTasks?: DynamicTask | DynamicTask[];
 }
-export interface Asserts {
-    src: Src;
+export interface OutputDist {
     dist?: string;
     build?: string;
     test?: string;
@@ -71,11 +61,19 @@ export interface Asserts {
     release?: string;
     deploy?: string;
 }
-export interface TaskOption extends Asserts {
+export interface TaskLoaderOption {
     loader: string | LoaderOption | DynamicTask | DynamicTask[];
     externalTask?: Task;
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src) => Src[]);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src, assertsTask?: Src) => Src[]);
     tasks?: TaskOption | TaskOption[];
+}
+export interface Asserts extends OutputDist, TaskLoaderOption {
+    name?: string;
+    src?: Src;
+    asserts?: IMap<Src | Asserts>;
+}
+export interface TaskOption extends Asserts {
+    src: Src;
 }
 export interface ITaskDefine {
     moduleTaskConfig(oper: Operation, option: TaskOption, env: EnvOption): TaskConfig;
@@ -86,7 +84,7 @@ export interface TaskConfig {
     env: EnvOption;
     oper: Operation;
     option: TaskOption;
-    runTasks?(subGroupTask?: Src, tasks?: Src[]): Src[];
+    runTasks?(subGroupTask?: Src, tasks?: Src[], assertTasks?: Src): Src[];
     printHelp?(lang: string): void;
     findTasksInModule?(module: string): Promise<Task[]>;
     findTasksInDir?(dirs: Src): Promise<Task[]>;
@@ -94,4 +92,18 @@ export interface TaskConfig {
     fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
     dynamicTasks?(tasks: DynamicTask | DynamicTask[]): Task[];
+}
+export interface EnvOption {
+    root?: string;
+    help?: boolean | string;
+    test?: boolean | string;
+    serve?: boolean | string;
+    e2e?: boolean | string;
+    release?: boolean;
+    deploy?: boolean;
+    watch?: boolean | string;
+    task?: string;
+    config?: string;
+    publish?: boolean | string;
+    grp?: Src;
 }

@@ -4,7 +4,7 @@ import { readdirSync, lstatSync } from 'fs';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { Src, Asserts, Task, TaskOption, Operation, EnvOption, DynamicTask, Pipe, TaskConfig } from './TaskConfig';
+import { Src, Asserts, Task, TaskOption, Operation, EnvOption, DynamicTask, TaskResult, Pipe, TaskConfig } from './TaskConfig';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
@@ -114,16 +114,31 @@ export class Development {
         return runSequence(gulp, tasks);
     }
 
-    protected toSquence(tasks: Array<Src | void>): Src[] {
-        return <Src[]>_.filter(tasks, t => !!t);
+    protected toSquence(tasks: Array<TaskResult | TaskResult[] | void>, oper: Operation): Src[] {
+        let seq: Src[] = [];
+        _.each(tasks, t => {
+            if (!t) {
+                return;
+            }
+            if (_.isString(t)) {
+                seq.push(t);
+            } else if (_.isArray(t)) {
+                seq.push(_.flatten(this.toSquence(t, oper)));
+            } else {
+                if (t.name) {
+                    if (t.oper && ((t.oper & oper) > 0)) {
+                        seq.push(t.name);
+                    }
+                }
+            }
+        });
+        return seq;
     }
 
-    protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]> {
+    protected loadTasks(gulp: Gulp, tasks: Asserts | Asserts[], env: EnvOption): Promise<Src[]> {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <TaskOption[]>tasks : [<TaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
-                console.log(chalk.grey('begin load task via loader:'), optask.loader);
-                let loader = this.createLoader(optask);
                 let oper: Operation;
                 if (env.deploy) {
                     oper = Operation.deploy;
@@ -136,6 +151,9 @@ export class Development {
                 } else {
                     oper = Operation.build;
                 }
+
+                console.log(chalk.grey('begin load task via loader:'), optask.loader);
+                let loader = this.createLoader(optask);
 
                 return loader.loadConfg(oper, env)
                     .then(cfg => {
@@ -150,39 +168,41 @@ export class Development {
                             cfg = this.bindingConfig(cfg);
                             return this.loadSubTask(gulp, cfg)
                                 .then(subtask => {
-                                    return loader.load(cfg)
+                                    return Promise.all([
+                                        loader.load(cfg),
+                                        this.loadAssertTasks(gulp, cfg)
+                                    ])
                                         .then(tasks => {
                                             console.log(chalk.green('tasks loaded.'));
-                                            return this.setup(gulp, cfg, tasks, subtask)
+                                            return this.setup(gulp, cfg, tasks[0], tasks[1], subtask)
                                         });
                                 });
                         }
                     });
-            })).then(tsq => {
-                return _.flatten(tsq);
-            });
+            })
+        ).then(tsq => {
+            return _.flatten(tsq);
+        });
     }
 
-    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], subGroupTask: Src): Promise<Src[]> {
+    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], assertsTask: Src, subGroupTask: Src): Promise<Src[]> {
         return Promise.all(_.map(tasks, t => {
             return t(gulp, config);
         }))
             .then(ts => {
-                let tsqs: Src[] = this.toSquence(ts);
-                if (config.option.runTasks) {
-                    if (_.isFunction(config.option.runTasks)) {
-                        tsqs = config.option.runTasks(config.oper, tsqs, subGroupTask);
-                    } else {
-                        tsqs = config.option.runTasks;
-                        subGroupTask && tsqs.push(subGroupTask);
-                    }
-                    return tsqs;
+                let tsqs: Src[] = this.toSquence(ts, config.oper);
+                if (_.isFunction(config.option.runTasks)) {
+                    return config.option.runTasks(config.oper, tsqs, subGroupTask, assertsTask);
+                } else if (_.isArray(config.option.runTasks)) {
+                    tsqs = config.option.runTasks;
                 } else if (config.runTasks) {
-                    return config.runTasks(subGroupTask, tsqs);
-                } else {
-                    subGroupTask && tsqs.push(subGroupTask);
-                    return tsqs;
+                    return config.runTasks(subGroupTask, tsqs, assertsTask);
                 }
+
+                assertsTask && tsqs.splice(0, 0, assertsTask)
+                subGroupTask && tsqs.splice(0, 0, subGroupTask);
+
+                return tsqs;
             });
     }
 
@@ -210,7 +230,7 @@ export class Development {
                         let last = _.last(subseq);
                         let frn = _.isArray(first) ? _.first(first) : first;
                         let lsn = _.isArray(last) ? _.last(last) : last;
-                        let subName = frn + '_' + lsn;
+                        let subName = `${config.option.name ? config.option.name + '_' : ''}${frn}_${lsn}`;
                         gulp.task(subName, () => {
                             return runSequence(gulp, subseq);
                         })
@@ -222,7 +242,50 @@ export class Development {
         } else {
             return Promise.resolve(null);
         }
+    }
 
+    protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<Src> {
+        let optask = config.option;
+        if (optask.asserts) {
+            let tasks = _.map(_.keys(optask.asserts), name => {
+                let op: Asserts;
+                let aop = optask.asserts[name];
+                if (_.isString(aop) || _.isArray(aop)) {
+                    op = <Asserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
+                } else {
+                    op = aop;
+                };
+                optask.name = name;
+                op.src = op.src || (optask.src + '/**/*.' + name);
+                op.dist = op.dist || optask.dist;
+                return op;
+            });
+
+            return Promise.all(_.map(tasks, task => {
+                return this.loadTasks(gulp, task, config.env)
+                    .then(sq => {
+                        return {
+                            task: task,
+                            sq: sq
+                        }
+                    });
+            }))
+                .then(tseq => {
+                    // asserts tasks run mutil.
+                    return _.map(tseq, t => {
+                        let subseq = t.sq;
+                        if (subseq && subseq.length > 0) {
+                            gulp.task(t.task.name, () => {
+                                return runSequence(gulp, subseq);
+                            })
+                            return t.task.name;
+                        }
+                        return t.sq;
+                    });
+                });
+        } else {
+            return Promise.resolve(null);
+        }
     }
 
     protected createLoader(option: TaskOption): ITaskLoader {
@@ -423,12 +486,8 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
                     Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg) : output))
                         .then(output => {
                             stream.pipe(output)
-                                .on('end', () => {
-                                    resolve();
-                                })
-                                .on('error', (err) => {
-                                    reject(err);
-                                });
+                                .once('end', resolve)
+                                .once('error', reject);
                         }).catch(err => {
                             reject(err);
                         })
@@ -438,10 +497,8 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
         } else {
             return new Promise((resolve, reject) => {
                 stream.pipe(gulp.dest(cfg.getDist(cfg.option)))
-                    .on('end', () => {
-                        resolve();
-                    })
-                    .on('error', reject);
+                    .once('end', resolve)
+                    .once('error', reject);
             });
         }
 

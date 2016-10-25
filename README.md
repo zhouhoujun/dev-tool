@@ -48,8 +48,8 @@ Development.create(gulp, __dirname, {
 //or create mutil task for web client, node server.
 Development.create(gulp, __dirname, {
     tasks[
-        {src: 'src/client', dist: 'public', loader: 'development-tool-web', tasks:[...] }, // any module implement ITaskDefine
-        {src: 'src/server', dist: 'lib', loader: 'development-tool-node', tasks:[...] }
+        {src: 'src/client', dist: 'public', loader: 'development-tool-web', asserts:{...},  tasks:[...] }, // any module implement ITaskDefine
+        {src: 'src/server', dist: 'lib', loader: 'development-tool-node', asserts:{...}, tasks:[...] }
         ...
     ]
 });
@@ -58,27 +58,28 @@ Development.create(gulp, __dirname, {
 
 ```ts
 import * as gulp from 'gulp';
-import  { Development } from 'development-tool';
-import { NodeBuildOption } from 'development-tool-node';
+import  { Development, Asserts, TaskOption } from 'development-tool';
 Development.create(gulp, __dirname, {
     tasks:[
-        <NodeBuildOption>{
+        {
             src: 'src',
             dist: 'lib',
             // build:'build path',
             // release: 'release path',
             // depoly: 'depoly path'
             asserts:{
-                json: 'src/**/*.json',
-                css:'src/common/**/*.css',
-                moduleBcss: ['src/moduleB/**/*.css'],
-                moduleAcss: {
-                    src: ['src/apath/**/*.css', 'src/bpath/**/*.css'],
-                    dist:'dist path',
-                    build:'build path',
-                    release: 'release path',
-                    depoly: 'depoly path'
-                },
+                //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
+                json: '',
+                //default copy to dist. auto create jpeg task and  jpeg-watch task.
+                jpeg: ['src/apath/**/*.jpeg', 'src/bpath/**/*.jpeg'],
+                //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
+                moduleBcss: 'src/moduleB/**/*.css',
+                // use Asserts task to deal with ts file, if src not setting, use  src/**/*.ts
+                ts:<Asserts>{...},
+                // use default task to deal with ts file, if src must setting.
+                less:<TaskOption>{...},
+                // use dynamic task to deal with html file, if src not setting, use src/**/*.html
+                html:{loader: <DynamicTask[]>[}
                 ...
             },
             loader: 'development-tool-node'
@@ -94,7 +95,7 @@ Development.create(gulp, __dirname, {
     tasks:{
         src: 'src',
         dist: 'lib',
-        loader: 'development-tool-node',
+        loader: 'development-tool-web',
         tasks:[
             {
                 src: 'files be dealt with',
@@ -193,17 +194,32 @@ Development.create(gulp, __dirname, {
 });
 
 
-// or with task from module
+// or with task from module and asserts.
 Development.create(gulp, __dirname, {
     tasks: {
         src: 'src/**/*.ts',
         dist: 'lib',
+        asserts:{
+            //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
+            json: '',
+            //default copy to dist. auto create jpeg task and  jpeg-watch task.
+            jpeg: ['src/apath/**/*.jpeg', 'src/bpath/**/*.jpeg'],
+            //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
+            moduleBcss: 'src/moduleB/**/*.css',
+            // use Asserts task to deal with ts file, if src not setting, use  src/**/*.ts
+            ts:<Asserts>{...},
+            // use default task to deal with ts file, if src must setting.
+            less:<TaskOption>{...},
+            // use dynamic task to deal with html file, if src not setting, use src/**/*.html
+            html:{loader: <DynamicTask[]>[}
+            ...
+        },
         loader: {
             module:'module name',
             dynamicTasks:[
                 {
                     name: 'clean',
-                    task: (config) => del(config.option.dist)
+                    task: (config) => del(config.getDist())
                 },
                 {
                     name: 'tscompile',

@@ -1,7 +1,7 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
-import { Src, Task, TaskOption, Operation, EnvOption, DynamicTask, TaskConfig } from './TaskConfig';
+import { Src, Asserts, Task, TaskOption, Operation, EnvOption, DynamicTask, TaskResult, TaskConfig } from './TaskConfig';
 import { DevelopConfig } from './DevelopConfig';
 export * from './DevelopConfig';
 export * from './TaskConfig';
@@ -17,10 +17,11 @@ export declare class Development {
     run(gulp: Gulp, env: EnvOption): Promise<any>;
     private bindingConfig(cfg);
     runSequence(gulp: Gulp, tasks: Src[]): Promise<any>;
-    protected toSquence(tasks: Array<Src | void>): Src[];
-    protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]>;
-    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], subGroupTask: Src): Promise<Src[]>;
+    protected toSquence(tasks: Array<TaskResult | TaskResult[] | void>, oper: Operation): Src[];
+    protected loadTasks(gulp: Gulp, tasks: Asserts | Asserts[], env: EnvOption): Promise<Src[]>;
+    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], assertsTask: Src, subGroupTask: Src): Promise<Src[]>;
     protected loadSubTask(gulp: Gulp, config: TaskConfig): Promise<Src>;
+    protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<Src>;
     protected createLoader(option: TaskOption): ITaskLoader;
     protected printHelp(help: boolean | string): void;
 }
