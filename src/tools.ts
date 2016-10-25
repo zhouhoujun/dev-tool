@@ -247,7 +247,8 @@ export class Development {
     protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<Src> {
         let optask = config.option;
         if (optask.asserts) {
-            let tasks = _.map(_.keys(optask.asserts), name => {
+            let tasks: Asserts[] = [];
+            _.each(_.keys(optask.asserts), name => {
                 let op: Asserts;
                 let aop = optask.asserts[name];
                 if (_.isString(aop) || _.isArray(aop)) {
@@ -255,10 +256,13 @@ export class Development {
                 } else {
                     op = aop;
                 };
+                if (_.isNull(op) || _.isUndefined(op)) {
+                    return;
+                }
                 optask.name = name;
                 op.src = op.src || (optask.src + '/**/*.' + name);
                 op.dist = op.dist || optask.dist;
-                return op;
+                tasks.push(op);
             });
 
             return Promise.all(_.map(tasks, task => {
