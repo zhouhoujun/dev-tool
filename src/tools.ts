@@ -269,7 +269,7 @@ export class Development {
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
                 }
-                optask.name = name;
+                op.name = name;
                 op.src = op.src || (optask.src + '/**/*.' + name);
                 op.dist = op.dist || optask.dist;
                 tasks.push(op);
@@ -289,6 +289,9 @@ export class Development {
                     return _.map(tseq, t => {
                         let subseq = t.sq;
                         if (subseq && subseq.length > 0) {
+                            if (subseq.length === 1) {
+                                return subseq[0];
+                            }
                             gulp.task(t.task.name, () => {
                                 return runSequence(gulp, subseq);
                             })
@@ -463,7 +466,7 @@ function createWatchTask(dt: DynamicTask) {
  */
 function createTask(dt: DynamicTask) {
     return (gulp: Gulp, cfg: TaskConfig) => {
-        gulp.task(dt.name, (callback) => {
+        gulp.task(dt.name, () => {
             return createTaskWork(gulp, cfg, dt);
         });
         return dt.name;

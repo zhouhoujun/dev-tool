@@ -52,8 +52,27 @@ export type Src = string | string[];
  * @interface ITaskResult
  */
 export interface ITaskResult {
+    /**
+     * task name for task sequence.
+     * 
+     * @type {string}
+     * @memberOf ITaskResult
+     */
     name?: string;
+    /**
+     * task Operation type. default all pperation.
+     * 
+     * @type {Operation}
+     * @memberOf ITaskResult
+     */
     oper?: Operation;
+    /**
+     * task sequence order.
+     * 
+     * @type {number}
+     * @memberOf ITaskResult
+     */
+    order?: number;
 }
 
 export type TaskResult = string | ITaskResult;
@@ -200,6 +219,13 @@ export interface DynamicTask {
      * @memberOf DynamicTask
      */
     name: string;
+    /**
+     * task order.
+     * 
+     * @type {number}
+     * @memberOf DynamicTask
+     */
+    order?: number;
     /**
      * task type. default for all Operation.
      * 

@@ -15,6 +15,7 @@ export declare type Src = string | string[];
 export interface ITaskResult {
     name?: string;
     oper?: Operation;
+    order?: number;
 }
 export declare type TaskResult = string | ITaskResult;
 export declare type Task = (gulp: Gulp, config: TaskConfig) => TaskResult | TaskResult[] | void;
@@ -42,6 +43,7 @@ export declare type Pipe = (config?: TaskConfig) => ITransform | Promise<ITransf
 export declare type OutputPipe = (map: Output, config?: TaskConfig, gulp?: Gulp) => ITransform | Promise<ITransform>;
 export interface DynamicTask {
     name: string;
+    order?: number;
     oper?: Operation;
     watch?: Array<string | WatchCallback> | ((config?: TaskConfig) => Array<string | WatchCallback>);
     watchChanged?(event: WatchEvent, config: TaskConfig): any;
