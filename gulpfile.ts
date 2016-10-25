@@ -1,7 +1,8 @@
 // DynamicTask 
 import * as gulp from 'gulp';
-import { Development, DynamicTask, Pipe } from './src/tools';
-let del = require('del');
+import { Development, DynamicTask } from './src/tools';
+
+const del = require('del');
 const cache = require('gulp-cached');
 const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');

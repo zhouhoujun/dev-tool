@@ -24,21 +24,33 @@ You can `import` modules:
 ```ts
 import * as gulp from 'gulp';
 import  { Development } from 'development-tool';
-import { NodeBuildOption } from 'development-tool-node';
 
 ```
 
 ## Create development tool
 
 ```ts
-
+import * as gulp from 'gulp';
+import  { Development } from 'development-tool';
 Development.create(gulp, __dirname, {
     tasks{src: 'src', dist: 'lib', loader: 'development-tool-*' } // any module implement ITaskDefine
+});
+
+//or create mutil task for web client, node server.
+Development.create(gulp, __dirname, {
+    tasks[
+        {src: 'src/client', dist: 'public', loader: 'development-tool-web', tasks:[...] }, // any module implement ITaskDefine
+        {src: 'src/server', dist: 'lib', loader: 'development-tool-node', tasks:[...] }
+        ...
+    ]
 });
 
 ```
 
 ```ts
+import * as gulp from 'gulp';
+import  { Development } from 'development-tool';
+import { NodeBuildOption } from 'development-tool-node';
 Development.create(gulp, __dirname, {
     tasks:[
         <NodeBuildOption>{
@@ -128,8 +140,9 @@ Development.create(gulp, __dirname, {
 
 ```ts
 import * as gulp from 'gulp';
-import { IMap, Development, TaskConfig, DynamicTask } from './src/tools';
-let del = require('del');
+import { Development, TaskConfig, DynamicTask } from 'development-tool';
+
+const del = require('del');
 const cache = require('gulp-cached');
 const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
@@ -154,7 +167,7 @@ Development.create(gulp, __dirname, {
                 // set muti-output. no setting default output default one to "dist: 'lib'" .
                 output: [
                     (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
-                    (tsmap, config: TaskConfig) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                    (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
                 ]
             },
             {
