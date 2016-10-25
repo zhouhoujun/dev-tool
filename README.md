@@ -177,6 +177,40 @@ Development.create(gulp, __dirname, {
         ]
     }
 });
+
+
+// or with task from module
+Development.create(gulp, __dirname, {
+    tasks: {
+        src: 'src/**/*.ts',
+        dist: 'lib',
+        loader: {
+            module:'module name',
+            dynamicTasks:[
+            {
+                name: 'clean',
+                task: (config) => del(config.option.dist)
+            },
+            {
+                name: 'tscompile',
+                pipes: [
+                    () => cache('typescript'),
+                    sourcemaps.init,
+                    tsProject
+                ],
+                // set muti-output. no setting default output default one to "dist: 'lib'" .
+                output: [
+                    (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
+                    (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                ]
+            },
+            {
+                name: 'watch',
+                watch: ['tscompile']
+            }
+        ]
+    }
+});
 ```
 
 https://github.com/zhouhoujun/development-tool.git
