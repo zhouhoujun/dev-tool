@@ -187,28 +187,29 @@ Development.create(gulp, __dirname, {
         loader: {
             module:'module name',
             dynamicTasks:[
-            {
-                name: 'clean',
-                task: (config) => del(config.option.dist)
-            },
-            {
-                name: 'tscompile',
-                pipes: [
-                    () => cache('typescript'),
-                    sourcemaps.init,
-                    tsProject
-                ],
-                // set muti-output. no setting default output default one to "dist: 'lib'" .
-                output: [
-                    (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
-                    (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
-                ]
-            },
-            {
-                name: 'watch',
-                watch: ['tscompile']
-            }
-        ]
+                {
+                    name: 'clean',
+                    task: (config) => del(config.option.dist)
+                },
+                {
+                    name: 'tscompile',
+                    pipes: [
+                        () => cache('typescript'),
+                        sourcemaps.init,
+                        tsProject
+                    ],
+                    // set muti-output. no setting default output default one to "dist: 'lib'" .
+                    output: [
+                        (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
+                        (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                    ]
+                },
+                {
+                    name: 'watch',
+                    watch: ['tscompile']
+                }
+            ]
+        }
     }
 });
 ```
