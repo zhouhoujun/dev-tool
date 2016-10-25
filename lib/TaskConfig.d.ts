@@ -39,15 +39,15 @@ export interface Output extends ITransform {
     js?: ITransform;
 }
 export declare type Pipe = (config?: TaskConfig) => ITransform | Promise<ITransform>;
-export declare type OutputPipe = (map: Output, config?: TaskConfig) => ITransform | Promise<ITransform>;
+export declare type OutputPipe = (map: Output, config?: TaskConfig, gulp?: Gulp) => ITransform | Promise<ITransform>;
 export interface DynamicTask {
     name: string;
     oper?: Operation;
-    watch?: Array<string | WatchCallback>;
+    watch?: Array<string | WatchCallback> | ((config?: TaskConfig) => Array<string | WatchCallback>);
     watchChanged?(event: WatchEvent, config: TaskConfig): any;
     pipe?(gulpsrc: ITransform, config: TaskConfig): ITransform | Promise<ITransform>;
-    pipes?: Pipe | Pipe[];
-    output?: OutputPipe | OutputPipe[];
+    pipes?: Pipe[] | ((config?: TaskConfig) => Pipe[]);
+    output?: OutputPipe[] | ((config?: TaskConfig) => OutputPipe[]);
     task?(config: TaskConfig, gulp: Gulp): void | ITransform | Promise<any>;
 }
 export interface DynamicLoaderOption extends LoaderOption {

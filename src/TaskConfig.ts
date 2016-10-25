@@ -184,7 +184,7 @@ export interface Output extends ITransform {
 
 export type Pipe = (config?: TaskConfig) => ITransform | Promise<ITransform>;
 
-export type OutputPipe = (map: Output, config?: TaskConfig) => ITransform | Promise<ITransform>;
+export type OutputPipe = (map: Output, config?: TaskConfig, gulp?: Gulp) => ITransform | Promise<ITransform>;
 
 /**
  * dynamic gulp task.
@@ -209,12 +209,12 @@ export interface DynamicTask {
     oper?: Operation;
 
     /**
-     * task is watch or not.
+     * watch tasks
      * 
-     * @type {(boolean|string)}
+     * 
      * @memberOf DynamicTask
      */
-    watch?: Array<string | WatchCallback>;
+    watch?: Array<string | WatchCallback> | ((config?: TaskConfig) => Array<string | WatchCallback>);
     /**
      * watch changed.
      * 
@@ -238,18 +238,18 @@ export interface DynamicTask {
     /**
      * task pipe works.
      * 
-     * @type {(Pipe| Pipe[])}
+     * 
      * @memberOf DynamicTask
      */
-    pipes?: Pipe | Pipe[];
+    pipes?: Pipe[] | ((config?: TaskConfig) => Pipe[]);
 
     /**
      * output pipe task
+     *
      * 
-     * @type {(OutputPipe | OutputPipe[])}
      * @memberOf DynamicTask
      */
-    output?: OutputPipe | OutputPipe[];
+    output?: OutputPipe[] | ((config?: TaskConfig) => OutputPipe[]);
 
     /**
      * custom task.

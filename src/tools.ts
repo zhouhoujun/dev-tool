@@ -244,6 +244,16 @@ export class Development {
         }
     }
 
+    /**
+     * load asserts tasks.
+     * 
+     * @protected
+     * @param {Gulp} gulp
+     * @param {TaskConfig} config
+     * @returns {Promise<Src>}
+     * 
+     * @memberOf Development
+     */
     protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<Src> {
         let optask = config.option;
         if (optask.asserts) {
@@ -430,14 +440,15 @@ export function files(directory: string, express?: ((fileName: string) => boolea
  */
 function createWatchTask(dt: DynamicTask) {
     return (gulp: Gulp, cfg: TaskConfig) => {
-        if (!_.isFunction(_.last(dt.watch))) {
-            dt.watch.push(<WatchCallback>(event: WatchEvent) => {
+        let watchs = _.isFunction(dt.watch) ? dt.watch(cfg) : dt.watch;
+        if (!_.isFunction(_.last(watchs))) {
+            watchs.push(<WatchCallback>(event: WatchEvent) => {
                 dt.watchChanged && dt.watchChanged(event, cfg);
             });
         }
         gulp.task(dt.name, () => {
-            console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src), ' , watch task:', chalk.cyan.call(chalk, dt.watch))
-            gulp.watch(cfg.option.src, dt.watch)
+            console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src));
+            gulp.watch(cfg.option.src, watchs)
         });
 
         return dt.name;
@@ -470,7 +481,8 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
     // }));
 
     if (dt.pipes) {
-        _.each(dt.pipes, (p: Pipe) => {
+        let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg) : dt.pipes;
+        _.each(pipes, (p: Pipe) => {
             src = src.then(psrc => {
                 return Promise.resolve((_.isFunction(p) ? p(cfg) : p))
                     .then(stram => {
@@ -485,9 +497,10 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
     }
     src.then(stream => {
         if (dt.output) {
-            return Promise.all(_.map(_.isArray(dt.output) ? dt.output : [dt.output], output => {
+            let outputs = _.isFunction(dt.output) ? dt.output(cfg) : dt.output;
+            return Promise.all(_.map(outputs, output => {
                 return new Promise((resolve, reject) => {
-                    Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg) : output))
+                    Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg, gulp) : output))
                         .then(output => {
                             stream.pipe(output)
                                 .once('end', resolve)
