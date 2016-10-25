@@ -10,23 +10,23 @@ export enum Operation {
     /**
      * build compile project.
      */
-    build,
+    build = 1 << 0,
     /**
      * test project.
      */
-    test,
+    test = 1 << 1,
     /**
      * e2e test project.
      */
-    e2e,
+    e2e = 1 << 2,
     /**
      * release project.
      */
-    release,
+    release = 1 << 3,
     /**
      * release and deploy project.
      */
-    deploy
+    deploy = 1 << 4
 }
 
 /**
@@ -246,7 +246,7 @@ export interface DynamicTask {
      */
     name: string;
     /**
-     * task type.
+     * task type. default for all Operation.
      * 
      * @type {Operation}
      * @memberOf DynamicTask
@@ -352,7 +352,21 @@ export interface Asserts {
      */
     build?: string;
     /**
-     * release folder. if empty use parent setting, or ues 'dist'.
+     * test folder. if empty use parent setting, or ues 'dist'.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    test?: string;
+    /**
+     * build folder. if empty use parent setting, or ues 'dist'.
+     * 
+     * @type {string}
+     * @memberOf Asserts
+     */
+    e2e?: string;
+    /**
+     * e2e folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
      * @memberOf Asserts

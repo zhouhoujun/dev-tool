@@ -149,7 +149,7 @@ Development.create(gulp, __dirname, {
 
 ```ts
 import * as gulp from 'gulp';
-import { Development, TaskConfig, DynamicTask } from 'development-tool';
+import { Development, Operation, TaskConfig, DynamicTask } from 'development-tool';
 
 const del = require('del');
 const cache = require('gulp-cached');
@@ -164,10 +164,14 @@ Development.create(gulp, __dirname, {
         loader: <DynamicTask[]>[
             {
                 name: 'clean',
+                //the task for Operation type. default for all.
+                //oper: Operation.release | Operation.depoly | Operation.build | Operation.test | Operation.e2e
                 task: (config) => del(config.getDist())
             },
             {
                 name: 'tscompile',
+                //the task for Operation type. default for all.
+                //oper: Operation.release | Operation.depoly | Operation.build | Operation.test | Operation.e2e
                 pipes: [
                     () => cache('typescript'),
                     sourcemaps.init,
@@ -181,6 +185,7 @@ Development.create(gulp, __dirname, {
             },
             {
                 name: 'watch',
+                //watch only for --watch env.
                 watch: ['tscompile']
             }
         ]

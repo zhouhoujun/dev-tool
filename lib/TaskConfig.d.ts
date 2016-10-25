@@ -2,11 +2,11 @@
 /// <reference types="node" />
 import { Gulp, WatchEvent, WatchCallback } from 'gulp';
 export declare enum Operation {
-    build = 0,
-    test = 1,
-    e2e = 2,
-    release = 3,
-    deploy = 4,
+    build = 1,
+    test = 2,
+    e2e = 4,
+    release = 8,
+    deploy = 16,
 }
 export interface IMap<T> {
     [K: string]: T;
@@ -66,6 +66,8 @@ export interface Asserts {
     src: Src;
     dist?: string;
     build?: string;
+    test?: string;
+    e2e?: string;
     release?: string;
     deploy?: string;
 }

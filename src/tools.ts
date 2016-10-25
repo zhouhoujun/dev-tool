@@ -76,9 +76,13 @@ export class Development {
             let dist: string;
             switch (cfg.oper) {
                 case Operation.build:
-                case Operation.test:
-                case Operation.e2e:
                     dist = asserts.build || asserts.dist;
+                    break;
+                case Operation.test:
+                    dist = asserts.test || asserts.build || asserts.dist;
+                    break;
+                case Operation.e2e:
+                    dist = asserts.e2e || asserts.build || asserts.dist;
                     break;
                 case Operation.release:
                     dist = asserts.release || asserts.dist;
@@ -389,10 +393,7 @@ function createTask(dt: DynamicTask) {
 }
 function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
 
-    let src = Promise.resolve(gulp.src(cfg.option.src)
-        .on('error', err => {
-            console.log(chalk.red(err));
-        }));
+    let src = Promise.resolve(gulp.src(cfg.option.src));
     // gulp.src(cfg.option.src)
     // .once('error', () => {
     //     process.exit(1);
@@ -406,9 +407,8 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
             src = src.then(psrc => {
                 return Promise.resolve((_.isFunction(p) ? p(cfg) : p))
                     .then(stram => {
-                        psrc = psrc.pipe(stram);
-                        return psrc;
-                    })
+                        return psrc.pipe(stram)
+                    });
             });
         })
     } else if (dt.pipe) {
@@ -429,6 +429,8 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
                                 .on('error', (err) => {
                                     reject(err);
                                 });
+                        }).catch(err => {
+                            reject(err);
                         })
 
                 });
@@ -445,7 +447,9 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
 
     });
 
-    return src;
+    return src.catch(err => {
+        console.log(chalk.red(err));
+    });
 }
 
 /**
@@ -459,7 +463,7 @@ function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
 export function dynamicTask(tasks: DynamicTask | DynamicTask[], oper: Operation, env: EnvOption): Task[] {
     let taskseq: Task[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
-        if (!(_.isNull(dt.oper) || _.isUndefined(dt.oper)) && dt.oper !== oper) {
+        if (dt.oper && (dt.oper & oper) <= 0) {
             return;
         }
         if (dt.watch) {
