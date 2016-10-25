@@ -164,7 +164,7 @@ Development.create(gulp, __dirname, {
         loader: <DynamicTask[]>[
             {
                 name: 'clean',
-                task: (config) => del(config.option.dist)
+                task: (config) => del(config.getDist())
             },
             {
                 name: 'tscompile',
