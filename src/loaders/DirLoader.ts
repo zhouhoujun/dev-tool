@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as path from 'path';
 import { existsSync } from 'fs';
-import { Task, DirLoaderOption, TaskOption, TaskConfig, ITaskDefine } from '../TaskConfig';
+import { Task, DirLoaderOption, TaskOption, TaskConfig, ITaskDefine } from 'development-core';
 import { BaseLoader } from './BaseLoader';
 
 export class DirLoader extends BaseLoader {

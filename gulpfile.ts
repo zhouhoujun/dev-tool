@@ -1,6 +1,7 @@
 // DynamicTask 
 import * as gulp from 'gulp';
-import { Development, TaskOption, Src, Operation, DynamicTask } from './src/tools';
+import { Development } from './src/tools';
+import { TaskOption, Src, Operation, DynamicTask } from 'development-core';
 import * as mocha from 'gulp-mocha';
 
 const del = require('del');

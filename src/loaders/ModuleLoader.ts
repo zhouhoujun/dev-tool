@@ -1,5 +1,5 @@
 // import * as _ from 'lodash';
-import { TaskOption } from '../TaskConfig';
+import { TaskOption } from 'development-core';
 import { BaseLoader } from './BaseLoader';
 
 /**

@@ -1,5 +1,5 @@
 
-import { TaskOption } from '../../src/tools';
+import { TaskOption } from 'development-core';
 
 
 export interface NodeTaskOption extends TaskOption {

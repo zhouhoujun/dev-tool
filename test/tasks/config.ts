@@ -1,4 +1,4 @@
-import { Task, Operation, EnvOption, TaskOption, TaskConfig, ITaskDefine, DynamicLoaderOption } from '../../src/TaskConfig';
+import { Task, Operation, EnvOption, TaskOption, TaskConfig, ITaskDefine } from 'development-core';
 import tasks from './task';
 import * as _ from 'lodash';
 export * from './NodeTaskOption';
@@ -20,6 +20,6 @@ export default <ITaskDefine>{
     },
 
     moduleTaskLoader(config: TaskConfig): Promise<Task[]> {
-        return Promise.resolve(config.dynamicTasks(tasks.nodeDynamicTasks));
+        return Promise.resolve(config.generateTask(tasks.nodeDynamicTasks));
     }
 }

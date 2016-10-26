@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
-import { Src, Task, EnvOption, Operation, TaskOption, LoaderOption, TaskConfig, ITaskDefine } from '../TaskConfig';
+import { bindingConfig, Src, Task, EnvOption, Operation
+    , TaskOption, LoaderOption, TaskConfig, ITaskDefine } from 'development-core';
 import { ITaskLoader } from '../ITaskLoader';
 const requireDir = require('require-dir');
 import * as chalk from 'chalk';
@@ -42,6 +43,7 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     protected bindingConfig(cfg: TaskConfig): TaskConfig {
+        cfg = bindingConfig(cfg);
         cfg.findTasksInDir = cfg.findTasksInDir || ((dirs) => {
             return this.loadTaskFromDir(dirs);
         });

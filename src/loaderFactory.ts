@@ -1,6 +1,6 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
-import { TaskOption, LoaderOption, DynamicLoaderOption } from './TaskConfig';
+import { TaskOption, LoaderOption, DynamicLoaderOption } from 'development-core';
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import * as _ from 'lodash';

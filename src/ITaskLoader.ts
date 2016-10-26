@@ -1,4 +1,4 @@
-import { Operation, Task, EnvOption, TaskConfig } from './TaskConfig';
+import { Operation, Task, EnvOption, TaskConfig } from 'development-core';
 
 
 

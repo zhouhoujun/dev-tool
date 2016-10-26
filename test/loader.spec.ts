@@ -2,7 +2,7 @@ import * as mocha from 'mocha';
 import { expect, assert } from 'chai';
 
 import { ILoaderFactory, LoaderFactory } from '../src/loaderFactory';
-import { Operation, DirLoaderOption, Task, TaskConfig } from '../src/TaskConfig';
+import { Operation, DirLoaderOption, Task, TaskConfig } from 'development-core';
 import { ITaskLoader } from '../src/ITaskLoader';
 
 let root = __dirname;

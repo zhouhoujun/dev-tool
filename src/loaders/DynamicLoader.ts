@@ -1,4 +1,4 @@
-import { Task, Operation, EnvOption, TaskOption, TaskConfig, ITaskDefine, DynamicLoaderOption } from '../TaskConfig';
+import { Task, Operation, EnvOption, TaskOption, TaskConfig, ITaskDefine, DynamicLoaderOption } from 'development-core';
 import { BaseLoader } from './BaseLoader';
 
 export class DynamicLoader extends BaseLoader {
@@ -38,10 +38,10 @@ let dynamicTaskDefine = (option: DynamicLoaderOption, modules) => {
                 return config.findTasksInModule(modules)
                     .then(tasks => {
                         tasks = tasks || [];
-                        return tasks.concat(config.dynamicTasks(lderOption.dynamicTasks));
+                        return tasks.concat(config.generateTask(lderOption.dynamicTasks));
                     });
             } else {
-                return Promise.resolve(config.dynamicTasks(lderOption.dynamicTasks));
+                return Promise.resolve(config.generateTask(lderOption.dynamicTasks));
             }
         }
     }

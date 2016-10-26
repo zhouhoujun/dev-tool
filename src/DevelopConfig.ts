@@ -1,4 +1,4 @@
-import { TaskOption } from './TaskConfig';
+import { TaskOption } from 'development-core';
 import { ITaskLoader } from './ITaskLoader';
 // import { Operation } from './Operation';
 

@@ -1,7 +1,7 @@
 /// <reference types="mocha"/>
 import * as _ from 'lodash';
 import * as path from 'path';
-import { DynamicTask, Operation } from '../../src/tools';
+import { DynamicTask, Operation } from 'development-core';
 // import * as chalk from 'chalk';
 import * as mocha from 'gulp-mocha';
 import { NodeTaskOption } from './NodeTaskOption';

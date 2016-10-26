@@ -150,7 +150,8 @@ Development.create(gulp, __dirname, {
 
 ```ts
 import * as gulp from 'gulp';
-import { Development, Operation, TaskConfig, DynamicTask } from 'development-tool';
+import { Development } from 'development-tool';
+import { TaskOption, Src, Operation, DynamicTask } from 'development-core';
 
 const del = require('del');
 const cache = require('gulp-cached');
