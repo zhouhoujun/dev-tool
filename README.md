@@ -223,13 +223,14 @@ Development.create(gulp, __dirname, {
                 },
                 {
                     name: 'tscompile',
-                    pipes: [
+                    pipes(config){
+                        return [
                         () => cache('typescript'),
                         sourcemaps.init,
                         tsProject
-                    ],
+                    ]),
                     // set muti-output. no setting default output default one to "dist: 'lib'" .
-                    output: [
+                    output [
                         (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
                         (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
                     ]
