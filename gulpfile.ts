@@ -18,6 +18,11 @@ Development.create(gulp, __dirname, [
         src: 'src',
         dist: 'lib',
         loader: [
+            // {
+            //     name: 'clean',
+            //     order: 0,
+            //     task: (config) => del(config.getDist())
+            // },
             {
                 name: 'tscompile',
                 src: 'src/**/*.ts',
