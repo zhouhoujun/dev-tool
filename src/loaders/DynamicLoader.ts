@@ -1,4 +1,4 @@
-import { Src, Task, Operation, EnvOption, TaskOption, TaskConfig, ITaskDefine, DynamicLoaderOption } from '../TaskConfig';
+import { Task, Operation, EnvOption, TaskOption, TaskConfig, ITaskDefine, DynamicLoaderOption } from '../TaskConfig';
 import { BaseLoader } from './BaseLoader';
 
 export class DynamicLoader extends BaseLoader {
@@ -25,18 +25,10 @@ export class DynamicLoader extends BaseLoader {
 let dynamicTaskDefine = (option: DynamicLoaderOption, modules) => {
     return <ITaskDefine>{
         moduleTaskConfig(oper: Operation, option: TaskOption, env: EnvOption): TaskConfig {
-            // let lderOption: DynamicLoaderOption = option.loader;
             return {
                 oper: oper,
                 env: env,
-                option: option,
-                runTasks(subGroupTask?: Src, tasks?: Src[]): Src[] {
-                    tasks = tasks || [];
-                    if (subGroupTask) {
-                        tasks.splice(0, 0, subGroupTask);
-                    }
-                    return tasks;
-                }
+                option: option
             }
         },
 
@@ -45,7 +37,8 @@ let dynamicTaskDefine = (option: DynamicLoaderOption, modules) => {
             if (modules) {
                 return config.findTasksInModule(modules)
                     .then(tasks => {
-                        tasks = tasks.concat(config.dynamicTasks(lderOption.dynamicTasks));
+                        tasks = tasks || [];
+                        return tasks.concat(config.dynamicTasks(lderOption.dynamicTasks));
                     });
             } else {
                 return Promise.resolve(config.dynamicTasks(lderOption.dynamicTasks));

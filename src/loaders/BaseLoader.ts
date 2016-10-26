@@ -94,6 +94,15 @@ export abstract class BaseLoader implements ITaskLoader {
         }
     }
 
+    /**
+     * find task by reflect-metadata mark @taskDefine.
+     * not vailable now.
+     * @protected
+     * @param {*} mdl
+     * @returns {ITaskDefine}
+     * 
+     * @memberOf BaseLoader
+     */
     protected findTaskDefine(mdl: any): ITaskDefine {
         let def: ITaskDefine = null;
         if (this.isTaskDefine(mdl)) {
@@ -143,6 +152,16 @@ export abstract class BaseLoader implements ITaskLoader {
         return exceptObj;
     }
 
+    /**
+     * find task by reflect-metadata mark @task.
+     * not vailable now.
+     * 
+     * @private
+     * @param {*} mdl
+     * @returns {Task[]}
+     * 
+     * @memberOf BaseLoader
+     */
     private findTasks(mdl: any): Task[] {
         let tasks = [];
         if (!mdl) {
@@ -157,7 +176,10 @@ export abstract class BaseLoader implements ITaskLoader {
                 });
             } else {
                 _.each(_.keys(mdl), key => {
-                    console.log(chalk.grey('register task from:'), chalk.cyan(key));
+                    if (!key || !mdl[key] || /^[0-9]+$/.test(key)) {
+                        return;
+                    }
+                    console.log(chalk.grey('register task from :'), chalk.cyan(key));
                     tasks = tasks.concat(this.findTasks(mdl[key]));
                 });
             }
@@ -167,16 +189,11 @@ export abstract class BaseLoader implements ITaskLoader {
 
     protected loadTaskFromModule(mdl: any): Promise<Task[]> {
         let taskfuns: Task[] = this.findTasks(mdl);
-        if (!taskfuns || taskfuns.length < 1) {
-            console.log(chalk.red('error module:'), mdl);
-            return Promise.reject('has not found task in module.');
-        } else {
-            return Promise.resolve(taskfuns);
-        }
+        return Promise.resolve(taskfuns);
     }
 
     protected loadTaskFromDir(dirs: Src): Promise<Task[]> {
-        return Promise.all(_.map(_.isArray(dirs) ? <string[]>dirs : [<string>dirs], dir => {
+        return Promise.all(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
             console.log(chalk.grey('begin load task from dir'), chalk.cyan(dir));
             let mdl = requireDir(dir, { recurse: true });
             return this.loadTaskFromModule(mdl);

@@ -55,10 +55,10 @@ export interface ITaskResult {
     /**
      * task name for task sequence.
      * 
-     * @type {string}
+     * @type {Src}
      * @memberOf ITaskResult
      */
-    name?: string;
+    name?: Src;
     /**
      * task Operation type. default all pperation.
      * 
@@ -75,9 +75,19 @@ export interface ITaskResult {
     order?: number;
 }
 
-export type TaskResult = string | ITaskResult;
+export type TaskResult = Src | ITaskResult;
 export type Task = (gulp: Gulp, config: TaskConfig) => TaskResult | TaskResult[] | void;
 
+/**
+ * task decorator annations.
+ * 
+ * @export
+ * @param {Function} constructor
+ */
+export function task(constructor: Function) {
+    Object.seal(constructor);
+    Object.seal(constructor.prototype);
+}
 /**
  * task loader option.
  * 
@@ -156,10 +166,10 @@ export interface DirLoaderOption extends LoaderOption {
     /**
      * loader dir
      * 
-     * @type {string[]}
+     * @type {Src}
      * @memberOf LoaderOption
      */
-    dir?: string[];
+    dir?: Src;
     /**
      * config in directory. 
      * 
@@ -201,113 +211,19 @@ export interface Output extends ITransform {
     js?: ITransform
 }
 
-export type Pipe = (config?: TaskConfig) => ITransform | Promise<ITransform>;
+export type Pipe = (config?: TaskConfig, dt?: DynamicTask,  gulp?: Gulp) => ITransform | Promise<ITransform>;
 
-export type OutputPipe = (map: Output, config?: TaskConfig, gulp?: Gulp) => ITransform | Promise<ITransform>;
-
-/**
- * dynamic gulp task.
- * 
- * @export
- * @interface DynamicTask
- */
-export interface DynamicTask {
-    /**
-     * task name
-     * 
-     * @type {string}
-     * @memberOf DynamicTask
-     */
-    name: string;
-    /**
-     * task order.
-     * 
-     * @type {number}
-     * @memberOf DynamicTask
-     */
-    order?: number;
-    /**
-     * task type. default for all Operation.
-     * 
-     * @type {Operation}
-     * @memberOf DynamicTask
-     */
-    oper?: Operation;
-
-    /**
-     * watch tasks
-     * 
-     * 
-     * @memberOf DynamicTask
-     */
-    watch?: Array<string | WatchCallback> | ((config?: TaskConfig) => Array<string | WatchCallback>);
-    /**
-     * watch changed.
-     * 
-     * @param {WatchEvent} event
-     * @param {TaskConfig} config
-     * 
-     * @memberOf DynamicTask
-     */
-    watchChanged?(event: WatchEvent, config: TaskConfig);
-    /**
-     * stream pipe.
-     * 
-     * @param {ITransform} gulpsrc
-     * @param {TaskConfig} config
-     * @returns {(ITransform | Promise<ITransform>)}
-     * 
-     * @memberOf DynamicTask
-     */
-    pipe?(gulpsrc: ITransform, config: TaskConfig): ITransform | Promise<ITransform>;
-
-    /**
-     * task pipe works.
-     * 
-     * 
-     * @memberOf DynamicTask
-     */
-    pipes?: Pipe[] | ((config?: TaskConfig) => Pipe[]);
-
-    /**
-     * output pipe task
-     *
-     * 
-     * @memberOf DynamicTask
-     */
-    output?: OutputPipe[] | ((config?: TaskConfig) => OutputPipe[]);
-
-    /**
-     * custom task.
-     * 
-     * @param {TaskConfig} config
-     * @param {Gulp} gulp
-     * @returns {(void | ITransform | Promise<any>)}
-     * 
-     * @memberOf DynamicTask
-     */
-    task?(config: TaskConfig, gulp: Gulp): void | ITransform | Promise<any>;
-
-}
-
-/**
- * the option for loader dynamic build task.
- * 
- * @export
- * @interface DynamicLoaderOption
- * @extends {LoaderOption}
- */
-export interface DynamicLoaderOption extends LoaderOption {
-    /**
-     * dynamic task
-     * 
-     * @type {(DynamicTask | DynamicTask[])}
-     * @memberOf DynamicLoaderOption
-     */
-    dynamicTasks?: DynamicTask | DynamicTask[];
-}
+export type OutputPipe = (map: Output, config?: TaskConfig, dt?: DynamicTask,  gulp?: Gulp) => ITransform | Promise<ITransform>;
 
 export interface OutputDist {
+    /**
+     * the src file filter string. default 'src'.
+     * 
+     * @type {string}
+     * @memberOf OutputDist
+     */
+    src?: Src;
+
     /**
      * default output folder. if empty use parent setting, or ues 'dist'.
      */
@@ -350,6 +266,117 @@ export interface OutputDist {
 }
 
 
+/**
+ * dynamic gulp task.
+ * 
+ * @export
+ * @interface DynamicTask
+ * @extends {OutputDist}
+ */
+export interface DynamicTask extends OutputDist {
+    /**
+     * task name
+     * 
+     * @type {string}
+     * @memberOf DynamicTask
+     */
+    name: string;
+    /**
+     * task order.
+     * 
+     * @type {number}
+     * @memberOf DynamicTask
+     */
+    order?: number;
+    /**
+     * task type. default for all Operation.
+     * 
+     * @type {Operation}
+     * @memberOf DynamicTask
+     */
+    oper?: Operation;
+
+    /**
+     * watch tasks
+     * 
+     * 
+     * @memberOf DynamicTask
+     */
+    watch?: Array<string | WatchCallback> | ((config?: TaskConfig, dt?: DynamicTask) => Array<string | WatchCallback>);
+    /**
+     * watch changed.
+     * 
+     * @param {WatchEvent} event
+     * @param {TaskConfig} config
+     * 
+     * @memberOf DynamicTask
+     */
+    watchChanged?(event: WatchEvent, config: TaskConfig);
+    /**
+     * stream pipe.
+     * 
+     * @param {ITransform} gulpsrc
+     * @param {TaskConfig} config
+     * @returns {(ITransform | Promise<ITransform>)}
+     * 
+     * @memberOf DynamicTask
+     */
+    pipe?(gulpsrc: ITransform, config: TaskConfig, dt?: DynamicTask): ITransform | Promise<ITransform>;
+
+    /**
+     * task pipe works.
+     * 
+     * 
+     * @memberOf DynamicTask
+     */
+    pipes?: Pipe[] | ((config?: TaskConfig, dt?: DynamicTask) => Pipe[]);
+
+    /**
+     * output pipe task
+     *
+     * 
+     * @memberOf DynamicTask
+     */
+    output?: OutputPipe[] | ((config?: TaskConfig, dt?: DynamicTask) => OutputPipe[]);
+
+    /**
+     * custom task.
+     * 
+     * @param {TaskConfig} config
+     * @param {DynamicTask} [dt]
+     * @param {Gulp} [gulp]
+     * @returns {(void | ITransform | Promise<any>)}
+     * 
+     * @memberOf DynamicTask
+     */
+    task?(config: TaskConfig, dt?: DynamicTask, gulp?: Gulp): void | ITransform | Promise<any>;
+
+}
+
+/**
+ * the option for loader dynamic build task.
+ * 
+ * @export
+ * @interface DynamicLoaderOption
+ * @extends {LoaderOption}
+ */
+export interface DynamicLoaderOption extends LoaderOption {
+    /**
+     * dynamic task
+     * 
+     * @type {(DynamicTask | DynamicTask[])}
+     * @memberOf DynamicLoaderOption
+     */
+    dynamicTasks?: DynamicTask | DynamicTask[];
+}
+
+
+/**
+ * task loader option.
+ * 
+ * @export
+ * @interface TaskLoaderOption
+ */
 export interface TaskLoaderOption {
     /**
      * task loader
@@ -371,7 +398,7 @@ export interface TaskLoaderOption {
      * 
      * @memberOf TaskConfig
      */
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src, assertsTask?: Src) => Src[]);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: TaskResult, assertsTask?: TaskResult) => Src[]);
 
     /**
      * sub tasks.
@@ -380,6 +407,14 @@ export interface TaskLoaderOption {
      * @memberOf TaskOption
      */
     tasks?: TaskOption | TaskOption[];
+
+    /**
+     * set sub task order in this task sequence.
+     * 
+     * @type {number}
+     * @memberOf TaskLoaderOption
+     */
+    subTaskOrder?: number;
 }
 
 
@@ -399,20 +434,20 @@ export interface Asserts extends OutputDist, TaskLoaderOption {
     name?: string;
 
     /**
-     * the src file filter string. default 'src'.
-     * 
-     * @type {string}
-     * @memberOf Asserts
-     */
-    src?: Src;
-
-    /**
      * tasks to deal with asserts.
      * 
-     * @type {IMap<Src | Asserts>}
+     * @type {IMap<Src | Asserts, DynamicTask[]>}
      * @memberOf Asserts
      */
-    asserts?: IMap<Src | Asserts>;
+    asserts?: IMap<Src | Asserts | DynamicTask[]>;
+
+    /**
+     * set asserts task order in this task sequence.
+     * 
+     * @type {number}
+     * @memberOf Asserts
+     */
+    assertsOrder?: number;
 }
 
 
@@ -504,14 +539,14 @@ export interface TaskConfig {
     /**
      * custom config run tasks sequence in.
      * 
-     * @param {Src} [subGroupTask]
+     * @param {TaskResult} [subGroupTask]
      * @param {Src[]} [tasks]
-     * @param {Src} [assertTasks]
+     * @param {TaskResult} [assertTasks]
      * @returns {Src[]}
      * 
      * @memberOf TaskConfig
      */
-    runTasks?(subGroupTask?: Src, tasks?: Src[], assertTasks?: Src): Src[];
+    runTasks?(subGroupTask?: TaskResult, tasks?: Src[], assertTasks?: TaskResult): Src[];
     /**
      * custom print help.
      * 
@@ -543,12 +578,12 @@ export interface TaskConfig {
     /**
      * get dist of current state.  default implement in tools.
      * 
-     * @param {Asserts} asserts
+     * @param {OutputDist} dist
      * @returns {string}
      * 
      * @memberOf TaskConfig
      */
-    getDist?(asserts?: Asserts): string;
+    getDist?(dist?: OutputDist): string;
     /**
      * filter file in directory.  default implement in tools.
      * 
@@ -578,7 +613,27 @@ export interface TaskConfig {
      * 
      * @memberOf TaskConfig
      */
-    dynamicTasks?(tasks: DynamicTask | DynamicTask[]): Task[]
+    dynamicTasks?(tasks: DynamicTask | DynamicTask[]): Task[];
+
+    /**
+     * add task result to task sequence.
+     * 
+     * @param {Src[]} sequence  task sequence.
+     * @param {TaskResult} taskResult
+     * @returns {Src[]}
+     * 
+     * @memberOf TaskConfig
+     */
+    addTask?(sequence: Src[], taskResult: TaskResult): Src[];
+    /**
+     * generate sub task name
+     * 
+     * @param {string} name
+     * @param {string} [defaultName]
+     * 
+     * @memberOf TaskConfig
+     */
+    subTaskName?(name: string, defaultName?: string);
 }
 
 /**

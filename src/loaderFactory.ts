@@ -57,7 +57,7 @@ export class LoaderFactory implements ILoaderFactory {
                 return new DynamicLoader(option);
             }
 
-            let loader = null;
+            let loader: ITaskLoader = null;
             let loderOption: LoaderOption = option.loader;
             switch (loderOption.type) {
                 case 'dir':

@@ -22,7 +22,6 @@
     "suppressImplicitAnyIndexErrors": true
   },
   "exclude": [
-    "test",
     "lib",
     "node_modules"    
   ],

@@ -193,7 +193,14 @@ Development.create(gulp, __dirname, {
     }
 });
 
+```
 
+## Create development tool with dynamic tasks, with task from module and asserts
+
+Dynamic task can set special src filter, dist path, build path, release path,
+test path, deploy path, e2e path. detail see `DynamicTask`  interface.
+
+```ts
 // or with task from module and asserts.
 Development.create(gulp, __dirname, {
     tasks: {
@@ -243,6 +250,67 @@ Development.create(gulp, __dirname, {
         }
     }
 });
+
+// Dynamic task can set special src filter, dist path, build path,
+// release path, test path, deploy path, e2e path. detail see  DynamicTask  interface
+Development.create(gulp, __dirname, [
+    {
+        src: 'src',
+        dist: 'lib',
+        assertsOrder: 1,
+        asserts: {
+            ts: [
+                {
+                    name: 'tscompile',
+                    //src: 'src/moduleA/**/*.ts'
+                    //dist:'lib/ts',
+                    pipes: [
+                        () => cache('typescript'),
+                        sourcemaps.init,
+                        tsProject
+                    ],
+                    output: [
+                        (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
+                        (tsmap, config, dt) => {
+                            if (config.oper === Operation.release || config.oper === Operation.deploy) {
+                                return tsmap.js
+                                    .pipe(babel({
+                                        presets: ['es2015']
+                                    }))
+                                    .pipe(uglify())
+                                    .pipe(sourcemaps.write('./sourcemaps'))
+                                    .pipe(gulp.dest(config.getDist(dt)));
+                            } else {
+                                return tsmap.js
+                                    .pipe(sourcemaps.write('./sourcemaps'))
+                                    .pipe(gulp.dest(config.getDist(dt)));
+                            }
+                        }
+                    ]
+                },
+                {
+                    name: 'watch',
+                    watch: ['tscompile']
+                }
+            ]
+        },
+        loader: [
+            {
+                name: 'test',
+                src: 'test/**/*spec.ts',
+                oper: Operation.test | Operation.release | Operation.deploy,
+                pipes: [
+                    mocha
+                ]
+            },
+            {
+                name: 'clean',
+                order: 0,
+                task: (config) => del(config.getDist())
+            }
+        ]
+    }
+]);
 ```
 
 https://github.com/zhouhoujun/development-tool.git

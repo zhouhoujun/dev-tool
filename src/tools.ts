@@ -4,7 +4,7 @@ import { readdirSync, lstatSync } from 'fs';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { Src, Asserts, Task, TaskOption, Operation, EnvOption, DynamicTask, TaskResult, Pipe, TaskConfig } from './TaskConfig';
+import { Src, OutputDist, Asserts, Task, TaskOption, Operation, EnvOption, DynamicTask, ITaskResult, TaskResult, Pipe, TaskConfig } from './TaskConfig';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
@@ -24,9 +24,23 @@ export class Development {
      * @memberOf Development
      */
     private globals: any = {};
-    static create(gulp: Gulp, dirname: string, option?: DevelopConfig): Development {
+    private env: EnvOption;
+    /**
+     * create development tool.
+     * 
+     * @static
+     * @param {Gulp} gulp
+     * @param {string} dirname
+     * @param {(DevelopConfig | TaskOption[])} setting
+     * @returns {Development}
+     * 
+     * @memberOf Development
+     */
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | TaskOption[]): Development {
+        let option = _.isArray(setting) ? { tasks: setting } : setting;
         let devtool = new Development(dirname, option);
-        gulp.task('build', (callback: TaskCallback) => {
+        option.setupTask = option.setupTask || 'build';
+        gulp.task(option.setupTask, (callback: TaskCallback) => {
             var options: EnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development' }
@@ -35,7 +49,7 @@ export class Development {
         });
 
         gulp.task('default', () => {
-            gulp.start('build');
+            gulp.start(option.setupTask);
         });
         return devtool;
     }
@@ -48,6 +62,7 @@ export class Development {
         if (!env.root) {
             env.root = this.dirname;
         }
+        this.env = env;
 
         if (env.help) {
             console.log(chalk.grey('... main help  ...'));
@@ -65,36 +80,25 @@ export class Development {
     }
 
     private bindingConfig(cfg: TaskConfig): TaskConfig {
+        cfg.env = cfg.env || this.env;
         cfg.globals = this.globals;
         cfg.fileFilter = cfg.fileFilter || files;
         cfg.runSequence = cfg.runSequence || runSequence;
+        cfg.addTask = cfg.addTask || addTask;
         cfg.dynamicTasks = cfg.dynamicTasks || ((tasks: DynamicTask | DynamicTask[]) => {
             return dynamicTask(tasks, cfg.oper, cfg.env);
         });
-        cfg.getDist = cfg.getDist || ((asserts?: Asserts) => {
-            asserts = asserts || cfg.option;
-            let dist: string;
-            switch (cfg.oper) {
-                case Operation.build:
-                    dist = asserts.build || asserts.dist;
-                    break;
-                case Operation.test:
-                    dist = asserts.test || asserts.build || asserts.dist;
-                    break;
-                case Operation.e2e:
-                    dist = asserts.e2e || asserts.build || asserts.dist;
-                    break;
-                case Operation.release:
-                    dist = asserts.release || asserts.dist;
-                    break;
-                case Operation.deploy:
-                    dist = asserts.deploy || asserts.dist;
-                    break;
-                default:
-                    dist = '';
-                    break;
+        cfg.subTaskName = cfg.subTaskName || ((name, deft = '') => {
+            return cfg.option.name ? `${cfg.option.name}-${name || deft}` : name;
+        });
+        cfg.getDist = cfg.getDist || ((ds?: OutputDist) => {
+            if (ds) {
+                let dist = getCurrentDist(ds, cfg.oper);
+                if (dist) {
+                    return dist;
+                }
             }
-            return dist;
+            return getCurrentDist(cfg.option, cfg.oper);
         });
 
         return cfg;
@@ -116,6 +120,19 @@ export class Development {
 
     protected toSquence(tasks: Array<TaskResult | TaskResult[] | void>, oper: Operation): Src[] {
         let seq: Src[] = [];
+        tasks = _.orderBy(tasks, t => {
+            if (t) {
+                if (_.isString(t)) {
+                    return NaN;
+                } else if (_.isArray(t)) {
+                    return NaN;
+                } else {
+                    return (<ITaskResult>t).order
+                }
+            }
+            return NaN;
+        });
+
         _.each(tasks, t => {
             if (!t) {
                 return;
@@ -135,7 +152,7 @@ export class Development {
         return seq;
     }
 
-    protected loadTasks(gulp: Gulp, tasks: Asserts | Asserts[], env: EnvOption): Promise<Src[]> {
+    protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]> {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <TaskOption[]>tasks : [<TaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
@@ -185,7 +202,7 @@ export class Development {
         });
     }
 
-    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], assertsTask: Src, subGroupTask: Src): Promise<Src[]> {
+    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], assertsTask: TaskResult, subGroupTask: TaskResult): Promise<Src[]> {
         return Promise.all(_.map(tasks, t => {
             return t(gulp, config);
         }))
@@ -199,8 +216,8 @@ export class Development {
                     return config.runTasks(subGroupTask, tsqs, assertsTask);
                 }
 
-                assertsTask && tsqs.splice(0, 0, assertsTask)
-                subGroupTask && tsqs.splice(0, 0, subGroupTask);
+                config.addTask(tsqs, assertsTask);
+                config.addTask(tsqs, subGroupTask);
 
                 return tsqs;
             });
@@ -216,10 +233,11 @@ export class Development {
      * 
      * @memberOf Development
      */
-    protected loadSubTask(gulp: Gulp, config: TaskConfig): Promise<Src> {
+    protected loadSubTask(gulp: Gulp, config: TaskConfig): Promise<TaskResult> {
         let optask = config.option;
         if (optask.tasks) {
             _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
+                subopt.name = config.subTaskName(subopt.name);
                 subopt.src = subopt.src || optask.src;
                 subopt.dist = subopt.dist || optask.dist;
             });
@@ -230,11 +248,19 @@ export class Development {
                         let last = _.last(subseq);
                         let frn = _.isArray(first) ? _.first(first) : first;
                         let lsn = _.isArray(last) ? _.last(last) : last;
-                        let subName = `${config.option.name ? config.option.name + '_' : ''}${frn}_${lsn}`;
+                        let subName = config.subTaskName(`${frn}-${lsn}`, '-sub');
                         gulp.task(subName, () => {
                             return runSequence(gulp, subseq);
                         })
-                        return subName;
+
+                        if (_.isNumber(config.option.subTaskOrder)) {
+                            return <ITaskResult>{
+                                order: config.option.subTaskOrder,
+                                name: subName
+                            };
+                        } else {
+                            return subName;
+                        }
                     } else {
                         return null;
                     }
@@ -254,29 +280,35 @@ export class Development {
      * 
      * @memberOf Development
      */
-    protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<Src> {
+    protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<TaskResult> {
         let optask = config.option;
         if (optask.asserts) {
             let tasks: Asserts[] = [];
             _.each(_.keys(optask.asserts), name => {
                 let op: Asserts;
                 let aop = optask.asserts[name];
-                if (_.isString(aop) || _.isArray(aop)) {
+                if (_.isString(aop)) {
                     op = <Asserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
+                } else if (_.isArray(aop)) {
+                    if (_.some(aop, it => _.isString(aop))) {
+                        op = <Asserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
+                    } else {
+                        op = <Asserts>{ loader: aop };
+                    }
                 } else {
                     op = aop;
                 };
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
                 }
-                op.name = name;
+                op.name = config.subTaskName(name, '-assert');
                 op.src = op.src || (optask.src + '/**/*.' + name);
                 op.dist = op.dist || optask.dist;
                 tasks.push(op);
             });
 
             return Promise.all(_.map(tasks, task => {
-                return this.loadTasks(gulp, task, config.env)
+                return this.loadTasks(gulp, <TaskOption>task, config.env)
                     .then(sq => {
                         return {
                             task: task,
@@ -286,7 +318,7 @@ export class Development {
             }))
                 .then(tseq => {
                     // asserts tasks run mutil.
-                    return _.map(tseq, t => {
+                    let assertSeq = _.map(tseq, t => {
                         let subseq = t.sq;
                         if (subseq && subseq.length > 0) {
                             if (subseq.length === 1) {
@@ -299,6 +331,14 @@ export class Development {
                         }
                         return t.sq;
                     });
+                    if (_.isNumber(config.option.assertsOrder)) {
+                        return <ITaskResult>{
+                            order: config.option.assertsOrder,
+                            name: assertSeq
+                        };
+                    } else {
+                        return assertSeq;
+                    }
                 });
         } else {
             return Promise.resolve(null);
@@ -396,8 +436,7 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
                             gulp['removeListener']('task_stop', taskStop);
                             gulp['removeListener']('task_err', taskErr);
                         }
-                    })
-                    .catch(err => {
+                    }, err => {
                         if (gulp['removeListener']) {
                             gulp['removeListener']('task_stop', taskStop);
                             gulp['removeListener']('task_err', taskErr);
@@ -435,6 +474,71 @@ export function files(directory: string, express?: ((fileName: string) => boolea
     return res;
 }
 
+
+/**
+ * get dist.
+ * 
+ * @param {OutputDist} ds
+ * @param {Operation} oper
+ * @returns
+ */
+function getCurrentDist(ds: OutputDist, oper: Operation) {
+    let dist: string;
+    switch (oper) {
+        case Operation.build:
+            dist = ds.build || ds.dist;
+            break;
+        case Operation.test:
+            dist = ds.test || ds.build || ds.dist;
+            break;
+        case Operation.e2e:
+            dist = ds.e2e || ds.build || ds.dist;
+            break;
+        case Operation.release:
+            dist = ds.release || ds.dist;
+            break;
+        case Operation.deploy:
+            dist = ds.deploy || ds.dist;
+            break;
+        default:
+            dist = '';
+            break;
+    }
+    return dist;
+}
+
+function addTask(taskSequence: Src[], rst: TaskResult) {
+    if (!rst) {
+        return taskSequence;
+    }
+    if (_.isString(rst) || _.isArray(rst)) {
+        taskSequence.push(rst);
+    } else if (rst.name) {
+        if (_.isNumber(rst.order) && rst.order >= 0 && rst.order < taskSequence.length) {
+            taskSequence.splice(rst.order, 0, rst.name);
+            return taskSequence;
+        }
+        taskSequence.push(rst.name);
+    }
+    return taskSequence;
+}
+
+
+/**
+ * promise task.
+ * 
+ * @param {DynamicTask} dt
+ * @returns
+ */
+function createTask(dt: DynamicTask) {
+    return (gulp: Gulp, cfg: TaskConfig) => {
+        let tk = cfg.subTaskName(dt.name);
+        gulp.task(tk, () => {
+            return dt.task(cfg, dt, gulp);
+        });
+        return tk
+    };
+}
 /**
  * create dynamic watch task.
  * 
@@ -449,6 +553,12 @@ function createWatchTask(dt: DynamicTask) {
                 dt.watchChanged && dt.watchChanged(event, cfg);
             });
         }
+        watchs = _.map(watchs, w => {
+            if (_.isString(w)) {
+                return cfg.subTaskName(w);
+            }
+            return w;
+        })
         gulp.task(dt.name, () => {
             console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src));
             gulp.watch(cfg.option.src, watchs)
@@ -457,76 +567,56 @@ function createWatchTask(dt: DynamicTask) {
         return dt.name;
     };
 }
-
-/**
- * promise task.
- * 
- * @param {DynamicTask} dt
- * @returns
- */
-function createTask(dt: DynamicTask) {
+function createPipesTask(dt: DynamicTask) {
     return (gulp: Gulp, cfg: TaskConfig) => {
-        gulp.task(dt.name, () => {
-            return createTaskWork(gulp, cfg, dt);
-        });
-        return dt.name;
-    };
-}
-function createTaskWork(gulp: Gulp, cfg: TaskConfig, dt: DynamicTask) {
 
-    let src = Promise.resolve(gulp.src(cfg.option.src));
-    // gulp.src(cfg.option.src)
-    // .once('error', () => {
-    //     process.exit(1);
-    // })
-    // .once('end', () => {
-    //     process.exit();
-    // }));
-
-    if (dt.pipes) {
-        let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg) : dt.pipes;
-        _.each(pipes, (p: Pipe) => {
-            src = src.then(psrc => {
-                return Promise.resolve((_.isFunction(p) ? p(cfg) : p))
-                    .then(stram => {
-                        return psrc.pipe(stram)
+        let tk = cfg.subTaskName(dt.name);
+        gulp.task(tk, () => {
+            let src = Promise.resolve(gulp.src(dt.src || cfg.option.src));
+            if (dt.pipes) {
+                let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg, dt) : dt.pipes;
+                _.each(pipes, (p: Pipe) => {
+                    src = src.then(psrc => {
+                        return Promise.resolve((_.isFunction(p) ? p(cfg, dt, gulp) : p))
+                            .then(stram => {
+                                return psrc.pipe(stram)
+                            });
                     });
+                })
+            } else if (dt.pipe) {
+                src = src.then((stream => {
+                    return dt.pipe(stream, cfg, dt);
+                }));
+            }
+            src.then(stream => {
+                if (dt.output) {
+                    let outputs = _.isFunction(dt.output) ? dt.output(cfg, dt) : dt.output;
+                    return Promise.all(_.map(outputs, output => {
+                        return new Promise((resolve, reject) => {
+                            Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg, dt, gulp) : output))
+                                .then(output => {
+                                    stream.pipe(output)
+                                        .once('end', resolve)
+                                        .once('error', reject);
+                                });
+
+                        });
+                    }));
+                } else {
+                    return new Promise((resolve, reject) => {
+                        stream.pipe(gulp.dest(cfg.getDist(dt)))
+                            .once('end', resolve)
+                            .once('error', reject);
+                    });
+                }
             });
-        })
-    } else if (dt.pipe) {
-        src = src.then((src => {
-            return dt.pipe(src, cfg);
-        }));
+            return src.catch(err => {
+                console.log(chalk.red(err));
+            });
+        });
+
+        return tk;
     }
-    src.then(stream => {
-        if (dt.output) {
-            let outputs = _.isFunction(dt.output) ? dt.output(cfg) : dt.output;
-            return Promise.all(_.map(outputs, output => {
-                return new Promise((resolve, reject) => {
-                    Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg, gulp) : output))
-                        .then(output => {
-                            stream.pipe(output)
-                                .once('end', resolve)
-                                .once('error', reject);
-                        }).catch(err => {
-                            reject(err);
-                        })
-
-                });
-            }));
-        } else {
-            return new Promise((resolve, reject) => {
-                stream.pipe(gulp.dest(cfg.getDist(cfg.option)))
-                    .once('end', resolve)
-                    .once('error', reject);
-            });
-        }
-
-    });
-
-    return src.catch(err => {
-        console.log(chalk.red(err));
-    });
 }
 
 /**
@@ -551,17 +641,11 @@ export function dynamicTask(tasks: DynamicTask | DynamicTask[], oper: Operation,
             taskseq.push(createWatchTask(dt));
         } else if (_.isFunction(dt.task)) { // custom task
             console.log('register custom dynamic task:', chalk.cyan(dt.name));
-            taskseq.push((gulp: Gulp, cfg: TaskConfig) => {
-                gulp.task(dt.name, () => {
-                    dt.task(cfg, gulp);
-                });
-
-                return dt.name;
-            });
+            taskseq.push(createTask(dt));
         } else {
             console.log('register pipes  dynamic task:', chalk.cyan(dt.name));
             // pipe stream task.
-            taskseq.push(createTask(dt));
+            taskseq.push(createPipesTask(dt));
         }
     });
 

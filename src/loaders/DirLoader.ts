@@ -23,7 +23,7 @@ export class DirLoader extends BaseLoader {
         let loader: DirLoaderOption = this.option.loader;
         if (!loader.configModule
             && !loader.module && loader.dir) {
-            return Promise.race<TaskConfig>(_.map(loader.dir, dir => {
+            return Promise.race<TaskConfig>(_.map(_.isArray(loader.dir) ? loader.dir : [loader.dir], dir => {
                 return new Promise((resolve, reject) => {
                     let mdl = this.getDirConfigModule(loader, dir);
                     if (mdl) {
@@ -42,6 +42,7 @@ export class DirLoader extends BaseLoader {
     private getDirConfigModule(loader: DirLoaderOption, dir: string) {
         let cfn = loader.dirConfigFile || './config';
         let fpath = path.join(dir, cfn);
+        console.log('----------------\n', fpath);
         if (/.\S+$/.test(fpath)) {
             return require(fpath);
         } else if (existsSync(fpath + '.js')) {

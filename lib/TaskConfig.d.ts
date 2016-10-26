@@ -1,4 +1,5 @@
 /// <reference types="gulp" />
+/// <reference types="chai" />
 /// <reference types="node" />
 import { Gulp, WatchEvent, WatchCallback } from 'gulp';
 export declare enum Operation {
@@ -13,11 +14,11 @@ export interface IMap<T> {
 }
 export declare type Src = string | string[];
 export interface ITaskResult {
-    name?: string;
+    name?: Src;
     oper?: Operation;
     order?: number;
 }
-export declare type TaskResult = string | ITaskResult;
+export declare type TaskResult = Src | ITaskResult;
 export declare type Task = (gulp: Gulp, config: TaskConfig) => TaskResult | TaskResult[] | void;
 export interface LoaderOption {
     type?: string;
@@ -29,7 +30,7 @@ export interface LoaderOption {
     isTaskDefine?(mdl: any): boolean;
 }
 export interface DirLoaderOption extends LoaderOption {
-    dir?: string[];
+    dir?: Src;
     dirConfigFile?: string;
 }
 export interface ITransform extends NodeJS.ReadWriteStream {
@@ -39,23 +40,10 @@ export interface Output extends ITransform {
     dts?: ITransform;
     js?: ITransform;
 }
-export declare type Pipe = (config?: TaskConfig) => ITransform | Promise<ITransform>;
-export declare type OutputPipe = (map: Output, config?: TaskConfig, gulp?: Gulp) => ITransform | Promise<ITransform>;
-export interface DynamicTask {
-    name: string;
-    order?: number;
-    oper?: Operation;
-    watch?: Array<string | WatchCallback> | ((config?: TaskConfig) => Array<string | WatchCallback>);
-    watchChanged?(event: WatchEvent, config: TaskConfig): any;
-    pipe?(gulpsrc: ITransform, config: TaskConfig): ITransform | Promise<ITransform>;
-    pipes?: Pipe[] | ((config?: TaskConfig) => Pipe[]);
-    output?: OutputPipe[] | ((config?: TaskConfig) => OutputPipe[]);
-    task?(config: TaskConfig, gulp: Gulp): void | ITransform | Promise<any>;
-}
-export interface DynamicLoaderOption extends LoaderOption {
-    dynamicTasks?: DynamicTask | DynamicTask[];
-}
+export declare type Pipe = (config?: TaskConfig, dt?: DynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
+export declare type OutputPipe = (map: Output, config?: TaskConfig, dt?: DynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 export interface OutputDist {
+    src?: Src;
     dist?: string;
     build?: string;
     test?: string;
@@ -63,16 +51,31 @@ export interface OutputDist {
     release?: string;
     deploy?: string;
 }
+export interface DynamicTask extends OutputDist {
+    name: string;
+    order?: number;
+    oper?: Operation;
+    watch?: Array<string | WatchCallback> | ((config?: TaskConfig, dt?: DynamicTask) => Array<string | WatchCallback>);
+    watchChanged?(event: WatchEvent, config: TaskConfig): any;
+    pipe?(gulpsrc: ITransform, config: TaskConfig, dt?: DynamicTask): ITransform | Promise<ITransform>;
+    pipes?: Pipe[] | ((config?: TaskConfig, dt?: DynamicTask) => Pipe[]);
+    output?: OutputPipe[] | ((config?: TaskConfig, dt?: DynamicTask) => OutputPipe[]);
+    task?(config: TaskConfig, dt?: DynamicTask, gulp?: Gulp): void | ITransform | Promise<any>;
+}
+export interface DynamicLoaderOption extends LoaderOption {
+    dynamicTasks?: DynamicTask | DynamicTask[];
+}
 export interface TaskLoaderOption {
     loader: string | LoaderOption | DynamicTask | DynamicTask[];
     externalTask?: Task;
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: Src, assertsTask?: Src) => Src[]);
+    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: TaskResult, assertsTask?: TaskResult) => Src[]);
     tasks?: TaskOption | TaskOption[];
+    subTaskOrder?: number;
 }
 export interface Asserts extends OutputDist, TaskLoaderOption {
     name?: string;
-    src?: Src;
-    asserts?: IMap<Src | Asserts>;
+    asserts?: IMap<Src | Asserts | DynamicTask[]>;
+    assertsOrder?: number;
 }
 export interface TaskOption extends Asserts {
     src: Src;
@@ -86,14 +89,16 @@ export interface TaskConfig {
     env: EnvOption;
     oper: Operation;
     option: TaskOption;
-    runTasks?(subGroupTask?: Src, tasks?: Src[], assertTasks?: Src): Src[];
+    runTasks?(subGroupTask?: TaskResult, tasks?: Src[], assertTasks?: TaskResult): Src[];
     printHelp?(lang: string): void;
     findTasksInModule?(module: string): Promise<Task[]>;
     findTasksInDir?(dirs: Src): Promise<Task[]>;
-    getDist?(asserts?: Asserts): string;
+    getDist?(dist?: OutputDist): string;
     fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
     dynamicTasks?(tasks: DynamicTask | DynamicTask[]): Task[];
+    addTask?(sequence: Src[], taskResult: TaskResult): Src[];
+    subTaskName?(name: string, defaultName?: string): any;
 }
 export interface EnvOption {
     root?: string;
