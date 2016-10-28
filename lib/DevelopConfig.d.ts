@@ -1,7 +1,7 @@
-import { TaskOption } from 'development-core';
+import { ITaskOption } from 'development-core';
 import { ITaskLoader } from './ITaskLoader';
 export interface DevelopConfig {
     setupTask?: string;
-    tasks: TaskOption | TaskOption[];
-    loaderFactory?(option: TaskOption): ITaskLoader;
+    tasks: ITaskOption | ITaskOption[];
+    loaderFactory?(option: ITaskOption): ITaskLoader;
 }
