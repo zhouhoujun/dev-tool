@@ -2,7 +2,7 @@ import * as mocha from 'mocha';
 import { expect, assert } from 'chai';
 
 import { ILoaderFactory, LoaderFactory } from '../src/loaderFactory';
-import { Operation, DirLoaderOption, Task, TaskConfig } from 'development-core';
+import { Operation, IDirLoaderOption, ITask, ITaskConfig } from 'development-core';
 import { ITaskLoader } from '../src/ITaskLoader';
 
 let root = __dirname;
@@ -21,7 +21,7 @@ describe('LoaderFactory', () => {
             loader: []
         });
 
-        let taskconfig: TaskConfig = await loader.loadConfg(Operation.build, { config: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.build, { config: 'test' });
 
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
@@ -34,10 +34,10 @@ describe('LoaderFactory', () => {
     it('create directory loader', async function () {
         let loader: ITaskLoader = factory.create({
             src: 'src',
-            loader: <DirLoaderOption>{ dir: path.join(root, './tasks') }
+            loader: <IDirLoaderOption>{ dir: path.join(root, './tasks') }
         });
 
-        let taskconfig: TaskConfig = await loader.loadConfg(Operation.deploy, { config: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.deploy, { config: 'test' });
 
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
@@ -56,7 +56,7 @@ describe('LoaderFactory', () => {
             loader: path.join(root, './tasks/config.ts')
         });
 
-        let taskconfig: TaskConfig = await loader.loadConfg(Operation.release, { config: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.release, { config: 'test' });
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
         expect(taskconfig.env.config).to.equals('test');
@@ -71,24 +71,24 @@ describe('LoaderFactory', () => {
         let loader: ITaskLoader = factory.create({
             src: 'src',
             loader: {
-                module: {
-                    moduleTaskConfig(oper, option, env): TaskConfig {
+                taskDefine: {
+                    loadConfig(oper, option, env): ITaskConfig {
                         // register default asserts.
-                        return <TaskConfig>{
+                        return <ITaskConfig>{
                             oper: oper,
                             env: env,
                             option: option
                         }
                     },
 
-                    moduleTaskLoader(config: TaskConfig): Promise<Task[]> {
+                    loadTasks(config: ITaskConfig): Promise<ITask[]> {
                         return Promise.resolve([]);
                     }
                 }
             }
         });
 
-        let taskconfig: TaskConfig = await loader.loadConfg(Operation.release, { config: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.release, { config: 'test' });
 
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;

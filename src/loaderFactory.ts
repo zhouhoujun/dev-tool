@@ -1,6 +1,6 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
-import { TaskOption, LoaderOption, DynamicLoaderOption } from 'development-core';
+import { ITaskOption, ILoaderOption, IDynamicLoaderOption } from 'development-core';
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import * as _ from 'lodash';
@@ -11,7 +11,7 @@ import * as _ from 'lodash';
  * @interface ILoaderFactory
  */
 export interface ILoaderFactory {
-    create(option: TaskOption): ITaskLoader;
+    create(option: ITaskOption): ITaskLoader;
 }
 
 
@@ -26,7 +26,7 @@ export class LoaderFactory implements ILoaderFactory {
 
     constructor() {
     }
-    create(option: TaskOption): ITaskLoader {
+    create(option: ITaskOption): ITaskLoader {
 
         if (_.isString(option.loader)) {
             option.loader = {
@@ -34,7 +34,7 @@ export class LoaderFactory implements ILoaderFactory {
             };
             return new ModuleLoader(option);
         } else if (_.isArray(option.loader)) {
-            option.loader = <DynamicLoaderOption>{
+            option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: option.loader
             };
             return new DynamicLoader(option);
@@ -46,7 +46,7 @@ export class LoaderFactory implements ILoaderFactory {
 
             // dynamic task name.
             if (_.isString(option.loader['name'])) {
-                option.loader = <DynamicLoaderOption>{
+                option.loader = <IDynamicLoaderOption>{
                     dynamicTasks: option.loader
                 };
                 return new DynamicLoader(option);
@@ -58,7 +58,7 @@ export class LoaderFactory implements ILoaderFactory {
             }
 
             let loader: ITaskLoader = null;
-            let loderOption: LoaderOption = option.loader;
+            let loderOption: ILoaderOption = option.loader;
             switch (loderOption.type) {
                 case 'dir':
                     loader = new DirLoader(option);

@@ -1,8 +1,8 @@
 
-import { TaskOption } from 'development-core';
+import { ITaskOption } from 'development-core';
 
 
-export interface NodeTaskOption extends TaskOption {
+export interface NodeTaskOption extends ITaskOption {
     /**
      * tsconfig for typescript
      * 

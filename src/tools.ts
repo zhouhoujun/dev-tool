@@ -6,8 +6,7 @@ import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
 import {
     Src, currentOperation, toSequence, runSequence
-    , Asserts, Task, TaskOption, Operation, EnvOption
-    , ITaskResult, TaskResult, TaskConfig
+    , IAsserts, ITaskInfo, ITask, ITaskOption, Operation, IEnvOption, ITaskConfig
 } from 'development-core';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
@@ -34,17 +33,17 @@ export class Development {
      * @static
      * @param {Gulp} gulp
      * @param {string} dirname
-     * @param {(DevelopConfig | TaskOption[])} setting
+     * @param {(DevelopConfig | ITaskOption[])} setting
      * @returns {Development}
      * 
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | TaskOption[]): Development {
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[]): Development {
         let option = _.isArray(setting) ? { tasks: setting } : setting;
         let devtool = new Development(dirname, option);
         option.setupTask = option.setupTask || 'build';
         gulp.task(option.setupTask, (callback: TaskCallback) => {
-            var options: EnvOption = minimist(process.argv.slice(2), {
+            var options: IEnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development' }
             });
@@ -61,7 +60,7 @@ export class Development {
 
     }
 
-    run(gulp: Gulp, env: EnvOption): Promise<any> {
+    run(gulp: Gulp, env: IEnvOption): Promise<any> {
         if (!env.root) {
             env.root = this.dirname;
         }
@@ -74,40 +73,22 @@ export class Development {
         return this.loadTasks(gulp, this.option.tasks, env)
             .then(tseq => {
                 console.log(chalk.grey('run sequenec tasks:'), tseq);
-                return this.runSequence(gulp, tseq);
+                return runSequence(gulp, tseq);
             })
             .catch(err => {
                 console.error(err);
             });
     }
 
-    private bindingConfig(cfg: TaskConfig): TaskConfig {
+    private bindingConfig(cfg: ITaskConfig): ITaskConfig {
         // cfg.env = cfg.env || this.env;
         cfg.globals = this.globals;
         return cfg;
     }
 
-    /**
-     * run task sequence.
-     * 
-     * @protected
-     * @param {Gulp} gulp
-     * @param {Src[]} tasks
-     * @returns {Promise<any>}
-     * 
-     * @memberOf Development
-     */
-    runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
-        return runSequence(gulp, tasks);
-    }
-
-    protected toSequence(tasks: Array<TaskResult | TaskResult[] | void>, oper: Operation): Src[] {
-        return toSequence(tasks, oper);
-    }
-
-    protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]> {
+    protected loadTasks(gulp: Gulp, tasks: ITaskOption | ITaskOption[], env: IEnvOption): Promise<Src[]> {
         return Promise.all<Src[]>(
-            _.map(_.isArray(tasks) ? <TaskOption[]>tasks : [<TaskOption>tasks], optask => {
+            _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
                 let oper: Operation = currentOperation(env);
 
@@ -144,22 +125,20 @@ export class Development {
         });
     }
 
-    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], assertsTask: TaskResult, subGroupTask: TaskResult): Promise<Src[]> {
-        return Promise.all(_.map(tasks, t => {
-            return t(gulp, config);
-        }))
-            .then(ts => {
-                let tsqs: Src[] = this.toSequence(ts, config.oper);
-                if (_.isFunction(config.option.runTasks)) {
-                    return config.option.runTasks(config.oper, tsqs, subGroupTask, assertsTask);
-                } else if (_.isArray(config.option.runTasks)) {
-                    tsqs = config.option.runTasks;
-                } else if (config.runTasks) {
-                    return config.runTasks(subGroupTask, tsqs, assertsTask);
+    protected setup(gulp: Gulp, config: ITaskConfig, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]> {
+        return Promise.resolve(toSequence(gulp, tasks, config))
+            .then(tsqs => {
+                // if (_.isFunction(config.option['runTasks'])) {
+                //     return config.option['runTasks'](config.oper, tsqs, subGroupTask, assertsTask);
+                // } else if (_.isArray(config.option['runTasks'])) {
+                //     tsqs = config.option['runTasks'];
+                // } else 
+                if (config.runTasks) {
+                    return config.runTasks(tsqs, assertsTask, subGroupTask);
                 }
 
-                config.addTask(tsqs, assertsTask);
-                config.addTask(tsqs, subGroupTask);
+                config.addToSequence(tsqs, assertsTask);
+                config.addToSequence(tsqs, subGroupTask);
 
                 return tsqs;
             });
@@ -170,14 +149,15 @@ export class Development {
      * 
      * @protected
      * @param {Gulp} gulp
-     * @param {TaskConfig} config
+     * @param {ITaskConfig} config
      * @returns {Promise<Src>}
      * 
      * @memberOf Development
      */
-    protected loadSubTask(gulp: Gulp, config: TaskConfig): Promise<TaskResult> {
-        let optask = config.option;
-        if (optask.tasks) {
+    protected loadSubTask(gulp: Gulp, config: ITaskConfig): Promise<ITaskInfo> {
+
+        if (config['tasks']) {
+            let optask = <ITaskOption>config.option;
             _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
                 subopt.name = config.subTaskName(subopt.name);
                 subopt.src = subopt.src || optask.src;
@@ -190,19 +170,16 @@ export class Development {
                         let last = _.last(subseq);
                         let frn = _.isArray(first) ? _.first(first) : first;
                         let lsn = _.isArray(last) ? _.last(last) : last;
+
                         let subName = config.subTaskName(`${frn}-${lsn}`, '-sub');
                         gulp.task(subName, () => {
                             return runSequence(gulp, subseq);
-                        })
+                        });
 
-                        if (_.isNumber(config.option.subTaskOrder)) {
-                            return <ITaskResult>{
-                                order: config.option.subTaskOrder,
-                                name: subName
-                            };
-                        } else {
-                            return subName;
-                        }
+                        return <ITaskInfo>{
+                            order: optask.subTaskOrder,
+                            name: subName
+                        };
                     } else {
                         return null;
                     }
@@ -217,25 +194,25 @@ export class Development {
      * 
      * @protected
      * @param {Gulp} gulp
-     * @param {TaskConfig} config
+     * @param {ITaskConfig} config
      * @returns {Promise<Src>}
      * 
      * @memberOf Development
      */
-    protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<TaskResult> {
+    protected loadAssertTasks(gulp: Gulp, config: ITaskConfig): Promise<ITaskInfo> {
         let optask = config.option;
-        if (optask.asserts) {
-            let tasks: Asserts[] = [];
+        if (config.option.asserts) {
+            let tasks: IAsserts[] = [];
             _.each(_.keys(optask.asserts), name => {
-                let op: Asserts;
+                let op: IAsserts;
                 let aop = optask.asserts[name];
                 if (_.isString(aop)) {
-                    op = <Asserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
+                    op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
                 } else if (_.isArray(aop)) {
                     if (_.some(aop, it => _.isString(aop))) {
-                        op = <Asserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
+                        op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
                     } else {
-                        op = <Asserts>{ loader: aop };
+                        op = <IAsserts>{ loader: aop };
                     }
                 } else {
                     op = aop;
@@ -250,7 +227,7 @@ export class Development {
             });
 
             return Promise.all(_.map(tasks, task => {
-                return this.loadTasks(gulp, <TaskOption>task, config.env)
+                return this.loadTasks(gulp, <ITaskOption>task, config.env)
                     .then(sq => {
                         return {
                             task: task,
@@ -262,24 +239,27 @@ export class Development {
                     // asserts tasks run mutil.
                     let assertSeq = _.map(tseq, t => {
                         let subseq = t.sq;
+                        let name;
                         if (subseq && subseq.length > 0) {
                             if (subseq.length === 1) {
                                 return subseq[0];
                             }
-                            gulp.task(t.task.name, () => {
+
+                            name = config.subTaskName(t.task)
+                            gulp.task(name, () => {
                                 return runSequence(gulp, subseq);
-                            })
-                            return t.task.name;
+                            });
+                        } else {
+                            name = config.subTaskName(t.sq);
                         }
-                        return t.sq;
+
+                        return name;
                     });
-                    if (_.isNumber(config.option.assertsOrder)) {
-                        return <ITaskResult>{
-                            order: config.option.assertsOrder,
-                            name: assertSeq
-                        };
-                    } else {
-                        return assertSeq;
+
+
+                    return <ITaskInfo>{
+                        order: config.option.assertsOrder,
+                        name: assertSeq
                     }
                 });
         } else {
@@ -287,11 +267,11 @@ export class Development {
         }
     }
 
-    protected createLoader(option: TaskOption): ITaskLoader {
+    protected createLoader(option: ITaskOption): ITaskLoader {
         let loader = null;
         if (!_.isFunction(this.option.loaderFactory)) {
             let factory = new LoaderFactory();
-            this.option.loaderFactory = (opt: TaskOption) => {
+            this.option.loaderFactory = (opt: ITaskOption) => {
                 return factory.create(opt);
             }
         }

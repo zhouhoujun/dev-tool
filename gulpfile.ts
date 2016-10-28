@@ -1,7 +1,7 @@
-// DynamicTask 
+// IDynamicTask 
 import * as gulp from 'gulp';
 import { Development } from './src/tools';
-import { TaskOption, Src, Operation, DynamicTask } from 'development-core';
+import { ITaskOption, Src, Operation, IDynamicTask } from 'development-core';
 import * as mocha from 'gulp-mocha';
 
 const del = require('del');
@@ -137,7 +137,7 @@ Development.create(gulp, __dirname, [
 //     tasks: {
 //         src: 'src/**/*.ts',
 //         dist: 'lib',
-//         loader: <DynamicTask[]>[
+//         loader: <IDynamicTask[]>[
 //             {
 //                 name: 'clean',
 //                 task: (config) => del(config.getDist())

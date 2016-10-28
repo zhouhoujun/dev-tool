@@ -1,18 +1,13 @@
-import { Src, Task, EnvOption, Operation, TaskOption, TaskConfig, ITaskDefine } from 'development-core';
+/// <reference types="chai" />
+import { ITask, IEnvOption, Operation, ITaskOption, ITaskConfig, ITaskDefine } from 'development-core';
 import { ITaskLoader } from '../ITaskLoader';
 export declare abstract class BaseLoader implements ITaskLoader {
-    protected option: TaskOption;
-    constructor(option: TaskOption);
-    load(cfg: TaskConfig): Promise<Task[]>;
-    loadConfg(oper: Operation, env: EnvOption): Promise<TaskConfig>;
-    protected bindingConfig(cfg: TaskConfig): TaskConfig;
+    protected option: ITaskOption;
+    constructor(option: ITaskOption);
+    load(cfg: ITaskConfig): Promise<ITask[]>;
+    loadConfg(oper: Operation, env: IEnvOption): Promise<ITaskConfig>;
+    protected bindingConfig(cfg: ITaskConfig): ITaskConfig;
     protected getTaskDefine(): Promise<ITaskDefine>;
-    protected getConfigModule(): any;
-    protected getTaskModule(): any;
-    protected findTaskDefine(mdl: any): ITaskDefine;
-    private isTaskDefine(mdl);
-    protected isTaskFunc(mdl: any, exceptObj?: boolean): boolean;
-    private findTasks(mdl);
-    protected loadTaskFromModule(mdl: any): Promise<Task[]>;
-    protected loadTaskFromDir(dirs: Src): Promise<Task[]>;
+    protected getConfigModule(): string | Object;
+    protected getTaskModule(): string | Object;
 }

@@ -58,7 +58,7 @@ Development.create(gulp, __dirname, {
 
 ```ts
 import * as gulp from 'gulp';
-import  { Development, Asserts, TaskOption } from 'development-tool';
+import  { Development, IAsserts, ITaskOption } from 'development-tool';
 Development.create(gulp, __dirname, {
     tasks:[
         {
@@ -74,12 +74,12 @@ Development.create(gulp, __dirname, {
                 jpeg: ['src/apath/**/*.jpeg', 'src/bpath/**/*.jpeg'],
                 //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
                 moduleBcss: 'src/moduleB/**/*.css',
-                // use Asserts task to deal with ts file, if src not setting, use  src/**/*.ts
-                ts:<Asserts>{...},
+                // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
+                ts:<IAsserts>{...},
                 // use default task to deal with ts file, if src must setting.
-                less:<TaskOption>{...},
+                less:<ITaskOption>{...},
                 // use dynamic task to deal with html file, if src not setting, use src/**/*.html
-                html:{loader: <DynamicTask[]>[}
+                html:{loader: <IDynamicTask[]>[}
                 ...
             },
             loader: 'development-tool-node'
@@ -151,7 +151,7 @@ Development.create(gulp, __dirname, {
 ```ts
 import * as gulp from 'gulp';
 import { Development } from 'development-tool';
-import { TaskOption, Src, Operation, DynamicTask } from 'development-core';
+import { ITaskOption, Src, Operation, IDynamicTask } from 'development-core';
 
 const del = require('del');
 const cache = require('gulp-cached');
@@ -163,7 +163,7 @@ Development.create(gulp, __dirname, {
     tasks: {
         src: 'src/**/*.ts',
         dist: 'lib',
-        loader: <DynamicTask[]>[
+        loader: <IDynamicTask[]>[
             {
                 name: 'clean',
                 //the task for Operation type. default for all.
@@ -199,7 +199,7 @@ Development.create(gulp, __dirname, {
 ## Create development tool with dynamic tasks, with task from module and asserts
 
 Dynamic task can set special src filter, dist path, build path, release path,
-test path, deploy path, e2e path. detail see `DynamicTask`  interface.
+test path, deploy path, e2e path. detail see `IDynamicTask`  interface.
 
 ```ts
 // or with task from module and asserts.
@@ -214,12 +214,12 @@ Development.create(gulp, __dirname, {
             jpeg: ['src/apath/**/*.jpeg', 'src/bpath/**/*.jpeg'],
             //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
             moduleBcss: 'src/moduleB/**/*.css',
-            // use Asserts task to deal with ts file, if src not setting, use  src/**/*.ts
-            ts:<Asserts>{...},
+            // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
+            ts:<IAsserts>{...},
             // use default task to deal with ts file, if src must setting.
-            less:<TaskOption>{...},
+            less:<ITaskOption>{...},
             // use dynamic task to deal with html file, if src not setting, use src/**/*.html
-            html:{loader: <DynamicTask[]>[}
+            html:{loader: <IDynamicTask[]>[}
             ...
         },
         loader: {
@@ -253,7 +253,7 @@ Development.create(gulp, __dirname, {
 });
 
 // Dynamic task can set special src filter, dist path, build path,
-// release path, test path, deploy path, e2e path. detail see  DynamicTask  interface
+// release path, test path, deploy path, e2e path. detail see  IDynamicTask  interface
 Development.create(gulp, __dirname, [
     {
         src: 'src',

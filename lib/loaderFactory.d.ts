@@ -1,9 +1,9 @@
 import { ITaskLoader } from './ITaskLoader';
-import { TaskOption } from 'development-core';
+import { ITaskOption } from 'development-core';
 export interface ILoaderFactory {
-    create(option: TaskOption): ITaskLoader;
+    create(option: ITaskOption): ITaskLoader;
 }
 export declare class LoaderFactory implements ILoaderFactory {
     constructor();
-    create(option: TaskOption): ITaskLoader;
+    create(option: ITaskOption): ITaskLoader;
 }

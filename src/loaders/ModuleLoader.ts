@@ -1,5 +1,5 @@
 // import * as _ from 'lodash';
-import { TaskOption } from 'development-core';
+import { ITaskOption } from 'development-core';
 import { BaseLoader } from './BaseLoader';
 
 /**
@@ -11,7 +11,7 @@ import { BaseLoader } from './BaseLoader';
  */
 export class ModuleLoader extends BaseLoader {
 
-    constructor(option: TaskOption) {
+    constructor(option: ITaskOption) {
         super(option);
     }
 }

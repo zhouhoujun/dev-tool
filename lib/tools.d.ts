@@ -1,7 +1,7 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
-import { Src, Task, TaskOption, Operation, EnvOption, TaskResult, TaskConfig } from 'development-core';
+import { Src, ITaskInfo, ITask, ITaskOption, IEnvOption, ITaskConfig } from 'development-core';
 import { DevelopConfig } from './DevelopConfig';
 export * from './DevelopConfig';
 export * from './ITaskLoader';
@@ -11,16 +11,14 @@ export declare class Development {
     private dirname;
     protected option: DevelopConfig;
     private globals;
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | TaskOption[]): Development;
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[]): Development;
     private constructor(dirname, option);
-    run(gulp: Gulp, env: EnvOption): Promise<any>;
+    run(gulp: Gulp, env: IEnvOption): Promise<any>;
     private bindingConfig(cfg);
-    runSequence(gulp: Gulp, tasks: Src[]): Promise<any>;
-    protected toSequence(tasks: Array<TaskResult | TaskResult[] | void>, oper: Operation): Src[];
-    protected loadTasks(gulp: Gulp, tasks: TaskOption | TaskOption[], env: EnvOption): Promise<Src[]>;
-    protected setup(gulp: Gulp, config: TaskConfig, tasks: Task[], assertsTask: TaskResult, subGroupTask: TaskResult): Promise<Src[]>;
-    protected loadSubTask(gulp: Gulp, config: TaskConfig): Promise<TaskResult>;
-    protected loadAssertTasks(gulp: Gulp, config: TaskConfig): Promise<TaskResult>;
-    protected createLoader(option: TaskOption): ITaskLoader;
+    protected loadTasks(gulp: Gulp, tasks: ITaskOption | ITaskOption[], env: IEnvOption): Promise<Src[]>;
+    protected setup(gulp: Gulp, config: ITaskConfig, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
+    protected loadSubTask(gulp: Gulp, config: ITaskConfig): Promise<ITaskInfo>;
+    protected loadAssertTasks(gulp: Gulp, config: ITaskConfig): Promise<ITaskInfo>;
+    protected createLoader(option: ITaskOption): ITaskLoader;
     protected printHelp(help: boolean | string): void;
 }
