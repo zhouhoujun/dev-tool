@@ -1,4 +1,4 @@
-import { TaskOption } from 'development-core';
+import { ITaskOption } from 'development-core';
 import { ITaskLoader } from './ITaskLoader';
 // import { Operation } from './Operation';
 
@@ -19,15 +19,15 @@ export interface DevelopConfig {
     /**
      * tasks config.
      * 
-     * @type {(TaskOption | TaskOption[])}
+     * @type {(ITaskOption | ITaskOption[])}
      * @memberOf DevelopConfig
      */
-    tasks: TaskOption | TaskOption[];
+    tasks: ITaskOption | ITaskOption[];
     /**
      * custom loader factory.
      * 
      * 
      * @memberOf DevelopConfig
      */
-    loaderFactory?(option: TaskOption): ITaskLoader;
+    loaderFactory?(option: ITaskOption): ITaskLoader;
 }
