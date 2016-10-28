@@ -1,6 +1,6 @@
 {
   "name": "development-tool",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "development build tools.",
   "main": "./lib/tools.js",
   "typings": "./lib/tools",
