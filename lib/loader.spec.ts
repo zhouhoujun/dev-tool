@@ -67,7 +67,7 @@ describe('LoaderFactory', () => {
     });
 
 
-    it('create module object loader', async function () {
+    it('create taskDefine object loader', async function () {
         let loader: ITaskLoader = factory.create({
             src: 'src',
             loader: {
