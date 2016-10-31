@@ -6,7 +6,7 @@ import {
 } from 'development-core';
 import { ITaskLoader } from '../ITaskLoader';
 // import * as chalk from 'chalk';
-
+import dynamicTaskDefine from './dynamicTaskDefine';
 export abstract class BaseLoader implements ITaskLoader {
 
     protected option: ITaskOption;
@@ -49,16 +49,22 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     protected getTaskDefine(): Promise<ITaskDefine> {
-        let tsdef: ITaskDefine = null;
-        let loader: ILoaderOption = this.option.loader;
+        return new Promise((resolve, reject) => {
+            let loader: ILoaderOption = this.option.loader;
 
-        if (loader.taskDefine) {
-            tsdef = loader.taskDefine;
-            return Promise.resolve(tsdef);
-        } else {
-            let mdl = this.getConfigModule();
-            return findTaskDefineInModule(mdl);
-        }
+            if (loader.taskDefine) {
+                resolve(loader.taskDefine);
+            } else {
+                let mdl = this.getConfigModule();
+                findTaskDefineInModule(mdl)
+                    .then(def => {
+                        resolve(def);
+                    })
+                    .catch(err => {
+                        resolve(dynamicTaskDefine(mdl));
+                    });
+            }
+        });
     }
 
     protected getConfigModule(): string | Object {

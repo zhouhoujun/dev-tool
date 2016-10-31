@@ -42,13 +42,16 @@ import  { Development } from 'development-tool';
 import * as gulp from 'gulp';
 import  { Development } from 'development-tool';
 Development.create(gulp, __dirname, {
-    tasks{src: 'src', dist: 'lib', loader: 'development-tool-*' } // any module implement ITaskDefine
+    // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
+    tasks{src: 'src', dist: 'lib', loader: 'development-tool-*' }
 });
 
 //or create mutil task for web client, node server.
 Development.create(gulp, __dirname, {
     tasks[
-        {src: 'src/client', dist: 'public', loader: 'development-tool-web', asserts:{...},  tasks:[...] }, // any module implement ITaskDefine
+        // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
+        {src: 'src/client', dist: 'public', loader: 'development-tool-web', asserts:{...},  tasks:[...] },
+        // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
         {src: 'src/server', dist: 'lib', loader: 'development-tool-node', asserts:{...}, tasks:[...] }
         ...
     ]
@@ -103,7 +106,8 @@ Development.create(gulp, __dirname, {
                 // build:'build path',
                 // release: 'release path',
                 // depoly: 'depoly path',
-                loader:'development-tool-*' //the module must implement ITaskDefine.
+                // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
+                loader:'development-tool-*'
             },
             {
                 src: ['src/apath/**/*.css', 'src/bpath/**/*.css'],
@@ -112,7 +116,7 @@ Development.create(gulp, __dirname, {
                 // release: 'release path',
                 // depoly: 'depoly path',
                 loader: {
-                    configModule: path.join(__dirname, './src/task.ts'), //the module must implement ITaskDefine.
+                    // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
                     dir: [path.join(__dirname, './src/mytasks')]
                 },
                 tasks: [
@@ -123,7 +127,7 @@ Development.create(gulp, __dirname, {
                         // release: 'release path',
                         // depoly: 'depoly path',
                         loader: {
-                            //./src/mytasks folder must has module implement ITaskDefine.
+                            // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
                             dir: path.join(__dirname, './src/mytasks')
                         }
                     },
@@ -134,8 +138,8 @@ Development.create(gulp, __dirname, {
                         // release: 'release path',
                         // depoly: 'depoly path',
                         loader: {
-                            module: path.join(__dirname, './src/mytasks/dosomething'),
-                            configModule: path.join(__dirname, './src/mytasks/config') //the module must implement ITaskDefine.
+                            // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
+                            module: path.join(__dirname, './src/mytasks/dosomething')
                         }
                     }
                 ]
@@ -300,9 +304,8 @@ Development.create(gulp, __dirname, [
                 name: 'test',
                 src: 'test/**/*spec.ts',
                 oper: Operation.test | Operation.release | Operation.deploy,
-                pipes: [
-                    mocha
-                ]
+                pipes: [mocha],
+                output: null
             },
             {
                 name: 'clean',

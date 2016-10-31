@@ -1,4 +1,5 @@
-import { ITask, Operation, IEnvOption, ITaskOption, ITaskConfig, ITaskDefine, IDynamicLoaderOption } from 'development-core';
+import { ITaskOption, ITaskDefine, IDynamicLoaderOption } from 'development-core';
+import dynamicTaskDefine from './dynamicTaskDefine';
 import { BaseLoader } from './BaseLoader';
 
 export class DynamicLoader extends BaseLoader {
@@ -14,7 +15,7 @@ export class DynamicLoader extends BaseLoader {
         if (loader.taskDefine) {
             tsdef = loader.taskDefine;
         } else {
-            tsdef = dynamicTaskDefine(loader, this.getTaskModule())
+            tsdef = dynamicTaskDefine(this.getTaskModule())
         }
 
         return Promise.resolve(tsdef);
@@ -22,27 +23,3 @@ export class DynamicLoader extends BaseLoader {
 }
 
 
-let dynamicTaskDefine = (option: IDynamicLoaderOption, modules) => {
-    return <ITaskDefine>{
-        loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {
-            return {
-                oper: oper,
-                env: env,
-                option: option
-            }
-        },
-
-        loadTasks(config: ITaskConfig): Promise<ITask[]> {
-            let lderOption: IDynamicLoaderOption = config.option.loader;
-            if (modules) {
-                return config.findTasks(modules)
-                    .then(tasks => {
-                        tasks = tasks || [];
-                        return tasks.concat(config.generateTask(lderOption.dynamicTasks));
-                    });
-            } else {
-                return Promise.resolve(config.generateTask(lderOption.dynamicTasks));
-            }
-        }
-    }
-}
