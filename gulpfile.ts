@@ -115,6 +115,7 @@ Development.create(gulp, __dirname, [
             {
                 name: 'test',
                 src: 'test/**/*spec.ts',
+                order: 1,
                 oper: Operation.test | Operation.release | Operation.deploy,
                 pipes: [mocha],
                 output: null
