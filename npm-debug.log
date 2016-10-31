@@ -1,0 +1,151 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'publish' ]
+2 info using npm@3.10.8
+3 info using node@v7.0.0
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   escapedName: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: 'D:\\Workspace\\source\\development-tool',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory C:\Users\zhouyou\AppData\Roaming\npm-cache\development-tool\0.5.6\package.tgz not in flight; packing
+9 verbose correctMkdir C:\Users\zhouyou\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+10 info lifecycle development-tool@0.5.6~prepublish: development-tool@0.5.6
+11 verbose lifecycle development-tool@0.5.6~prepublish: unsafe-perm in lifecycle true
+12 verbose lifecycle development-tool@0.5.6~prepublish: PATH: C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;D:\Workspace\source\development-tool\node_modules\.bin;C:\Program Files\Docker\Docker\Resources\bin;C:\Python27\;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SDKs\TypeScript\1.0\;C:\Program Files\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.7.0_79/bin;D:\Workspace\Android\android-sdk\tools;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\GtkSharp\2.12\bin;C:\Program Files\dotnet\bin;C:\Go\bin;C:\ProgramData\chocolatey\bin;D:\Workspace\phantomjs-2.1.1-windows\bin;C:\Program Files\TortoiseSVN\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\dotnet\;C:\Program Files\nodejs\;C:\Users\zhouyou\.dnx\runtimes\dnx-clr-win-x86.1.0.0-rc1-update2\bin;C:\Users\zhouyou\.dnx\bin;C:\Program Files (x86)\Microsoft VS Code\bin;C:\Users\zhouyou\AppData\Local\Microsoft\WindowsApps;C:\Users\zhouyou\AppData\Roaming\npm
+13 verbose lifecycle development-tool@0.5.6~prepublish: CWD: D:\Workspace\source\development-tool
+14 silly lifecycle development-tool@0.5.6~prepublish: Args: [ '/d /s /c', 'gulp build --release' ]
+15 silly lifecycle development-tool@0.5.6~prepublish: Returned: code: 0  signal: null
+16 verbose tar pack [ 'C:\\Users\\zhouyou\\AppData\\Roaming\\npm-cache\\development-tool\\0.5.6\\package.tgz',
+16 verbose tar pack   'D:\\Workspace\\source\\development-tool' ]
+17 verbose tarball C:\Users\zhouyou\AppData\Roaming\npm-cache\development-tool\0.5.6\package.tgz
+18 verbose folder D:\Workspace\source\development-tool
+19 verbose addLocalTarball adding from inside cache C:\Users\zhouyou\AppData\Roaming\npm-cache\development-tool\0.5.6\package.tgz
+20 verbose correctMkdir C:\Users\zhouyou\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+21 silly cache afterAdd development-tool@0.5.6
+22 verbose afterAdd C:\Users\zhouyou\AppData\Roaming\npm-cache\development-tool\0.5.6\package\package.json not in flight; writing
+23 verbose correctMkdir C:\Users\zhouyou\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+24 verbose afterAdd C:\Users\zhouyou\AppData\Roaming\npm-cache\development-tool\0.5.6\package\package.json written
+25 silly publish { name: 'development-tool',
+25 silly publish   version: '0.5.6',
+25 silly publish   description: 'development build tools.',
+25 silly publish   main: './lib/tools.js',
+25 silly publish   typings: './lib/tools',
+25 silly publish   scripts:
+25 silly publish    { gulp: 'gulp',
+25 silly publish      postinstall: 'npm prune',
+25 silly publish      reinstall: 'npm cache clean && npm install',
+25 silly publish      test: 'gulp build test',
+25 silly publish      prepublish: 'gulp build --release',
+25 silly publish      e2e: 'protractor',
+25 silly publish      'e2e.live': 'protractor --elementExplorer' },
+25 silly publish   keywords: [ 'development', 'tool', 'typescript', 'node', 'babel' ],
+25 silly publish   author: { name: 'houjun' },
+25 silly publish   license: 'MIT',
+25 silly publish   bugs: { url: 'https://github.com/zhouhoujun/development-tool/issues' },
+25 silly publish   registry: 'jspm',
+25 silly publish   repository:
+25 silly publish    { type: 'git',
+25 silly publish      url: 'git+https://github.com/zhouhoujun/development-tool.git' },
+25 silly publish   dependencies:
+25 silly publish    { '@types/chalk': '^0.4.31',
+25 silly publish      '@types/gulp': '^3.8.32',
+25 silly publish      '@types/lodash': '^4.14.37',
+25 silly publish      '@types/minimist': '^1.1.29',
+25 silly publish      chalk: '^1.1.3',
+25 silly publish      checksum: '^0.1.1',
+25 silly publish      'development-core': '^0.4.10',
+25 silly publish      gulp: '^3.9.1',
+25 silly publish      lodash: '^4.13.1' },
+25 silly publish   devDependencies:
+25 silly publish    { '@types/chai': '^3.4.34',
+25 silly publish      '@types/gulp-mocha': '0.0.29',
+25 silly publish      'babel-preset-es2015': '^6.18.0',
+25 silly publish      bluebird: '^3.4.1',
+25 silly publish      chai: '^3.5.0',
+25 silly publish      del: '^2.2.1',
+25 silly publish      'gulp-babel': '^6.1.2',
+25 silly publish      'gulp-cached': '^1.1.0',
+25 silly publish      'gulp-mocha': '^3.0.1',
+25 silly publish      'gulp-sourcemaps': '^2.1.1',
+25 silly publish      'gulp-typescript': '^3.0.2',
+25 silly publish      'gulp-uglify': '^2.0.0',
+25 silly publish      through2: '^2.0.1',
+25 silly publish      'ts-node': '^1.6.0',
+25 silly publish      tslint: '^3.15.1',
+25 silly publish      'tslint-stylish': '^2.1.0-beta',
+25 silly publish      typescript: '^2.0.3',
+25 silly publish      'zone.js': '^0.6.10' },
+25 silly publish   homepage: 'https://github.com/zhouhoujun/development-tool#readme',
+25 silly publish   readme: '# packaged development-tool\r\n\r\nThis repo is for distribution on `npm`. The source for this module is in the\r\n[main repo](https://github.com/zhouhoujun/development-tool/src/mastert).\r\nPlease file issues and pull requests against that repo.\r\nThis package use to develop kit for project development via gulp tasks.\r\n\r\n\r\nDevelopment tool can load task from module, directory, object or dynamic tasks.\r\ndynamic load task and run task by command evn:\r\n```shell\r\n\r\ngulp [build] [--build]  [--test] [--e2e]  [--release] [--depoly] [--server] [--watch]\r\n\r\n```\r\n\r\n## Install\r\n\r\nYou can install this package either with `npm`.\r\n\r\n### npm\r\n\r\n```shell\r\n\r\nnpm install development-tool\r\n\r\n```\r\n\r\nYou can `import` modules:\r\n\r\n## import module\r\n\r\n```ts\r\nimport * as gulp from \'gulp\';\r\nimport  { Development } from \'development-tool\';\r\n\r\n```\r\n\r\n## Create development tool\r\n\r\n```ts\r\nimport * as gulp from \'gulp\';\r\nimport  { Development } from \'development-tool\';\r\nDevelopment.create(gulp, __dirname, {\r\n    // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.\r\n    tasks{src: \'src\', dist: \'lib\', loader: \'development-tool-*\' }\r\n});\r\n\r\n//or create mutil task for web client, node server.\r\nDevelopment.create(gulp, __dirname, {\r\n    tasks[\r\n        // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.\r\n        {src: \'src/client\', dist: \'public\', loader: \'development-tool-web\', asserts:{...},  tasks:[...] },\r\n        // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.\r\n        {src: \'src/server\', dist: \'lib\', loader: \'development-tool-node\', asserts:{...}, tasks:[...] }\r\n        ...\r\n    ]\r\n});\r\n\r\n```\r\n\r\n```ts\r\nimport * as gulp from \'gulp\';\r\nimport  { Development, IAsserts, ITaskOption } from \'development-tool\';\r\nDevelopment.create(gulp, __dirname, {\r\n    tasks:[\r\n        {\r\n            src: \'src\',\r\n            dist: \'lib\',\r\n            // build:\'build path\',\r\n            // release: \'release path\',\r\n            // depoly: \'depoly path\'\r\n            asserts:{\r\n                //default copy \'src/**/*.json\' to dist. auto create json task and  json-watch task.\r\n                json: \'\',\r\n                //default copy to dist. auto create jpeg task and  jpeg-watch task.\r\n                jpeg: [\'src/apath/**/*.jpeg\', \'src/bpath/**/*.jpeg\'],\r\n                //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.\r\n                moduleBcss: \'src/moduleB/**/*.css\',\r\n                // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts\r\n                ts:<IAsserts>{...},\r\n                // use default task to deal with ts file, if src must setting.\r\n                less:<ITaskOption>{...},\r\n                // use dynamic task to deal with html file, if src not setting, use src/**/*.html\r\n                html:{loader: <IDynamicTask[]>[}\r\n                ...\r\n            },\r\n            loader: \'development-tool-node\'\r\n        }\r\n    ]\r\n});\r\n```\r\n\r\n## Create development tool with addation sub tasks\r\n\r\n```ts\r\nDevelopment.create(gulp, __dirname, {\r\n    tasks:{\r\n        src: \'src\',\r\n        dist: \'lib\',\r\n        loader: \'development-tool-web\',\r\n        tasks:[\r\n            {\r\n                src: \'files be dealt with\',\r\n                dist: \'dist path\',\r\n                // build:\'build path\',\r\n                // release: \'release path\',\r\n                // depoly: \'depoly path\',\r\n                // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.\r\n                loader:\'development-tool-*\'\r\n            },\r\n            {\r\n                src: [\'src/apath/**/*.css\', \'src/bpath/**/*.css\'],\r\n                dist: \'dist path\',\r\n                // build:\'build path\',\r\n                // release: \'release path\',\r\n                // depoly: \'depoly path\',\r\n                loader: {\r\n                    // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.\r\n                    dir: [path.join(__dirname, \'./src/mytasks\')]\r\n                },\r\n                tasks: [\r\n                    {\r\n                        src: \'files be dealt with\',\r\n                        dist: \'dist path\',\r\n                        // build:\'build path\',\r\n                        // release: \'release path\',\r\n                        // depoly: \'depoly path\',\r\n                        loader: {\r\n                            // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.\r\n                            dir: path.join(__dirname, \'./src/mytasks\')\r\n                        }\r\n                    },\r\n                    {\r\n                        src: \'files be dealt with\',\r\n                        dist: \'dist path\',\r\n                        // build:\'build path\',\r\n                        // release: \'release path\',\r\n                        // depoly: \'depoly path\',\r\n                        loader: {\r\n                            // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.\r\n                            module: path.join(__dirname, \'./src/mytasks/dosomething\')\r\n                        }\r\n                    }\r\n                ]\r\n            }\r\n            ...\r\n        ]\r\n    }\r\n});\r\n```\r\n\r\n## Create development tool with dynamic tasks\r\n\r\n```ts\r\nimport * as gulp from \'gulp\';\r\nimport { Development } from \'development-tool\';\r\nimport { ITaskOption, Src, Operation, IDynamicTask } from \'development-core\';\r\n\r\nconst del = require(\'del\');\r\nconst cache = require(\'gulp-cached\');\r\nconst ts = require(\'gulp-typescript\');\r\nconst sourcemaps = require(\'gulp-sourcemaps\');\r\nlet tsProject = ts.createProject(\'tsconfig.json\');\r\n\r\nDevelopment.create(gulp, __dirname, {\r\n    tasks: {\r\n        src: \'src/**/*.ts\',\r\n        dist: \'lib\',\r\n        loader: <IDynamicTask[]>[\r\n            {\r\n                name: \'clean\',\r\n                //the task for Operation type. default for all.\r\n                //oper: Operation.release | Operation.depoly | Operation.build | Operation.test | Operation.e2e\r\n                task: (config) => del(config.getDist())\r\n            },\r\n            {\r\n                name: \'tscompile\',\r\n                //the task for Operation type. default for all.\r\n                //oper: Operation.release | Operation.depoly | Operation.build | Operation.test | Operation.e2e\r\n                pipes: [\r\n                    () => cache(\'typescript\'),\r\n                    sourcemaps.init,\r\n                    tsProject\r\n                ],\r\n                // set muti-output. no setting default output default one to "dist: \'lib\'" .\r\n                output: [\r\n                    (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),\r\n                    (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write(\'./sourcemaps\')).pipe(gulp.dest(config.getDist()))\r\n                ]\r\n            },\r\n            {\r\n                name: \'watch\',\r\n                //watch only for --watch env.\r\n                watch: [\'tscompile\']\r\n            }\r\n        ]\r\n    }\r\n});\r\n\r\n```\r\n\r\n## Create development tool with dynamic tasks, with task from module and asserts\r\n\r\nDynamic task can set special src filter, dist path, build path, release path,\r\ntest path, deploy path, e2e path. detail see `IDynamicTask`  interface.\r\n\r\n```ts\r\n// or with task from module and asserts.\r\nDevelopment.create(gulp, __dirname, {\r\n    tasks: {\r\n        src: \'src/**/*.ts\',\r\n        dist: \'lib\',\r\n        asserts:{\r\n            //default copy \'src/**/*.json\' to dist. auto create json task and  json-watch task.\r\n            json: \'\',\r\n            //default copy to dist. auto create jpeg task and  jpeg-watch task.\r\n            jpeg: [\'src/apath/**/*.jpeg\', \'src/bpath/**/*.jpeg\'],\r\n            //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.\r\n            moduleBcss: \'src/moduleB/**/*.css\',\r\n            // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts\r\n            ts:<IAsserts>{...},\r\n            // use default task to deal with ts file, if src must setting.\r\n            less:<ITaskOption>{...},\r\n            // use dynamic task to deal with html file, if src not setting, use src/**/*.html\r\n            html:{loader: <IDynamicTask[]>[}\r\n            ...\r\n        },\r\n        loader: {\r\n            module:\'module name\',\r\n            dynamicTasks:[\r\n                {\r\n                    name: \'clean\',\r\n                    task: (config) => del(config.getDist())\r\n                },\r\n                {\r\n                    name: \'tscompile\',\r\n                    pipes(config){\r\n                        return [\r\n                        () => cache(\'typescript\'),\r\n                        sourcemaps.init,\r\n                        tsProject\r\n                    ]),\r\n                    // set muti-output. no setting default output default one to "dist: \'lib\'" .\r\n                    output [\r\n                        (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),\r\n                        (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write(\'./sourcemaps\')).pipe(gulp.dest(config.getDist()))\r\n                    ]\r\n                },\r\n                {\r\n                    name: \'watch\',\r\n                    watch: [\'tscompile\']\r\n                }\r\n            ]\r\n        }\r\n    }\r\n});\r\n\r\n// Dynamic task can set special src filter, dist path, build path,\r\n// release path, test path, deploy path, e2e path. detail see  IDynamicTask  interface\r\nDevelopment.create(gulp, __dirname, [\r\n    {\r\n        src: \'src\',\r\n        dist: \'lib\',\r\n        assertsOrder: 1,\r\n        asserts: {\r\n            ts: [\r\n                {\r\n                    name: \'tscompile\',\r\n                    //src: \'src/moduleA/**/*.ts\'\r\n                    //dist:\'lib/ts\',\r\n                    pipes: [\r\n                        () => cache(\'typescript\'),\r\n                        sourcemaps.init,\r\n                        tsProject\r\n                    ],\r\n                    output: [\r\n                        (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),\r\n                        (tsmap, config, dt) => {\r\n                            if (config.oper === Operation.release || config.oper === Operation.deploy) {\r\n                                return tsmap.js\r\n                                    .pipe(babel({\r\n                                        presets: [\'es2015\']\r\n                                    }))\r\n                                    .pipe(uglify())\r\n                                    .pipe(sourcemaps.write(\'./sourcemaps\'))\r\n                                    .pipe(gulp.dest(config.getDist(dt)));\r\n                            } else {\r\n                                return tsmap.js\r\n                                    .pipe(sourcemaps.write(\'./sourcemaps\'))\r\n                                    .pipe(gulp.dest(config.getDist(dt)));\r\n                            }\r\n                        }\r\n                    ]\r\n                },\r\n                {\r\n                    name: \'watch\',\r\n                    watch: [\'tscompile\']\r\n                }\r\n            ]\r\n        },\r\n        loader: [\r\n            {\r\n                name: \'test\',\r\n                src: \'test/**/*spec.ts\',\r\n                oper: Operation.test | Operation.release | Operation.deploy,\r\n                pipes: [mocha],\r\n                output: null\r\n            },\r\n            {\r\n                name: \'clean\',\r\n                order: 0,\r\n                task: (config) => del(config.getDist())\r\n            }\r\n        ]\r\n    }\r\n]);\r\n```\r\n\r\nhttps://github.com/zhouhoujun/development-tool.git\r\nThe mocks are then available at `jspm_components/development-tool/development-tool.js`.\r\n\r\n## Documentation\r\n\r\nDocumentation is available on the\r\n[development-tool docs site](https://github.com/zhouhoujun/development-tool).\r\n\r\n## License\r\n\r\nMIT © [Houjun](https://github.com/zhouhoujun/)',
+25 silly publish   readmeFilename: 'README.md',
+25 silly publish   gitHead: '9689bd8e02906dcdeabb5d5bc5110c36bc9ea188',
+25 silly publish   _id: 'development-tool@0.5.6',
+25 silly publish   _shasum: 'd987e3d935ca77744cc6fb2793d01b46453eae63',
+25 silly publish   _from: '.' }
+26 verbose getPublishConfig undefined
+27 silly mapToRegistry name development-tool
+28 silly mapToRegistry using default registry
+29 silly mapToRegistry registry https://registry.npmjs.org/
+30 silly mapToRegistry data Result {
+30 silly mapToRegistry   raw: 'development-tool',
+30 silly mapToRegistry   scope: null,
+30 silly mapToRegistry   escapedName: 'development-tool',
+30 silly mapToRegistry   name: 'development-tool',
+30 silly mapToRegistry   rawSpec: '',
+30 silly mapToRegistry   spec: 'latest',
+30 silly mapToRegistry   type: 'tag' }
+31 silly mapToRegistry uri https://registry.npmjs.org/development-tool
+32 verbose publish registryBase https://registry.npmjs.org/
+33 silly publish uploading C:\Users\zhouyou\AppData\Roaming\npm-cache\development-tool\0.5.6\package.tgz
+34 verbose request uri https://registry.npmjs.org/development-tool
+35 verbose request sending authorization for write operation
+36 info attempt registry request try #1 at 17:48:47
+37 verbose request using bearer token for auth
+38 verbose request id e7747dcf42c1be6b
+39 http request PUT https://registry.npmjs.org/development-tool
+40 http 403 https://registry.npmjs.org/development-tool
+41 verbose headers { 'content-type': 'application/json',
+41 verbose headers   'cache-control': 'max-age=300',
+41 verbose headers   'content-length': '95',
+41 verbose headers   'accept-ranges': 'bytes',
+41 verbose headers   date: 'Mon, 31 Oct 2016 09:48:51 GMT',
+41 verbose headers   via: '1.1 varnish',
+41 verbose headers   connection: 'keep-alive',
+41 verbose headers   'x-served-by': 'cache-ams4433-AMS',
+41 verbose headers   'x-cache': 'MISS',
+41 verbose headers   'x-cache-hits': '0',
+41 verbose headers   'x-timer': 'S1477907329.935000,VS0,VE1254',
+41 verbose headers   vary: 'Accept-Encoding' }
+42 verbose request invalidating C:\Users\zhouyou\AppData\Roaming\npm-cache\registry.npmjs.org\development-tool on PUT
+43 error publish Failed PUT 403
+44 verbose stack Error: "You cannot publish over the previously published version 0.5.6." : development-tool
+44 verbose stack     at makeError (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:302:12)
+44 verbose stack     at CachingRegistryClient.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:290:14)
+44 verbose stack     at Request._callback (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:210:14)
+44 verbose stack     at Request.self.callback (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:187:22)
+44 verbose stack     at emitTwo (events.js:106:13)
+44 verbose stack     at Request.emit (events.js:191:7)
+44 verbose stack     at Request.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1044:10)
+44 verbose stack     at emitOne (events.js:96:13)
+44 verbose stack     at Request.emit (events.js:188:7)
+44 verbose stack     at IncomingMessage.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:965:12)
+45 verbose statusCode 403
+46 verbose pkgid development-tool
+47 verbose cwd D:\Workspace\source\development-tool
+48 error Windows_NT 10.0.14931
+49 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
+50 error node v7.0.0
+51 error npm  v3.10.8
+52 error code E403
+53 error "You cannot publish over the previously published version 0.5.6." : development-tool
+54 error If you need help, you may report this error at:
+54 error     <https://github.com/npm/npm/issues>
+55 verbose exit [ 1, true ]

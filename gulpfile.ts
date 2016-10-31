@@ -76,7 +76,7 @@ Development.create(gulp, __dirname, [
     {
         src: 'src',
         dist: 'lib',
-        assertsOrder: 1,
+        assertsOrder: 2,
         asserts: {
             ts: [
                 {
