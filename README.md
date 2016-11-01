@@ -192,7 +192,7 @@ Development.create(gulp, __dirname, {
             {
                 name: 'watch',
                 //watch only for --watch env.
-                watch: ['tscompile']
+                watchTasks: ['tscompile']
             }
         ]
     }
@@ -249,7 +249,7 @@ Development.create(gulp, __dirname, {
                 },
                 {
                     name: 'watch',
-                    watch: ['tscompile']
+                    watchTasks: ['tscompile']
                 }
             ]
         }
@@ -295,7 +295,7 @@ Development.create(gulp, __dirname, [
                 },
                 {
                     name: 'watch',
-                    watch: ['tscompile']
+                    watchTasks: ['tscompile']
                 }
             ]
         },
