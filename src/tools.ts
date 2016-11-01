@@ -138,6 +138,7 @@ export class Development {
                     return config.runTasks(tsqs, assertsTask, subGroupTask);
                 }
 
+                console.log(assertsTask);
                 config.addToSequence(tsqs, assertsTask);
                 config.addToSequence(tsqs, subGroupTask);
 
@@ -179,7 +180,7 @@ export class Development {
 
                         return <ITaskInfo>{
                             order: optask.subTaskOrder,
-                            name: subName
+                            taskName: subName
                         };
                     } else {
                         return null;
@@ -208,13 +209,15 @@ export class Development {
                 let op: IAsserts;
                 let aop = optask.asserts[name];
                 if (_.isString(aop)) {
-                    op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
+                    op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
                 } else if (_.isArray(aop)) {
                     if (_.some(aop, it => _.isString(aop))) {
-                        op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watch: [name] }] };
+                        op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
                     } else {
                         op = <IAsserts>{ loader: aop };
                     }
+                } else if (_.isFunction(aop)) {
+                    op = { loader: aop };
                 } else {
                     op = aop;
                 };
@@ -222,8 +225,8 @@ export class Development {
                     return;
                 }
                 op.name = config.subTaskName(name, '-assert');
-                op.src = op.src || (optask.src + '/**/*.' + name);
-                op.dist = op.dist || optask.dist;
+                op.src = op.src || (config.getSrc() + '/**/*.' + name);
+                op.dist = op.dist || config.getDist();
                 tasks.push(op);
             });
 
@@ -260,7 +263,7 @@ export class Development {
 
                     return <ITaskInfo>{
                         order: config.option.assertsOrder,
-                        name: assertSeq
+                        taskName: assertSeq
                     }
                 });
         } else {

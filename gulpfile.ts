@@ -1,16 +1,29 @@
 // IDynamicTask 
 import * as gulp from 'gulp';
+import 'development-core';
 import { Development } from './src/tools';
-import { ITaskOption, Src, Operation, IDynamicTask } from 'development-core';
-import * as mocha from 'gulp-mocha';
+// import { ITaskOption, Src, Operation, IDynamicTask } from 'development-core';
 
-const del = require('del');
-const cache = require('gulp-cached');
-const ts = require('gulp-typescript');
-const sourcemaps = require('gulp-sourcemaps');
-let tsProject = ts.createProject('tsconfig.json');
-const uglify = require('gulp-uglify');
-const babel = require('gulp-babel');
+// build by development-tool-node
+import 'development-tool-node';
+
+Development.create(gulp, __dirname, [{
+    src: 'src',
+    dist: 'lib',
+    testSrc: 'test/**/*.spec.ts',
+    loader: 'development-tool-node'
+}]);
+
+
+
+// import * as mocha from 'gulp-mocha';
+// const del = require('del');
+// const cache = require('gulp-cached');
+// const ts = require('gulp-typescript');
+// const sourcemaps = require('gulp-sourcemaps');
+// let tsProject = ts.createProject('tsconfig.json');
+// const uglify = require('gulp-uglify');
+// const babel = require('gulp-babel');
 
 // // build 1
 // Development.create(gulp, __dirname, [
@@ -60,7 +73,7 @@ const babel = require('gulp-babel');
 //             },
 //             {
 //                 name: 'watch',
-//                 watch: ['tscompile']
+//                 watchTasks: ['tscompile']
 //             },
 //             {
 //                 name: 'clean',
@@ -71,63 +84,63 @@ const babel = require('gulp-babel');
 //     }
 // ]);
 
-// build 2
-Development.create(gulp, __dirname, [
-    {
-        src: 'src',
-        dist: 'lib',
-        assertsOrder: 2,
-        asserts: {
-            ts: [
-                {
-                    name: 'tscompile',
-                    pipes: [
-                        () => cache('typescript'),
-                        sourcemaps.init,
-                        tsProject
-                    ],
-                    output: [
-                        (tsmap, config) => tsmap.dts.pipe(gulp.dest(config.getDist())),
-                        (tsmap, config) => {
-                            if (config.oper === Operation.release || config.oper === Operation.deploy) {
-                                return tsmap.js
-                                    .pipe(babel({
-                                        presets: ['es2015']
-                                    }))
-                                    .pipe(uglify())
-                                    .pipe(sourcemaps.write('./sourcemaps'))
-                                    .pipe(gulp.dest(config.getDist()));
-                            } else {
-                                return tsmap.js
-                                    .pipe(sourcemaps.write('./sourcemaps'))
-                                    .pipe(gulp.dest(config.getDist()));
-                            }
-                        }
-                    ]
-                },
-                {
-                    name: 'watch',
-                    watch: ['tscompile']
-                }
-            ]
-        },
-        loader: [
-            {
-                name: 'test',
-                src: 'test/**/*spec.ts',
-                order: 1,
-                oper: Operation.test | Operation.release | Operation.deploy,
-                pipes: [mocha],
-                output: null
-            },
-            {
-                name: 'clean',
-                order: 0,
-                task: (config, dt) => del(config.getDist(dt))
-            }
-        ]
-    }
-]);
+// // build 2
+// Development.create(gulp, __dirname, [
+//     {
+//         src: 'src',
+//         dist: 'lib',
+//         assertsOrder: 2,
+//         asserts: {
+//             ts: [
+//                 {
+//                     name: 'tscompile',
+//                     pipes: [
+//                         () => cache('typescript'),
+//                         sourcemaps.init,
+//                         tsProject
+//                     ],
+//                     output: [
+//                         (tsmap, config) => tsmap.dts.pipe(gulp.dest(config.getDist())),
+//                         (tsmap, config) => {
+//                             if (config.oper === Operation.release || config.oper === Operation.deploy) {
+//                                 return tsmap.js
+//                                     .pipe(babel({
+//                                         presets: ['es2015']
+//                                     }))
+//                                     .pipe(uglify())
+//                                     .pipe(sourcemaps.write('./sourcemaps'))
+//                                     .pipe(gulp.dest(config.getDist()));
+//                             } else {
+//                                 return tsmap.js
+//                                     .pipe(sourcemaps.write('./sourcemaps'))
+//                                     .pipe(gulp.dest(config.getDist()));
+//                             }
+//                         }
+//                     ]
+//                 },
+//                 {
+//                     name: 'watch',
+//                     watchTasks: ['tscompile']
+//                 }
+//             ]
+//         },
+//         loader: [
+//             {
+//                 name: 'test',
+//                 src: 'test/**/*spec.ts',
+//                 order: 1,
+//                 oper: Operation.test | Operation.release | Operation.deploy,
+//                 pipes: [mocha],
+//                 output: null
+//             },
+//             {
+//                 name: 'clean',
+//                 order: 0,
+//                 task: (config, dt) => del(config.getDist(dt))
+//             }
+//         ]
+//     }
+// ]);
 
 //// build 3
 // Development.create(gulp, __dirname, {
@@ -167,7 +180,7 @@ Development.create(gulp, __dirname, [
 //             },
 //             {
 //                 name: 'watch',
-//                 watch: ['tscompile']
+//                 watchTasks: ['tscompile']
 //             }
 //         ]
 //     }

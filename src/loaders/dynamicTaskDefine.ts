@@ -12,11 +12,12 @@ export default (modules) => {
 
         loadTasks(config: ITaskConfig): Promise<ITask[]> {
             let lderOption: IDynamicLoaderOption = config.option.loader;
-            let dtask: ITask[] = null;
+            let dtask: ITask[] = [];
             if (lderOption.dynamicTasks) {
                 dtask = config.generateTask(lderOption.dynamicTasks);
             }
             if (modules) {
+                console.log(modules);
                 return config.findTasks(modules)
                     .then(tasks => {
                         tasks = tasks || [];

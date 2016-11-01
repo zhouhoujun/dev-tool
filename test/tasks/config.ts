@@ -1,5 +1,5 @@
 import { ITask, Operation, IEnvOption, ITaskOption, ITaskConfig, taskdefine, ITaskDefine } from 'development-core';
-import tasks from './task';
+import * as tasks from './task';
 import * as _ from 'lodash';
 export * from './NodeTaskOption';
 
@@ -8,7 +8,7 @@ export class TestTaskDefine implements ITaskDefine {
     loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {
         // register default asserts.
         option.asserts = _.extend({
-            ts: { loader: tasks.tsDynamicTasks }
+            ts: { loader: (config: ITaskConfig) => config.findTasks(tasks, { group: 'ts' }) }
         }, option.asserts);
 
         // console.log('run moduleTaskConfig............');
@@ -21,7 +21,7 @@ export class TestTaskDefine implements ITaskDefine {
     }
 
     loadTasks(config: ITaskConfig): Promise<ITask[]> {
-        return Promise.resolve(config.generateTask(tasks.nodeDynamicTasks));
+        return config.findTasks(tasks);
     }
 }
 

@@ -3,6 +3,7 @@ import { DirLoader } from './loaders/DirLoader';
 import { ITaskOption, ILoaderOption, IDynamicLoaderOption } from 'development-core';
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
+import { CustomLoader } from './loaders/CustomLoader';
 import * as _ from 'lodash';
 /**
  * loader factory.
@@ -33,6 +34,8 @@ export class LoaderFactory implements ILoaderFactory {
                 module: option.loader
             };
             return new ModuleLoader(option);
+        } else if (_.isFunction(option.loader)) {
+            return new CustomLoader(option, option.loader);
         } else if (_.isArray(option.loader)) {
             option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: option.loader

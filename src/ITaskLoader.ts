@@ -1,7 +1,6 @@
 import { Operation, ITask, IEnvOption, ITaskConfig } from 'development-core';
 
 
-
 /**
  * task loader.
  * 
