@@ -50,7 +50,7 @@ Development.create(gulp, __dirname, {
 Development.create(gulp, __dirname, {
     tasks[
         // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
-        {src: 'src/client', dist: 'public', loader: 'development-tool-web', asserts:{...},  tasks:[...] },
+        {src: 'src/client', dist: 'public', loader: 'development-tool-web', asserts:{...},  tasks:[...]  },
         // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
         {src: 'src/server', dist: 'lib', loader: 'development-tool-node', asserts:{...}, tasks:[...] }
         ...
@@ -58,6 +58,10 @@ Development.create(gulp, __dirname, {
 });
 
 ```
+
+## add special pipe work via pipes config, add special output by config output in loader option
+
+only dynamic task and IPipeTask (base class PipeTask) can add special pipe work.
 
 ```ts
 import * as gulp from 'gulp';
@@ -71,6 +75,7 @@ Development.create(gulp, __dirname, {
             // release: 'release path',
             // depoly: 'depoly path'
             asserts:{
+                ts:{ loader: 'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] },
                 //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
                 json: '',
                 //default copy to dist. auto create jpeg task and  jpeg-watch task.
@@ -82,7 +87,7 @@ Development.create(gulp, __dirname, {
                 // use default task to deal with ts file, if src must setting.
                 less:<ITaskOption>{...},
                 // use dynamic task to deal with html file, if src not setting, use src/**/*.html
-                html:{loader: <IDynamicTask[]>[}
+                html:{loader: <IDynamicTaskOption[]>[}
                 ...
             },
             loader: 'development-tool-node'
@@ -155,7 +160,7 @@ Development.create(gulp, __dirname, {
 ```ts
 import * as gulp from 'gulp';
 import { Development } from 'development-tool';
-import { ITaskOption, Src, Operation, IDynamicTask } from 'development-core';
+import { ITaskOption, Src, Operation, IDynamicTaskOption } from 'development-core';
 
 const del = require('del');
 const cache = require('gulp-cached');
@@ -167,7 +172,7 @@ Development.create(gulp, __dirname, {
     tasks: {
         src: 'src/**/*.ts',
         dist: 'lib',
-        loader: <IDynamicTask[]>[
+        loader: <IDynamicTaskOption[]>[
             {
                 name: 'clean',
                 //the task for Operation type. default for all.
@@ -203,7 +208,7 @@ Development.create(gulp, __dirname, {
 ## Create development tool with dynamic tasks, with task from module and asserts
 
 Dynamic task can set special src filter, dist path, build path, release path,
-test path, deploy path, e2e path. detail see `IDynamicTask`  interface.
+test path, deploy path, e2e path. detail see `IDynamicTaskOption`  interface.
 
 ```ts
 // or with task from module and asserts.
@@ -219,11 +224,12 @@ Development.create(gulp, __dirname, {
             //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
             moduleBcss: 'src/moduleB/**/*.css',
             // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
-            ts:<IAsserts>{...},
+            // can add special pipe work via pipes config. add special output by config output
+            ts:{ loader: 'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] },
             // use default task to deal with ts file, if src must setting.
             less:<ITaskOption>{...},
             // use dynamic task to deal with html file, if src not setting, use src/**/*.html
-            html:{loader: <IDynamicTask[]>[}
+            html:{loader: <IDynamicTaskOption[]>[}
             ...
         },
         loader: {
@@ -257,7 +263,7 @@ Development.create(gulp, __dirname, {
 });
 
 // Dynamic task can set special src filter, dist path, build path,
-// release path, test path, deploy path, e2e path. detail see  IDynamicTask  interface
+// release path, test path, deploy path, e2e path. detail see  IDynamicTaskOption  interface
 Development.create(gulp, __dirname, [
     {
         src: 'src',
