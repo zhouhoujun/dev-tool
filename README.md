@@ -107,19 +107,25 @@ Development.create(gulp, __dirname, {
         tasks:[
             {
                 src: 'files be dealt with',
+                //testSrc: '...',
+                //e2eSrc: '...',
+                //watchSrc: '...'
                 dist: 'dist path',
-                // build:'build path',
-                // release: 'release path',
-                // depoly: 'depoly path',
+                // buildDist:'build path',
+                // releaseDist: 'release path',
+                // depolyDist: 'depoly path'
                 // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
                 loader:'development-tool-*'
             },
             {
                 src: ['src/apath/**/*.css', 'src/bpath/**/*.css'],
+                //testSrc: '...',
+                //e2eSrc: '...',
+                //watchSrc: '...'
                 dist: 'dist path',
-                // build:'build path',
-                // release: 'release path',
-                // depoly: 'depoly path',
+                // buildDist:'build path',
+                // releaseDist: 'release path',
+                // depolyDist: 'depoly path'
                 loader: {
                     // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
                     dir: [path.join(__dirname, './src/mytasks')]
@@ -127,10 +133,13 @@ Development.create(gulp, __dirname, {
                 tasks: [
                     {
                         src: 'files be dealt with',
+                        //testSrc: '...',
+                        //e2eSrc: '...',
+                        //watchSrc: '...'
                         dist: 'dist path',
-                        // build:'build path',
-                        // release: 'release path',
-                        // depoly: 'depoly path',
+                        // buildDist:'build path',
+                        // releaseDist: 'release path',
+                        // depolyDist: 'depoly path'
                         loader: {
                             // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
                             dir: path.join(__dirname, './src/mytasks')
@@ -138,10 +147,13 @@ Development.create(gulp, __dirname, {
                     },
                     {
                         src: 'files be dealt with',
+                        //testSrc: '...',
+                        //e2eSrc: '...',
+                        //watchSrc: '...'
                         dist: 'dist path',
-                        // build:'build path',
-                        // release: 'release path',
-                        // depoly: 'depoly path',
+                        // buildDist:'build path',
+                        // releaseDist: 'release path',
+                        // depolyDist: 'depoly path'
                         loader: {
                             // any module implement ITaskDefine, or @tasks(...) decorator and @dynamicTask decorator task.
                             module: path.join(__dirname, './src/mytasks/dosomething')
