@@ -70,10 +70,13 @@ Development.create(gulp, __dirname, {
     tasks:[
         {
             src: 'src',
+            //testSrc: '...',
+            //e2eSrc: '...',
+            //watchSrc: '...'
             dist: 'lib',
-            // build:'build path',
-            // release: 'release path',
-            // depoly: 'depoly path'
+            // buildDist:'build path',
+            // releaseDist: 'release path',
+            // depolyDist: 'depoly path'
             asserts:{
                 ts:{ loader: 'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] },
                 //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
