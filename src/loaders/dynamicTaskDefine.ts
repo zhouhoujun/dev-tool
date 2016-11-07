@@ -1,10 +1,9 @@
-import { ITask, Operation, IEnvOption, ITaskOption, ITaskConfig, ITaskDefine, IDynamicLoaderOption } from 'development-core';
+import { ITask, IEnvOption, ITaskOption, ITaskConfig, ITaskDefine, IDynamicLoaderOption } from 'development-core';
 
 export default (modules) => {
     return <ITaskDefine>{
-        loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {
+        loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
             return {
-                oper: oper,
                 env: env,
                 option: option
             }

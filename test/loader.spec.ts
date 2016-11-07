@@ -21,12 +21,12 @@ describe('LoaderFactory', () => {
             loader: []
         });
 
-        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.build, { config: 'test', watch: true });
+        let taskconfig: ITaskConfig = await loader.loadConfg({ config: 'test', watch: true });
 
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
         expect(taskconfig.env.config).to.equals('test');
-        expect(taskconfig.oper).to.eq(Operation.build);
+        expect(taskconfig.oper).to.eq(Operation.build | Operation.watch);
         expect(Array.isArray(taskconfig.option.loader)).to.false;
         expect(Array.isArray(taskconfig.option.loader['dynamicTasks'])).to.true;
 
@@ -41,7 +41,7 @@ describe('LoaderFactory', () => {
             loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
         });
 
-        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.build, { config: 'test', group: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg({ config: 'test', group: 'test' });
 
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
@@ -55,7 +55,7 @@ describe('LoaderFactory', () => {
         expect(tasks.length).eq(1);
 
 
-        let nogptaskconfig: ITaskConfig = await loader.loadConfg(Operation.build, { config: 'test' });
+        let nogptaskconfig: ITaskConfig = await loader.loadConfg({ config: 'test' });
 
         expect(nogptaskconfig).to.not.null;
         expect(nogptaskconfig).to.not.undefined;
@@ -75,12 +75,12 @@ describe('LoaderFactory', () => {
             loader: <IDirLoaderOption>{ dir: path.join(root, './tasks') }
         });
 
-        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.deploy, { config: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg({ config: 'test', deploy: true });
 
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
-        expect(taskconfig.env.config).to.equals('test');
-        expect(taskconfig.oper).to.eq(Operation.deploy);
+        expect(taskconfig.env.config).eq('test');
+        expect(taskconfig.oper).eq(Operation.deploy);
         expect(taskconfig.option.src).to.eq('src');
 
         let tasks = await loader.load(taskconfig);
@@ -95,11 +95,11 @@ describe('LoaderFactory', () => {
             loader: path.join(root, './tasks/config.ts')
         });
 
-        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.release, { config: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg({ config: 'test', release: true });
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
         expect(taskconfig.env.config).to.equals('test');
-        expect(taskconfig.oper).to.eq(Operation.release);
+        expect(taskconfig.oper).eq(Operation.release);
 
         let tasks = await loader.load(taskconfig);
         expect(tasks).not.null;
@@ -112,10 +112,9 @@ describe('LoaderFactory', () => {
             src: 'src',
             loader: {
                 taskDefine: {
-                    loadConfig(oper, option, env): ITaskConfig {
+                    loadConfig(option, env): ITaskConfig {
                         // register default asserts.
                         return <ITaskConfig>{
-                            oper: oper,
                             env: env,
                             option: option
                         }
@@ -128,7 +127,7 @@ describe('LoaderFactory', () => {
             }
         });
 
-        let taskconfig: ITaskConfig = await loader.loadConfg(Operation.release, { config: 'test' });
+        let taskconfig: ITaskConfig = await loader.loadConfg({ config: 'test', release: true });
 
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;

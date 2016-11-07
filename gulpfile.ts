@@ -1,17 +1,34 @@
-// IDynamicTask 
+// IDynamicTaskOption 
 import * as gulp from 'gulp';
 import 'development-core';
 import { Development } from './src/tools';
-// import { ITaskOption, Src, Operation, IDynamicTask } from 'development-core';
+import { ITaskOption, Src, Operation, IDynamicTaskOption } from 'development-core';
 
-// build by development-tool-node
-import 'development-tool-node';
+import * as mocha from 'gulp-mocha';
 
+const del = require('del');
 Development.create(gulp, __dirname, [{
     src: 'src',
     dist: 'lib',
     testSrc: 'test/**/*.spec.ts',
-    loader: 'development-tool-node'
+    asserts: {
+        ts: { loader: 'development-assert-ts' }
+    },
+    loader: [
+        {
+            name: 'test',
+            src: 'test/**/*spec.ts',
+            order: 1,
+            oper: Operation.test | Operation.default,
+            pipes: [mocha],
+            output: null
+        },
+        {
+            name: 'clean',
+            order: 0,
+            task: (config, dt) => del(config.getDist(dt))
+        }
+    ]
 }]);
 
 
@@ -147,7 +164,7 @@ Development.create(gulp, __dirname, [{
 //     tasks: {
 //         src: 'src/**/*.ts',
 //         dist: 'lib',
-//         loader: <IDynamicTask[]>[
+//         loader: <IDynamicTaskOption[]>[
 //             {
 //                 name: 'clean',
 //                 task: (config) => del(config.getDist())

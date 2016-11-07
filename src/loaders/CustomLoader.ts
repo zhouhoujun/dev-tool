@@ -1,4 +1,4 @@
-import { ITask, customLoader, Operation, IEnvOption, ITaskOption, ITaskDefine, bindingConfig, ITaskConfig } from 'development-core';
+import { ITask, customLoader, IEnvOption, ITaskOption, ITaskDefine, bindingConfig, ITaskConfig } from 'development-core';
 import { ITaskLoader } from '../ITaskLoader';
 
 export class CustomLoader implements ITaskLoader {
@@ -10,12 +10,11 @@ export class CustomLoader implements ITaskLoader {
         return Promise.resolve(this.loader(cfg))
     }
 
-    loadConfg(oper: Operation, env: IEnvOption): Promise<ITaskConfig> {
+    loadConfg(env: IEnvOption): Promise<ITaskConfig> {
         let self = this;
         return Promise.resolve({
             option: self.option,
-            env: env,
-            oper: oper
+            env: env
         })
             .then(config => {
                 return bindingConfig(config);
@@ -23,9 +22,8 @@ export class CustomLoader implements ITaskLoader {
     }
     protected getTaskDefine(): Promise<ITaskDefine> {
         let tsdef: ITaskDefine = {
-            loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {
+            loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
                 return {
-                    oper: oper,
                     env: env,
                     option: option
                 }

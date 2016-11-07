@@ -91,12 +91,11 @@ export class Development {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
-                let oper: Operation = currentOperation(env);
 
                 console.log(chalk.grey('begin load task via loader:'), optask.loader);
                 let loader = this.createLoader(optask);
 
-                return loader.loadConfg(oper, env)
+                return loader.loadConfg(env)
                     .then(cfg => {
                         console.log(chalk.green('task config loaded.'));
                         if (cfg.env.help) {

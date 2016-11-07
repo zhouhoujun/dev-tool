@@ -21,12 +21,11 @@ export interface ITaskLoader {
     /**
      * load config.
      * 
-     * @param {Operation} oper
      * @param {IEnvOption} env
      * @returns {Promise<ITaskConfig>}
      * 
      * @memberOf ITaskLoader
      */
-    loadConfg(oper: Operation, env: IEnvOption): Promise<ITaskConfig>;
+    loadConfg(env: IEnvOption): Promise<ITaskConfig>;
 
 }

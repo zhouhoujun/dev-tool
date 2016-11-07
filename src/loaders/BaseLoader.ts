@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import {
-    bindingConfig, ITask, IEnvOption, Operation
+    bindingConfig, ITask, IEnvOption
     , ITaskOption, ILoaderOption, ITaskConfig, ITaskDefine
     , findTaskDefineInModule
 } from 'development-core';
@@ -29,11 +29,11 @@ export abstract class BaseLoader implements ITaskLoader {
             });
     }
 
-    loadConfg(oper: Operation, env: IEnvOption): Promise<ITaskConfig> {
+    loadConfg(env: IEnvOption): Promise<ITaskConfig> {
 
         return this.getTaskDefine()
             .then(def => {
-                return def.loadConfig(oper, this.option, env);
+                return def.loadConfig(this.option, env);
             })
             .then(config => {
                 return this.bindingConfig(config);
