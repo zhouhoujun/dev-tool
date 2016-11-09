@@ -78,15 +78,15 @@ Development.create(gulp, __dirname, {
             // releaseDist: 'release path',
             // depolyDist: 'depoly path'
             asserts:{
-                ts:{ loader: 'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] },
+                // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
+                // pipes, output is addation pipe work.
+                ts:{ loader: { module:'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] }},
                 //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
                 json: '',
                 //default copy to dist. auto create jpeg task and  jpeg-watch task.
                 jpeg: ['src/apath/**/*.jpeg', 'src/bpath/**/*.jpeg'],
                 //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
                 moduleBcss: 'src/moduleB/**/*.css',
-                // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
-                ts:<IAsserts>{...},
                 // use default task to deal with ts file, if src must setting.
                 less:<ITaskOption>{...},
                 // use dynamic task to deal with html file, if src not setting, use src/**/*.html
@@ -240,7 +240,7 @@ Development.create(gulp, __dirname, {
             moduleBcss: 'src/moduleB/**/*.css',
             // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
             // can add special pipe work via pipes config. add special output by config output
-            ts:{ loader: 'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] },
+            ts:{ loader: {module:'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] }},
             // use default task to deal with ts file, if src must setting.
             less:<ITaskOption>{...},
             // use dynamic task to deal with html file, if src not setting, use src/**/*.html
