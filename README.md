@@ -80,7 +80,23 @@ Development.create(gulp, __dirname, {
             asserts:{
                 // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
                 // pipes, output is addation pipe work.
-                ts:{ loader: { module:'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] }},
+                ts: {
+                    loader: {
+                        module:'development-assert-ts',
+                        // add pipe works for module tasks.
+                        pipe(stream, config, dist, gulp){ ... }
+                        pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
+                        output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
+                    }
+                },
+                tsb:{
+                    src:'srcb/**/*.ts',
+                    loader:'development-assert-ts',
+                    // also can add pipe works for module tasks here.
+                    pipe(stream, config, dist, gulp){ ... }
+                    pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
+                    output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
+                }
                 //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
                 json: '',
                 //default copy to dist. auto create jpeg task and  jpeg-watch task.
