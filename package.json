@@ -16,6 +16,7 @@
   "keywords": [
     "development",
     "tool",
+    "gulp",
     "typescript",
     "node",
     "babel"
