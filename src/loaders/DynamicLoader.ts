@@ -1,5 +1,5 @@
-import { ITaskOption, ITaskDefine, IDynamicLoaderOption } from 'development-core';
-import dynamicTaskDefine from './dynamicTaskDefine';
+import { ITaskOption, IContextDefine } from 'development-core';
+import contextDefine from '../utils/contextDefine';
 import { BaseLoader } from './BaseLoader';
 
 export class DynamicLoader extends BaseLoader {
@@ -9,16 +9,8 @@ export class DynamicLoader extends BaseLoader {
     }
 
 
-    protected getTaskDefine(): Promise<ITaskDefine> {
-        let tsdef: ITaskDefine = null;
-        let loader: IDynamicLoaderOption = this.option.loader;
-        if (loader.taskDefine) {
-            tsdef = loader.taskDefine;
-        } else {
-            tsdef = dynamicTaskDefine(this.getTaskModule())
-        }
-
-        return Promise.resolve(tsdef);
+    protected getContextDefine(): IContextDefine | Promise<IContextDefine> {
+        return contextDefine(this.getTaskModule())
     }
 }
 

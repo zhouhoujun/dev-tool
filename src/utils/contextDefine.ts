@@ -1,23 +1,20 @@
-import { ITask, IEnvOption, ITaskOption, ITaskConfig, ITaskDefine, IDynamicLoaderOption } from 'development-core';
+import { bindingConfig, ITask, ITaskConfig, ITaskContext, IContextDefine, IDynamicLoaderOption } from 'development-core';
 
 export default (modules) => {
-    return <ITaskDefine>{
-        loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
-            return {
-                env: env,
-                option: option
-            }
+    return <IContextDefine>{
+        getContext(config: ITaskConfig): ITaskContext {
+            return bindingConfig(config);
         },
 
-        loadTasks(config: ITaskConfig): Promise<ITask[]> {
-            let lderOption: IDynamicLoaderOption = config.option.loader;
+        tasks(context: ITaskContext): Promise<ITask[]> {
+            let lderOption: IDynamicLoaderOption = context.option.loader;
             let dtask: ITask[] = [];
             if (lderOption.dynamicTasks) {
-                dtask = config.generateTask(lderOption.dynamicTasks);
+                dtask = context.generateTask(lderOption.dynamicTasks);
             }
             if (modules) {
-                console.log(modules);
-                return config.findTasks(modules)
+                // console.log(modules);
+                return context.findTasks(modules)
                     .then(tasks => {
                         tasks = tasks || [];
                         if (dtask) {

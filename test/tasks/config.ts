@@ -1,26 +1,44 @@
-import { ITask, IEnvOption, bindingConfig, ITaskOption, ITaskConfig, taskdefine, ITaskDefine } from 'development-core';
+import { ITask, IEnvOption, bindingConfig,IContextDefine, ITaskContext, ITaskOption, ITaskConfig, taskdefine, ITaskDefine } from 'development-core';
 import * as tasks from './task';
 import * as _ from 'lodash';
 export * from './NodeTaskOption';
 
-@taskdefine()
-export class TestTaskDefine implements ITaskDefine {
-    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
+
+@taskdefine
+export class ContextDefine implements IContextDefine {
+    getContext(config: ITaskConfig): ITaskContext {
         // register default asserts.
-        option.asserts = _.extend({
-            ts: { loader: (config: ITaskConfig) => config.findTasks(tasks, { group: 'ts' }) }
-        }, option.asserts);
 
-        // console.log('run moduleTaskConfig............');
+        config.option.asserts = _.extend({
+            ts: { loader: (ctx: ITaskContext) => ctx.findTasks(tasks, { group: 'ts' }) }
+        }, config.option.asserts);
 
-        return <ITaskConfig>{
-            env: env,
-            option: option
-        };
+        return bindingConfig(config);
     }
 
-    loadTasks(config: ITaskConfig): Promise<ITask[]> {
-        return config.findTasks(tasks);
+    tasks(ctx: ITaskContext): Promise<ITask[]> {
+        return ctx.findTasks(tasks);
     }
 }
+
+// @taskdefine()
+// export class TestTaskDefine implements ITaskDefine {
+//     loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
+//         // register default asserts.
+//         option.asserts = _.extend({
+//             ts: { loader: (ctx: ITaskContext) => ctx.findTasks(tasks, { group: 'ts' }) }
+//         }, option.asserts);
+
+//         // console.log('run moduleTaskConfig............');
+
+//         return <ITaskConfig>{
+//             env: env,
+//             option: option
+//         };
+//     }
+
+//     loadTasks(ctx: ITaskContext): Promise<ITask[]> {
+//         return ctx.findTasks(tasks);
+//     }
+// }
 

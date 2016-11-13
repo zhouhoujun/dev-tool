@@ -1,37 +1,25 @@
-import { ITask, customLoader, IEnvOption, ITaskOption, ITaskDefine, bindingConfig, ITaskConfig } from 'development-core';
+import { ITask, customLoader, IEnvOption, ITaskContext, ITaskOption, bindingConfig } from 'development-core';
 import { ITaskLoader } from '../ITaskLoader';
 
 export class CustomLoader implements ITaskLoader {
 
     constructor(private option: ITaskOption, private loader: customLoader) {
+
     }
 
-    load(cfg: ITaskConfig): Promise<ITask[]> {
-        return Promise.resolve(this.loader(cfg))
+    load(context: ITaskContext): Promise<ITask[]> {
+        return Promise.resolve(this.loader(context));
     }
 
-    loadConfg(env: IEnvOption): Promise<ITaskConfig> {
+    private condef: Promise<ITaskContext>;
+    loadContext(env: IEnvOption): Promise<ITaskContext> {
         let self = this;
-        return Promise.resolve({
-            option: self.option,
-            env: env
-        })
-            .then(config => {
-                return bindingConfig(config);
-            });
-    }
-    protected getTaskDefine(): Promise<ITaskDefine> {
-        let tsdef: ITaskDefine = {
-            loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
-                return {
-                    env: env,
-                    option: option
-                }
-            },
-        }
+        this.condef = this.condef || Promise.resolve(
+            bindingConfig({
+                option: self.option,
+                env: env
+            }));
 
-        return Promise.resolve(tsdef);
+        return this.condef;
     }
 }
-
-

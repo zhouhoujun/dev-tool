@@ -1,12 +1,7 @@
-import * as _ from 'lodash';
-import {
-    bindingConfig, ITask, IEnvOption
-    , ITaskOption, ILoaderOption, ITaskConfig, ITaskDefine
-    , findTaskDefineInModule
-} from 'development-core';
+import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskOption, ILoaderOption } from 'development-core';
 import { ITaskLoader } from '../ITaskLoader';
-// import * as chalk from 'chalk';
-import dynamicTaskDefine from './dynamicTaskDefine';
+
+
 export abstract class BaseLoader implements ITaskLoader {
 
     protected option: ITaskOption;
@@ -14,58 +9,50 @@ export abstract class BaseLoader implements ITaskLoader {
         this.option = option;
     }
 
-    load(cfg: ITaskConfig): Promise<ITask[]> {
-        return this.getTaskDefine()
+    load(context: ITaskContext): Promise<ITask[]> {
+        return this.contextDef
             .then(def => {
-                if (def.loadTasks) {
-                    return def.loadTasks(cfg);
-                } else {
-                    let mdl = this.getTaskModule();
-                    return cfg.findTasks(mdl);
-                }
+                return this.loadTasks(context, def);
             })
             .catch(err => {
                 console.error(err);
             });
     }
 
-    loadConfg(env: IEnvOption): Promise<ITaskConfig> {
-
-        return this.getTaskDefine()
+    loadContext(env: IEnvOption): Promise<ITaskContext> {
+        let self = this;
+        return this.contextDef
             .then(def => {
-                return def.loadConfig(this.option, env);
-            })
-            .then(config => {
-                return this.bindingConfig(config);
+                return def.getContext({
+                    option: self.option,
+                    env: env
+                });
             })
             .catch(err => {
                 console.error(err);
             });
     }
 
-    protected bindingConfig(cfg: ITaskConfig): ITaskConfig {
-        cfg = bindingConfig(cfg);
-        return cfg;
+    private _contextDef: Promise<IContextDefine>;
+    protected get contextDef(): Promise<IContextDefine> {
+        if (!this._contextDef) {
+            this._contextDef = Promise.resolve(this.getContextDefine());
+        }
+
+        return this._contextDef;
     }
 
-    protected getTaskDefine(): Promise<ITaskDefine> {
-        return new Promise((resolve, reject) => {
-            let loader: ILoaderOption = this.option.loader;
 
-            if (loader.taskDefine) {
-                resolve(loader.taskDefine);
-            } else {
-                let mdl = this.getConfigModule();
-                findTaskDefineInModule(mdl)
-                    .then(def => {
-                        resolve(def);
-                    })
-                    .catch(err => {
-                        resolve(dynamicTaskDefine(mdl));
-                    });
-            }
-        });
+    protected loadTasks(context: ITaskContext, def: IContextDefine): Promise<ITask[]> {
+        if (def.tasks) {
+            return def.tasks(context);
+        } else {
+            let mdl = this.getTaskModule();
+            return context.findTasks(mdl);
+        }
     }
+
+    protected abstract getContextDefine(): IContextDefine | Promise<IContextDefine>;
 
     protected getConfigModule(): string | Object {
         let loader: ILoaderOption = this.option.loader;

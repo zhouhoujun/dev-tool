@@ -4,10 +4,7 @@ import { Gulp, TaskCallback } from 'gulp';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import {
-    Src, currentOperation, toSequence, runSequence
-    , IAsserts, ITaskInfo, ITask, ITaskOption, Operation, IEnvOption, ITaskConfig
-} from 'development-core';
+import { Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
@@ -81,10 +78,10 @@ export class Development {
             });
     }
 
-    private bindingConfig(cfg: ITaskConfig): ITaskConfig {
+    private bindingContext(ctx: ITaskContext): ITaskContext {
         // cfg.env = cfg.env || this.env;
-        cfg.globals = this.globals;
-        return cfg;
+        ctx.globals = this.globals;
+        return ctx;
     }
 
     protected loadTasks(gulp: Gulp, tasks: ITaskOption | ITaskOption[], env: IEnvOption): Promise<Src[]> {
@@ -95,26 +92,26 @@ export class Development {
                 console.log(chalk.grey('begin load task via loader:'), optask.loader);
                 let loader = this.createLoader(optask);
 
-                return loader.loadConfg(env)
-                    .then(cfg => {
-                        console.log(chalk.green('task config loaded.'));
-                        if (cfg.env.help) {
-                            if (cfg.printHelp) {
+                return loader.loadContext(env)
+                    .then(ctx => {
+                        this.bindingContext(ctx);
+                        console.log(chalk.green('task context loaded.'));
+                        if (ctx.env.help) {
+                            if (ctx.printHelp) {
                                 console.log(chalk.grey('...development default help...'));
-                                cfg.printHelp(_.isString(cfg.env.help) ? cfg.env.help : '');
+                                ctx.printHelp(_.isString(ctx.env.help) ? ctx.env.help : '');
                             }
                             return [];
                         } else {
-                            cfg = this.bindingConfig(cfg);
-                            return this.loadSubTask(gulp, cfg)
+                            return this.loadSubTask(gulp, ctx)
                                 .then(subtask => {
                                     return Promise.all([
-                                        loader.load(cfg),
-                                        this.loadAssertTasks(gulp, cfg)
+                                        loader.load(ctx),
+                                        this.loadAssertTasks(gulp, ctx)
                                     ])
                                         .then(tasks => {
                                             console.log(chalk.green('tasks loaded.'));
-                                            return this.setup(gulp, cfg, tasks[0], tasks[1], subtask)
+                                            return this.setup(gulp, ctx, tasks[0], tasks[1], subtask)
                                         });
                                 });
                         }
@@ -125,21 +122,20 @@ export class Development {
         });
     }
 
-    protected setup(gulp: Gulp, config: ITaskConfig, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]> {
-        return Promise.resolve(toSequence(gulp, tasks, config))
+    protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]> {
+        return Promise.resolve(toSequence(gulp, tasks, ctx))
             .then(tsqs => {
-                // if (_.isFunction(config.option['runTasks'])) {
-                //     return config.option['runTasks'](config.oper, tsqs, subGroupTask, assertsTask);
-                // } else if (_.isArray(config.option['runTasks'])) {
-                //     tsqs = config.option['runTasks'];
+                // if (_.isFunction(context.option['runTasks'])) {
+                //     return context.option['runTasks'](context.oper, tsqs, subGroupTask, assertsTask);
+                // } else if (_.isArray(context.option['runTasks'])) {
+                //     tsqs = context.option['runTasks'];
                 // } else 
-                if (config.runTasks) {
-                    return config.runTasks(tsqs, assertsTask, subGroupTask);
+                if (ctx.runTasks) {
+                    return ctx.runTasks(tsqs, assertsTask, subGroupTask);
                 }
-
-                console.log(assertsTask);
-                config.addToSequence(tsqs, assertsTask);
-                config.addToSequence(tsqs, subGroupTask);
+                // console.log(assertsTask);
+                ctx.addToSequence(tsqs, assertsTask);
+                ctx.addToSequence(tsqs, subGroupTask);
 
                 return tsqs;
             });
@@ -150,21 +146,21 @@ export class Development {
      * 
      * @protected
      * @param {Gulp} gulp
-     * @param {ITaskConfig} config
+     * @param {ITaskContext} ctx
      * @returns {Promise<Src>}
      * 
      * @memberOf Development
      */
-    protected loadSubTask(gulp: Gulp, config: ITaskConfig): Promise<ITaskInfo> {
+    protected loadSubTask(gulp: Gulp, ctx: ITaskContext): Promise<ITaskInfo> {
 
-        if (config['tasks']) {
-            let optask = <ITaskOption>config.option;
+        if (ctx['tasks']) {
+            let optask = <ITaskOption>ctx.option;
             _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
-                subopt.name = config.subTaskName(subopt.name);
+                subopt.name = ctx.subTaskName(subopt.name);
                 subopt.src = subopt.src || optask.src;
                 subopt.dist = subopt.dist || optask.dist;
             });
-            return this.loadTasks(gulp, optask.tasks, config.env)
+            return this.loadTasks(gulp, optask.tasks, ctx.env)
                 .then(subseq => {
                     if (subseq && subseq.length > 0) {
                         let first = _.first(subseq);
@@ -172,7 +168,7 @@ export class Development {
                         let frn = _.isArray(first) ? _.first(first) : first;
                         let lsn = _.isArray(last) ? _.last(last) : last;
 
-                        let subName = config.subTaskName(`${frn}-${lsn}`, '-sub');
+                        let subName = ctx.subTaskName(`${frn}-${lsn}`, '-sub');
                         gulp.task(subName, () => {
                             return runSequence(gulp, subseq);
                         });
@@ -195,14 +191,14 @@ export class Development {
      * 
      * @protected
      * @param {Gulp} gulp
-     * @param {ITaskConfig} config
+     * @param {ITaskContext} ctx
      * @returns {Promise<Src>}
      * 
      * @memberOf Development
      */
-    protected loadAssertTasks(gulp: Gulp, config: ITaskConfig): Promise<ITaskInfo> {
-        let optask = config.option;
-        if (config.option.asserts) {
+    protected loadAssertTasks(gulp: Gulp, ctx: ITaskContext): Promise<ITaskInfo> {
+        let optask = ctx.option;
+        if (ctx.option.asserts) {
             let tasks: IAsserts[] = [];
             _.each(_.keys(optask.asserts), name => {
                 let op: IAsserts;
@@ -223,14 +219,14 @@ export class Development {
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
                 }
-                op.name = config.subTaskName(name, '-assert');
-                op.src = op.src || (config.getSrc() + '/**/*.' + name);
-                op.dist = op.dist || config.getDist();
+                op.name = ctx.subTaskName(name, '-assert');
+                op.src = op.src || (ctx.getSrc() + '/**/*.' + name);
+                op.dist = op.dist || ctx.getDist();
                 tasks.push(op);
             });
 
             return Promise.all(_.map(tasks, task => {
-                return this.loadTasks(gulp, <ITaskOption>task, config.env)
+                return this.loadTasks(gulp, <ITaskOption>task, ctx.env)
                     .then(sq => {
                         return {
                             task: task,
@@ -248,12 +244,12 @@ export class Development {
                                 return subseq[0];
                             }
 
-                            name = config.subTaskName(t.task)
+                            name = ctx.subTaskName(t.task)
                             gulp.task(name, () => {
                                 return runSequence(gulp, subseq);
                             });
                         } else {
-                            name = config.subTaskName(t.sq);
+                            name = ctx.subTaskName(t.sq);
                         }
 
                         return name;
@@ -261,7 +257,7 @@ export class Development {
 
 
                     return <ITaskInfo>{
-                        order: config.option.assertsOrder,
+                        order: ctx.option.assertsOrder,
                         taskName: assertSeq
                     }
                 });
@@ -288,10 +284,10 @@ export class Development {
 
             console.log(`
                 /**
-                 * gulp [build] [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
+                 * gulp [build] [--env production|development] [--context name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
                  * @params
                  *  --env  development or production;
-                 *  --config app setting
+                 *  --context app setting
                  *  --root path, set relative path of the development tool root.
                  *  --watch  watch src file change or not. if changed will auto update to node service. 
                  *  --release release web app or not. if [--env production], default to release. 
@@ -305,10 +301,10 @@ export class Development {
 
             console.log(`
                 /**
-                 * gulp [build] [--env production|development] [--config name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
+                 * gulp [build] [--env production|development] [--context name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
                  * @params
                  *  --env 发布环境 默认开发环境development;
-                 *  --config 设置配置文件;
+                 *  --context 设置配置文件;
                  *  --root path, 设置编译环境相对路径
                  *  --watch  是否需要动态监听文件变化
                  *  --release 是否release编译, [--env production] 默认release 

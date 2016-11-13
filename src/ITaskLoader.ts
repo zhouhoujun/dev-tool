@@ -1,4 +1,4 @@
-import { Operation, ITask, IEnvOption, ITaskConfig } from 'development-core';
+import { Operation, ITask, IEnvOption, IContextDefine, ITaskContext } from 'development-core';
 
 
 /**
@@ -11,21 +11,21 @@ export interface ITaskLoader {
     /**
      * load task.
      * 
-     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} context
      * @returns {Promise<ITask[]>}
      * 
      * @memberOf ITaskLoader
      */
-    load(cfg: ITaskConfig): Promise<ITask[]>;
+    load(context: ITaskContext): Promise<ITask[]>;
 
     /**
-     * load config.
+     * load context.
      * 
-     * @param {IEnvOption} env
-     * @returns {Promise<ITaskConfig>}
+     * @param {ITaskContext} context
+     * @returns {Promise<ITask[]>}
      * 
      * @memberOf ITaskLoader
      */
-    loadConfg(env: IEnvOption): Promise<ITaskConfig>;
+    loadContext(env: IEnvOption): Promise<ITaskContext>;
 
 }

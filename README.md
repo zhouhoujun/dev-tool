@@ -80,7 +80,23 @@ Development.create(gulp, __dirname, {
             asserts:{
                 // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
                 // pipes, output is addation pipe work.
-                ts:{ loader: { module:'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] }},
+                ts: {
+                    loader: {
+                        module:'development-assert-ts',
+                        // add pipe works for module tasks.
+                        pipe(stream, config, dist, gulp){ ... }
+                        pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
+                        output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
+                    }
+                },
+                tsb:{
+                    src:'srcb/**/*.ts',
+                    loader:'development-assert-ts',
+                    // also can add pipe works for module tasks here.
+                    pipe(stream, config, dist, gulp){ ... }
+                    pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
+                    output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
+                }
                 //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
                 json: '',
                 //default copy to dist. auto create jpeg task and  jpeg-watch task.
@@ -205,8 +221,8 @@ Development.create(gulp, __dirname, {
                 ],
                 // set muti-output. no setting default output default one to "dist: 'lib'" .
                 output: [
-                    (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
-                    (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                    (tsmap, config) =>  tsmap['dts'].pipe(gulp.dest(config.getDist())),
+                    (tsmap, config) =>  tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
                 ]
             },
             {
@@ -252,11 +268,11 @@ Development.create(gulp, __dirname, {
             dynamicTasks:[
                 {
                     name: 'clean',
-                    task: (config) => del(config.getDist())
+                    task: (ctx) => del(ctx.getDist())
                 },
                 {
                     name: 'tscompile',
-                    pipes(config){
+                    pipes(ctx){
                         return [
                         () => cache('typescript'),
                         sourcemaps.init,
@@ -264,8 +280,8 @@ Development.create(gulp, __dirname, {
                     ]),
                     // set muti-output. no setting default output default one to "dist: 'lib'" .
                     output [
-                        (tsmap, config) =>  tsmap.dts.pipe(gulp.dest(config.getDist())),
-                        (tsmap, config) =>  tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                        (tsmap, ctx) =>  tsmap['dts'].pipe(gulp.dest(ctx.getDist())),
+                        (tsmap, ctx) =>  tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(ctx.getDist()))
                     ]
                 },
                 {
@@ -296,20 +312,20 @@ Development.create(gulp, __dirname, [
                         tsProject
                     ],
                     output: [
-                        (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                        (tsmap, config, dt) => {
-                            if (config.oper === Operation.release || config.oper === Operation.deploy) {
+                        (tsmap, ctx, dt) => tsmap.dts.pipe(gulp.dest(ctx.getDist(dt))),
+                        (tsmap, ctx, dt) => {
+                            if (ctx.oper === Operation.release || ctx.oper === Operation.deploy) {
                                 return tsmap.js
                                     .pipe(babel({
                                         presets: ['es2015']
                                     }))
                                     .pipe(uglify())
                                     .pipe(sourcemaps.write('./sourcemaps'))
-                                    .pipe(gulp.dest(config.getDist(dt)));
+                                    .pipe(gulp.dest(ctx.getDist(dt)));
                             } else {
                                 return tsmap.js
                                     .pipe(sourcemaps.write('./sourcemaps'))
-                                    .pipe(gulp.dest(config.getDist(dt)));
+                                    .pipe(gulp.dest(ctx.getDist(dt)));
                             }
                         }
                     ]
@@ -331,7 +347,7 @@ Development.create(gulp, __dirname, [
             {
                 name: 'clean',
                 order: 0,
-                task: (config) => del(config.getDist())
+                task: (ctx) => del(ctx.getDist())
             }
         ]
     }
