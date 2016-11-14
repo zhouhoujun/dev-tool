@@ -59,7 +59,7 @@ Development.create(gulp, __dirname, {
 
 ```
 
-## add special pipe work via pipes config, add special output by config output in loader option
+## add special pipe work via pipes ctx, add special output by ctx output in loader option
 
 only dynamic task and IPipeTask (base class PipeTask) can add special pipe work.
 
@@ -83,18 +83,18 @@ Development.create(gulp, __dirname, [
                 loader: {
                     module:'development-assert-ts',
                     // add pipe works for module tasks.
-                    pipe(stream, config, dist, gulp){ ... }
-                    pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
-                    output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
+                    pipe(stream, ctx, dist, gulp){ ... }
+                    pipes: Pipe[] | (ctx, dist, gulp)=> Pipe[],
+                    output: OutputPipe[] | (stream, ctx, dist, gulp)=> OutputPipe[]
                 }
             },
             tsb:{
                 src:'srcb/**/*.ts',
                 loader:'development-assert-ts',
                 // also can add pipe works for module tasks here.
-                pipe(stream, config, dist, gulp){ ... }
-                pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
-                output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
+                pipe(stream, ctx, dist, gulp){ ... }
+                pipes: Pipe[] | (ctx, dist, gulp)=> Pipe[],
+                output: OutputPipe[] | (stream, ctx, dist, gulp)=> OutputPipe[]
             }
             //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
             json: '',
@@ -253,8 +253,8 @@ Development.create(gulp, __dirname, {
             //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
             moduleBcss: 'src/moduleB/**/*.css',
             // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
-            // can add special pipe work via pipes config. add special output by config output
-            ts:{ loader: {module:'development-assert-ts', pipes: Pipe[] | (config, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[] }},
+            // can add special pipe work via pipes ctx. add special output by ctx output
+            ts:{ loader: {module:'development-assert-ts', pipes: Pipe[] | (ctx, dist, gulp)=> Pipe[], output: OutputPipe[] | (stream, ctx, dist, gulp)=> OutputPipe[] }},
             // use default task to deal with ts file, if src must setting.
             less:<ITaskOption>{...},
             // use dynamic task to deal with html file, if src not setting, use src/**/*.html
