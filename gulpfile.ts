@@ -2,34 +2,38 @@
 import * as gulp from 'gulp';
 import 'development-core';
 import { Development } from './src/tools';
-import { ITaskOption, Src, Operation, IDynamicTaskOption } from 'development-core';
+import { Operation, ITaskOption, Pipe } from 'development-core';
 
 import * as mocha from 'gulp-mocha';
 
 const del = require('del');
-Development.create(gulp, __dirname, [{
-    src: 'src',
-    dist: 'lib',
-    testSrc: 'test/**/*.spec.ts',
-    asserts: {
-        ts: { loader: 'development-assert-ts' }
-    },
-    loader: [
-        {
-            name: 'test',
-            src: 'test/**/*spec.ts',
-            order: 1,
-            oper: Operation.test | Operation.default,
-            pipes: [mocha],
-            output: null
+Development.create(gulp, __dirname, [
+    <ITaskOption>{
+        src: 'src',
+        dist: 'lib',
+        buildDist: 'build',
+        testSrc: 'test/**/*.spec.ts',
+        asserts: {
+            ts: { loader: 'development-assert-ts' }
         },
-        {
-            name: 'clean',
-            order: 0,
-            task: (config, dt) => del(config.getDist(dt))
-        }
-    ]
-}]);
+        loader: [
+            {
+                name: 'test',
+                src: 'test/**/*spec.ts',
+                order: 1,
+                oper: Operation.test | Operation.default,
+                pipes: <Pipe[]>[
+                    () => mocha()
+                ],
+                output: null
+            },
+            {
+                name: 'clean',
+                order: 0,
+                task: (ctx, dt) => del(ctx.getDist(dt))
+            }
+        ]
+    }]);
 
 
 

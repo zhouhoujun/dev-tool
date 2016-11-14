@@ -66,53 +66,51 @@ only dynamic task and IPipeTask (base class PipeTask) can add special pipe work.
 ```ts
 import * as gulp from 'gulp';
 import  { Development, IAsserts, ITaskOption } from 'development-tool';
-Development.create(gulp, __dirname, {
-    tasks:[
-        {
-            src: 'src',
-            //testSrc: '...',
-            //e2eSrc: '...',
-            //watchSrc: '...'
-            dist: 'lib',
-            // buildDist:'build path',
-            // releaseDist: 'release path',
-            // depolyDist: 'depoly path'
-            asserts:{
-                // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
-                // pipes, output is addation pipe work.
-                ts: {
-                    loader: {
-                        module:'development-assert-ts',
-                        // add pipe works for module tasks.
-                        pipe(stream, config, dist, gulp){ ... }
-                        pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
-                        output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
-                    }
-                },
-                tsb:{
-                    src:'srcb/**/*.ts',
-                    loader:'development-assert-ts',
-                    // also can add pipe works for module tasks here.
+Development.create(gulp, __dirname, [
+    {
+        src: 'src',
+        //testSrc: '...',
+        //e2eSrc: '...',
+        //watchSrc: '...'
+        dist: 'lib',
+        // buildDist:'build path',
+        // releaseDist: 'release path',
+        // depolyDist: 'depoly path'
+        asserts:{
+            // use IAsserts task to deal with ts file, if src not setting, use  src/**/*.ts
+            // pipes, output is addation pipe work.
+            ts: {
+                loader: {
+                    module:'development-assert-ts',
+                    // add pipe works for module tasks.
                     pipe(stream, config, dist, gulp){ ... }
                     pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
                     output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
                 }
-                //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
-                json: '',
-                //default copy to dist. auto create jpeg task and  jpeg-watch task.
-                jpeg: ['src/apath/**/*.jpeg', 'src/bpath/**/*.jpeg'],
-                //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
-                moduleBcss: 'src/moduleB/**/*.css',
-                // use default task to deal with ts file, if src must setting.
-                less:<ITaskOption>{...},
-                // use dynamic task to deal with html file, if src not setting, use src/**/*.html
-                html:{loader: <IDynamicTaskOption[]>[}
-                ...
             },
-            loader: 'development-tool-node'
-        }
-    ]
-});
+            tsb:{
+                src:'srcb/**/*.ts',
+                loader:'development-assert-ts',
+                // also can add pipe works for module tasks here.
+                pipe(stream, config, dist, gulp){ ... }
+                pipes: Pipe[] | (config, dist, gulp)=> Pipe[],
+                output: OutputPipe[] | (stream, config, dist, gulp)=> OutputPipe[]
+            }
+            //default copy 'src/**/*.json' to dist. auto create json task and  json-watch task.
+            json: '',
+            //default copy to dist. auto create jpeg task and  jpeg-watch task.
+            jpeg: ['src/apath/**/*.jpeg', 'src/bpath/**/*.jpeg'],
+            //default copy to dist. auto create moduleBcss task and moduleBcss-watch task.
+            moduleBcss: 'src/moduleB/**/*.css',
+            // use default task to deal with ts file, if src must setting.
+            less:<ITaskOption>{...},
+            // use dynamic task to deal with html file, if src not setting, use src/**/*.html
+            html:{loader: <IDynamicTaskOption[]>[}
+            ...
+        },
+        loader: 'development-tool-node'
+    }
+]);
 ```
 
 ## Create development tool with addation sub tasks
@@ -208,7 +206,7 @@ Development.create(gulp, __dirname, {
                 name: 'clean',
                 //the task for Operation type. default for all.
                 //oper: Operation.release | Operation.depoly | Operation.build | Operation.test | Operation.e2e
-                task: (config) => del(config.getDist())
+                task: (ctx) => del(ctx.getDist())
             },
             {
                 name: 'tscompile',
@@ -221,8 +219,8 @@ Development.create(gulp, __dirname, {
                 ],
                 // set muti-output. no setting default output default one to "dist: 'lib'" .
                 output: [
-                    (tsmap, config) =>  tsmap['dts'].pipe(gulp.dest(config.getDist())),
-                    (tsmap, config) =>  tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist()))
+                    (tsmap, ctx) =>  tsmap['dts'].pipe(gulp.dest(ctx.getDist())),
+                    (tsmap, ctx) =>  tsmap['js'].pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(ctx.getDist()))
                 ]
             },
             {
