@@ -1,4 +1,4 @@
-import { Operation, ITask, IEnvOption, IContextDefine, ITaskContext } from 'development-core';
+import { ITask, IEnvOption, ITaskContext } from 'development-core';
 
 
 /**

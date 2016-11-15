@@ -1,5 +1,6 @@
-import { ITaskOption } from 'development-core';
+import { ITaskOption, IAsserts } from 'development-core';
 import { ITaskLoader } from './ITaskLoader';
+export declare type TaskOption = ITaskOption | ITaskOption[] | IAsserts | IAsserts[] | Array<ITaskOption | IAsserts>;
 /**
  * Develop config
  *
@@ -17,10 +18,10 @@ export interface DevelopConfig {
     /**
      * tasks config.
      *
-     * @type {(ITaskOption | ITaskOption[])}
+     * @type {TaskOption}
      * @memberOf DevelopConfig
      */
-    tasks: ITaskOption | ITaskOption[];
+    tasks: TaskOption;
     /**
      * custom loader factory.
      *

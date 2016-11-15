@@ -1,8 +1,8 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
-import { Src, ITaskContext, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
-import { DevelopConfig } from './DevelopConfig';
+import { Src, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
+import { DevelopConfig, TaskOption } from './DevelopConfig';
 export * from './DevelopConfig';
 export * from './ITaskLoader';
 export * from './LoaderFactory';
@@ -30,11 +30,11 @@ export declare class Development {
      *
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[]): Development;
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[] | IAsserts[]): Development;
     private constructor(dirname, option);
     run(gulp: Gulp, env: IEnvOption): Promise<any>;
     private bindingContext(ctx);
-    protected loadTasks(gulp: Gulp, tasks: ITaskOption | ITaskOption[], env: IEnvOption): Promise<Src[]>;
+    protected loadTasks(gulp: Gulp, tasks: TaskOption, env: IEnvOption): Promise<Src[]>;
     protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
     /**
      * load sub tasks as group task.

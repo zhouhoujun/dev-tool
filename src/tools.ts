@@ -5,7 +5,7 @@ import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
 import { Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
-import { DevelopConfig } from './DevelopConfig';
+import { DevelopConfig, TaskOption } from './DevelopConfig';
 import * as chalk from 'chalk';
 
 export * from './DevelopConfig';
@@ -35,7 +35,7 @@ export class Development {
      * 
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[]): Development {
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[] | IAsserts[]): Development {
         let option = _.isArray(setting) ? { tasks: setting } : setting;
         let devtool = new Development(dirname, option);
         option.setupTask = option.setupTask || 'build';
@@ -84,7 +84,7 @@ export class Development {
         return ctx;
     }
 
-    protected loadTasks(gulp: Gulp, tasks: ITaskOption | ITaskOption[], env: IEnvOption): Promise<Src[]> {
+    protected loadTasks(gulp: Gulp, tasks: TaskOption, env: IEnvOption): Promise<Src[]> {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
