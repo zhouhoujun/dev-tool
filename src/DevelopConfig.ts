@@ -1,9 +1,7 @@
-import { ITaskOption, IAsserts } from 'development-core';
+import { ITaskOption, TaskOption } from 'development-core';
 import { ITaskLoader } from './ITaskLoader';
 // import { Operation } from './Operation';
 
-
-export type TaskOption = ITaskOption | ITaskOption[] | IAsserts | IAsserts[] | Array<ITaskOption | IAsserts>;
 
 /**
  * Develop config

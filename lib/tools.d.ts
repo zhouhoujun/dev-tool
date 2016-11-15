@@ -1,8 +1,8 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
-import { Src, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
-import { DevelopConfig, TaskOption } from './DevelopConfig';
+import { TaskOption, Src, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
+import { DevelopConfig } from './DevelopConfig';
 export * from './DevelopConfig';
 export * from './ITaskLoader';
 export * from './LoaderFactory';

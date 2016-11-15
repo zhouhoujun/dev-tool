@@ -4,8 +4,8 @@ import { Gulp, TaskCallback } from 'gulp';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
-import { DevelopConfig, TaskOption } from './DevelopConfig';
+import { TaskOption, Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
+import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
 export * from './DevelopConfig';
