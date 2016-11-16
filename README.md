@@ -59,6 +59,125 @@ Development.create(gulp, __dirname, {
 
 ```
 
+## Demo for node project
+
+```ts
+
+import * as gulp from 'gulp';
+import { ITaskOption } from 'development-core';
+import { Development } from 'development-tool';
+// import 'development-tool-node';
+
+Development.create(gulp, __dirname, {
+    tasks: <ITaskOption>{
+        src: 'src',
+        dist: 'lib',
+        buildDist: 'build',
+        testSrc: 'test/**/*.spec.ts',
+        loader: 'development-tool-node'
+    }
+});
+
+```
+
+## Demo for angular project
+
+```ts
+
+import * as gulp from 'gulp';
+
+import { Pipe, TaskOption, Operation } from 'development-core';
+import { Development } from 'development-tool';
+import { IBundlesConfig } from 'development-tool-jspm';
+const tslint = require('gulp-tslint');
+const ngAnnotate = require('gulp-ng-annotate');
+const cache = require('gulp-cached');
+const rename = require('gulp-rename');
+const jeditor = require('gulp-json-editor');
+
+
+Development.create(gulp, __dirname, [{
+    src: 'src',
+    dist: 'dist/development',
+    releaseDist: 'dist/production',
+    testSrc: 'test/**/*.spec.ts',
+    cleanSrc: (oper, env) => {
+        if (env.release || env.deploy) {
+            return 'dist/production';
+        } else {
+            return 'dist/development/!(jspm_packages)**';
+        }
+    },
+    loader: 'development-tool-web',
+    assertsOrder: 1,
+    asserts: {
+        css: '',
+        html: ['src/*.html', 'src/*.cshtml'],
+        json: ['src/**/*.json', '!src/data/**/*.json', '!src**/jsconfig.json', '!src/config*.json'],
+        config: {
+            src(oper, env) {
+                if (env.config) {
+                    return `src/config-${env.config}.json`;
+                } else {
+                    return 'src/config.json';
+                }
+            },
+            loader: [
+                {
+                    name: 'config',
+                    oper: Operation.default,
+                    pipes: [
+                        () => cache('config_json'),
+                        () => rename('config.json'),
+                        () => jeditor()
+                    ]
+                }
+            ]
+        },
+        template: {
+            src: 'src/**/*.tpl.html',
+            loader: 'development-assert-templ'
+        },
+        ts: {
+            src: ['src/**/*.ts', 'test/**/*.ts'],
+            loader: {
+                module: 'development-assert-ts',
+                pipes: <Pipe[]>[
+                    { name: 'tscompile', toTransform: () => tslint(), order: 2 },
+                    { name: 'tscompile', toTransform: () => ngAnnotate(), order: 3 },
+                ]
+            }
+        },
+        jspmconfig: {
+            src: 'src/jspm-config/*.js'
+        },
+        js: {
+            loader: {
+                module: 'development-assert-js',
+                pipes: <Pipe[]>[
+                    { name: 'jscompile', toTransform: () => ngAnnotate(), order: 2 }
+                ]
+            }
+        }
+    },
+
+    tasks: <TaskOption[]>[
+        <IBundlesConfig>{
+            baseURL: '',
+            src: ['dist/development/**/*.js', '!dist/development/jspm_packages/*'],
+            dist: 'dist/production/bundles',
+            mainfile: 'bundle.js',
+            loader: 'development-tool-jspm',
+            // bundles: {
+
+            // }
+        }
+    ]
+
+}]);
+
+```
+
 ## add special pipe work via pipes ctx, add special output by ctx output in loader option
 
 only dynamic task and IPipeTask (base class PipeTask) can add special pipe work.
