@@ -4,7 +4,7 @@ import { Gulp, TaskCallback } from 'gulp';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { TaskOption, Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
+import { TaskOption, Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption, IDynamicTaskOption } from 'development-core';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
@@ -88,8 +88,7 @@ export class Development {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
-
-                console.log(chalk.grey('begin load task via loader:'), optask.loader);
+                // console.log(chalk.grey('begin load task via loader:'), optask.loader);
                 let loader = this.createLoader(optask);
 
                 return loader.loadContext(env)
@@ -202,19 +201,21 @@ export class Development {
             let tasks: IAsserts[] = [];
             _.each(_.keys(optask.asserts), name => {
                 let op: IAsserts;
-                let aop = optask.asserts[name];
-                if (_.isString(aop)) {
-                    op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
-                } else if (_.isArray(aop)) {
-                    if (_.some(aop, it => _.isString(aop))) {
-                        op = <IAsserts>{ src: aop, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
-                    } else {
-                        op = <IAsserts>{ loader: aop };
+                let sr = optask.asserts[name];
+                if (_.isString(sr)) {
+                    op = <IAsserts>{ src: sr, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
+                } else if (_.isArray(sr)) {
+                    if (sr.length > 0) {
+                        if (_.isString(_.first(<string[]>sr))) {
+                            op = <IAsserts>{ src: <string[]>sr, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
+                        } else {
+                            op = <IAsserts>{ loader: <IDynamicTaskOption[]>sr };
+                        }
                     }
-                } else if (_.isFunction(aop)) {
-                    op = { loader: aop };
+                } else if (_.isFunction(sr)) {
+                    op = { loader: sr };
                 } else {
-                    op = aop;
+                    op = sr;
                 };
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
