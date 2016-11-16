@@ -1,6 +1,6 @@
 {
   "name": "development-tool",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "development build tools, gulp task manager.",
   "main": "./lib/tools.js",
   "typings": "./lib/tools",
