@@ -1,11 +1,11 @@
-import { ITaskOption, IContextDefine } from 'development-core';
+import { ITaskOption, IContextDefine, IEnvOption } from 'development-core';
 import contextDefine from '../utils/contextDefine';
 import { BaseLoader } from './BaseLoader';
 
 export class DynamicLoader extends BaseLoader {
 
-    constructor(option: ITaskOption) {
-        super(option);
+    constructor(option: ITaskOption, env?: IEnvOption) {
+        super(option, env);
     }
 
 

@@ -3,7 +3,8 @@ import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskOption } from 'de
 import { ITaskLoader } from '../ITaskLoader';
 export declare abstract class BaseLoader implements ITaskLoader {
     protected option: ITaskOption;
-    constructor(option: ITaskOption);
+    protected env: IEnvOption;
+    constructor(option: ITaskOption, env?: IEnvOption);
     load(context: ITaskContext): Promise<ITask[]>;
     loadContext(env: IEnvOption): Promise<ITaskContext>;
     private _contextDef;

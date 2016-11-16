@@ -1,4 +1,4 @@
-import { ITaskOption, TaskOption } from 'development-core';
+import { ITaskOption, TaskOption, IEnvOption } from 'development-core';
 import { ITaskLoader } from './ITaskLoader';
 // import { Operation } from './Operation';
 
@@ -24,11 +24,15 @@ export interface DevelopConfig {
      * @memberOf DevelopConfig
      */
     tasks: TaskOption;
+
     /**
      * custom loader factory.
      * 
+     * @param {ITaskOption} option
+     * @param {IEnvOption} [env]
+     * @returns {ITaskLoader}
      * 
      * @memberOf DevelopConfig
      */
-    loaderFactory?(option: ITaskOption): ITaskLoader;
+    loaderFactory?(option: ITaskOption, env?: IEnvOption): ITaskLoader;
 }

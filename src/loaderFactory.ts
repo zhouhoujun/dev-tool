@@ -1,6 +1,6 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
-import { ITaskOption, ILoaderOption, IDynamicLoaderOption } from 'development-core';
+import { ITaskOption, ILoaderOption, IDynamicLoaderOption, IEnvOption } from 'development-core';
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import { CustomLoader } from './loaders/CustomLoader';
@@ -12,7 +12,16 @@ import * as _ from 'lodash';
  * @interface ILoaderFactory
  */
 export interface ILoaderFactory {
-    create(option: ITaskOption): ITaskLoader;
+    /**
+     * create loader.
+     * 
+     * @param {ITaskOption} option
+     * @param {IEnvOption} [env]
+     * @returns {ITaskLoader}
+     * 
+     * @memberOf ILoaderFactory
+     */
+    create(option: ITaskOption, env?: IEnvOption): ITaskLoader;
 }
 
 
@@ -27,7 +36,7 @@ export class LoaderFactory implements ILoaderFactory {
 
     constructor() {
     }
-    create(option: ITaskOption): ITaskLoader {
+    create(option: ITaskOption, env?: IEnvOption): ITaskLoader {
 
         if (_.isString(option.loader)) {
             option.loader = {
@@ -44,7 +53,7 @@ export class LoaderFactory implements ILoaderFactory {
         } else {
             // if config dir.
             if (option.loader['dir']) {
-                return new DirLoader(option);
+                return new DirLoader(option, env);
             }
 
             // dynamic task name.
@@ -64,7 +73,7 @@ export class LoaderFactory implements ILoaderFactory {
             let loderOption: ILoaderOption = option.loader;
             switch (loderOption.type) {
                 case 'dir':
-                    loader = new DirLoader(option);
+                    loader = new DirLoader(option, env);
                     break;
 
                 case 'dynamic':
@@ -73,7 +82,7 @@ export class LoaderFactory implements ILoaderFactory {
 
                 case 'module':
                 default:
-                    loader = new ModuleLoader(option);
+                    loader = new ModuleLoader(option, env);
                     break;
             }
             return loader;

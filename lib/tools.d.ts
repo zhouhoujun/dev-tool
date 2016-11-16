@@ -58,6 +58,6 @@ export declare class Development {
      * @memberOf Development
      */
     protected loadAssertTasks(gulp: Gulp, ctx: ITaskContext): Promise<ITaskInfo>;
-    protected createLoader(option: ITaskOption): ITaskLoader;
+    protected createLoader(option: ITaskOption, env: IEnvOption): ITaskLoader;
     protected printHelp(help: boolean | string): void;
 }

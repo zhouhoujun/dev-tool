@@ -1,5 +1,5 @@
 import { ITaskLoader } from './ITaskLoader';
-import { ITaskOption } from 'development-core';
+import { ITaskOption, IEnvOption } from 'development-core';
 /**
  * loader factory.
  *
@@ -7,7 +7,16 @@ import { ITaskOption } from 'development-core';
  * @interface ILoaderFactory
  */
 export interface ILoaderFactory {
-    create(option: ITaskOption): ITaskLoader;
+    /**
+     * create loader.
+     *
+     * @param {ITaskOption} option
+     * @param {IEnvOption} [env]
+     * @returns {ITaskLoader}
+     *
+     * @memberOf ILoaderFactory
+     */
+    create(option: ITaskOption, env?: IEnvOption): ITaskLoader;
 }
 /**
  * loader factory.
@@ -18,5 +27,5 @@ export interface ILoaderFactory {
  */
 export declare class LoaderFactory implements ILoaderFactory {
     constructor();
-    create(option: ITaskOption): ITaskLoader;
+    create(option: ITaskOption, env?: IEnvOption): ITaskLoader;
 }

@@ -5,8 +5,10 @@ import { ITaskLoader } from '../ITaskLoader';
 export abstract class BaseLoader implements ITaskLoader {
 
     protected option: ITaskOption;
-    constructor(option: ITaskOption) {
+    protected env: IEnvOption;
+    constructor(option: ITaskOption, env?: IEnvOption) {
         this.option = option;
+        this.env = env;
     }
 
     load(context: ITaskContext): Promise<ITask[]> {
@@ -20,6 +22,7 @@ export abstract class BaseLoader implements ITaskLoader {
     }
 
     loadContext(env: IEnvOption): Promise<ITaskContext> {
+        this.env = env;
         let self = this;
         return this.contextDef
             .then(def => {

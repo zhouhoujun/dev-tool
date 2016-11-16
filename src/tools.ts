@@ -89,7 +89,7 @@ export class Development {
             _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
                 // console.log(chalk.grey('begin load task via loader:'), optask.loader);
-                let loader = this.createLoader(optask);
+                let loader = this.createLoader(optask, env);
 
                 return loader.loadContext(env)
                     .then(ctx => {
@@ -267,15 +267,15 @@ export class Development {
         }
     }
 
-    protected createLoader(option: ITaskOption): ITaskLoader {
+    protected createLoader(option: ITaskOption, env: IEnvOption): ITaskLoader {
         let loader = null;
         if (!_.isFunction(this.option.loaderFactory)) {
             let factory = new LoaderFactory();
             this.option.loaderFactory = (opt: ITaskOption) => {
-                return factory.create(opt);
+                return factory.create(opt, env);
             }
         }
-        loader = this.option.loaderFactory(option);
+        loader = this.option.loaderFactory(option, env);
         return loader;
     }
 
