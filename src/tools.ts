@@ -4,7 +4,7 @@ import { Gulp, TaskCallback } from 'gulp';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { TaskOption, Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption, IDynamicTaskOption } from 'development-core';
+import { TaskOption, Operation, Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption, IDynamicTaskOption } from 'development-core';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
@@ -221,8 +221,8 @@ export class Development {
                     return;
                 }
                 op.name = ctx.subTaskName(name, '-assert');
-                op.src = op.src || (ctx.getSrc() + '/**/*.' + name);
-                op.dist = op.dist || ctx.getDist();
+                op.src = op.src || (ctx.getSrc({ oper: Operation.build }) + '/**/*.' + name);
+                op.dist = op.dist || ctx.getDist({ oper: Operation.build });
                 tasks.push(op);
             });
 

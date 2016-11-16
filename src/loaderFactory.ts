@@ -5,6 +5,8 @@ import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import { CustomLoader } from './loaders/CustomLoader';
 import * as _ from 'lodash';
+import * as chalk from 'chalk';
+
 /**
  * loader factory.
  * 
@@ -47,10 +49,10 @@ export class LoaderFactory implements ILoaderFactory {
             return new CustomLoader(option, option.loader);
         } else if (_.isArray(option.loader)) {
             option.loader = <IDynamicLoaderOption>{
-                dynamicTasks: option.loader
+                dynamicTasks: option.loader || []
             };
             return new DynamicLoader(option);
-        } else {
+        } else if (option.loader) {
             // if config dir.
             if (option.loader['dir']) {
                 return new DirLoader(option, env);
@@ -86,6 +88,12 @@ export class LoaderFactory implements ILoaderFactory {
                     break;
             }
             return loader;
+        } else {
+            console.log(chalk.cyan(<string>option.name), chalk.yellow('loader not setting, use dynamic loader.'))
+            option.loader = <IDynamicLoaderOption>{
+                dynamicTasks: []
+            };
+            return new DynamicLoader(option);
         }
     }
 }
