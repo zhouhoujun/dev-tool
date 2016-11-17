@@ -53,10 +53,27 @@ export class Development {
         return devtool;
     }
 
+    /**
+     * Creates an instance of Development.
+     * 
+     * @param {string} dirname
+     * @param {DevelopConfig} option
+     * 
+     * @memberOf Development
+     */
     private constructor(private dirname: string, protected option: DevelopConfig) {
 
     }
 
+    /**
+     * run task.
+     * 
+     * @param {Gulp} gulp
+     * @param {IEnvOption} env
+     * @returns {Promise<any>}
+     * 
+     * @memberOf Development
+     */
     run(gulp: Gulp, env: IEnvOption): Promise<any> {
         if (!env.root) {
             env.root = this.dirname;
@@ -69,13 +86,38 @@ export class Development {
 
         return this.loadTasks(gulp, this.option.tasks, env)
             .then(tseq => {
+                tseq = this.filterTaskSequence(tseq);
                 console.log(chalk.grey('run sequenec tasks:'), tseq);
-                return runSequence(gulp, tseq);
+                return runSequence(gulp, this.filterTaskSequence(tseq));
             })
             .catch(err => {
                 console.error(err);
                 process.exit(1);
             });
+    }
+
+    /**
+     * filter task sequence. 
+     * 
+     * @private
+     * @param {Src[]} seq
+     * @returns {Src[]}
+     * 
+     * @memberOf Development
+     */
+    private filterTaskSequence(seq: Src[]): Src[] {
+        let rseq: Src[] = [];
+        _.each(seq, it => {
+            if (!it) {
+                return;
+            }
+            if (_.isString(it)) {
+                rseq.push(it);
+            } else if (_.isArray(it)) {
+                rseq.push(_.filter(it, itm => !!itm));
+            }
+        });
+        return rseq;
     }
 
     private bindingContext(ctx: ITaskContext): ITaskContext {
@@ -203,24 +245,24 @@ export class Development {
                 let op: IAsserts;
                 let sr = optask.asserts[name];
                 if (_.isString(sr)) {
-                    op = <IAsserts>{ src: sr, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
+                    op = <IAsserts>{ src: sr, loader: [{ name: name, pipes: [], watch: true }] };
                 } else if (_.isArray(sr)) {
                     if (sr.length > 0) {
                         if (_.isString(_.first(<string[]>sr))) {
-                            op = <IAsserts>{ src: <string[]>sr, loader: [{ name: name, pipes: [] }, { name: `${name}-watch`, watchTasks: [name] }] };
+                            op = <IAsserts>{ src: <string[]>sr, loader: [{ name: name, pipes: [], watch: true }] };
                         } else {
-                            op = <IAsserts>{ loader: <IDynamicTaskOption[]>sr };
+                            op = <IAsserts>{ name: name, loader: <IDynamicTaskOption[]>sr, watch: true };
                         }
                     }
                 } else if (_.isFunction(sr)) {
-                    op = { loader: sr };
+                    op = { loader: sr, name: name };
                 } else {
                     op = sr;
+                    op.name = op.name || name;
                 };
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
                 }
-                op.name = ctx.subTaskName(name, '-assert');
                 op.src = op.src || (ctx.getSrc({ oper: Operation.build }) + '/**/*.' + name);
                 op.dist = op.dist || ctx.getDist({ oper: Operation.build });
                 tasks.push(op);

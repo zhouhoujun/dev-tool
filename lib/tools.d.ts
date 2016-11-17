@@ -31,8 +31,35 @@ export declare class Development {
      * @memberOf Development
      */
     static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[] | IAsserts[]): Development;
+    /**
+     * Creates an instance of Development.
+     *
+     * @param {string} dirname
+     * @param {DevelopConfig} option
+     *
+     * @memberOf Development
+     */
     private constructor(dirname, option);
+    /**
+     * run task.
+     *
+     * @param {Gulp} gulp
+     * @param {IEnvOption} env
+     * @returns {Promise<any>}
+     *
+     * @memberOf Development
+     */
     run(gulp: Gulp, env: IEnvOption): Promise<any>;
+    /**
+     * filter task sequence.
+     *
+     * @private
+     * @param {Src[]} seq
+     * @returns {Src[]}
+     *
+     * @memberOf Development
+     */
+    private filterTaskSequence(seq);
     private bindingContext(ctx);
     protected loadTasks(gulp: Gulp, tasks: TaskOption, env: IEnvOption): Promise<Src[]>;
     protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
