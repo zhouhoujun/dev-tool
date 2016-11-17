@@ -1,7 +1,7 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
-import { TaskOption, Src, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption } from 'development-core';
+import { TaskOption, Src, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption, IDynamicTaskOption } from 'development-core';
 import { DevelopConfig } from './DevelopConfig';
 export * from './DevelopConfig';
 export * from './ITaskLoader';
@@ -25,12 +25,12 @@ export declare class Development {
      * @static
      * @param {Gulp} gulp
      * @param {string} dirname
-     * @param {(DevelopConfig | ITaskOption[])} setting
+     * @param {(DevelopConfig | Array<ITaskOption | IAsserts | IDynamicTaskOption>)} setting
      * @returns {Development}
      *
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[] | IAsserts[]): Development;
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAsserts | IDynamicTaskOption>): Development;
     /**
      * Creates an instance of Development.
      *

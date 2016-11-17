@@ -30,12 +30,12 @@ export class Development {
      * @static
      * @param {Gulp} gulp
      * @param {string} dirname
-     * @param {(DevelopConfig | ITaskOption[])} setting
+     * @param {(DevelopConfig | Array<ITaskOption | IAsserts | IDynamicTaskOption>)} setting
      * @returns {Development}
      * 
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | ITaskOption[] | IAsserts[]): Development {
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAsserts | IDynamicTaskOption>): Development {
         let option = _.isArray(setting) ? { tasks: setting } : setting;
         let devtool = new Development(dirname, option);
         option.setupTask = option.setupTask || 'build';

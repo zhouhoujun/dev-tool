@@ -101,8 +101,8 @@ Development.create(gulp, __dirname, [{
     dist: 'dist/development',
     releaseDist: 'dist/production',
     testSrc: 'test/**/*.spec.ts',
-    cleanSrc: (oper, env) => {
-        if (env.release || env.deploy) {
+    cleanSrc: (ctx) => {
+        if (ctx.env.release || ctx.env.deploy) {
             return 'dist/production';
         } else {
             return 'dist/development/!(jspm_packages)**';
@@ -115,9 +115,9 @@ Development.create(gulp, __dirname, [{
         html: ['src/*.html', 'src/*.cshtml'],
         json: ['src/**/*.json', '!src/data/**/*.json', '!src**/jsconfig.json', '!src/config*.json'],
         config: {
-            src(oper, env) {
-                if (env.config) {
-                    return `src/config-${env.config}.json`;
+            src(ctx) {
+                if (ctx.env.config) {
+                    return `src/config-${ctx.env.config}.json`;
                 } else {
                     return 'src/config.json';
                 }
@@ -161,7 +161,7 @@ Development.create(gulp, __dirname, [{
         }
     },
 
-    tasks: <TaskOption[]>[
+    tasks: [
         <IBundlesConfig>{
             baseURL: '',
             src: ['dist/development/**/*.js', '!dist/development/jspm_packages/*'],
