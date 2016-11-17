@@ -57,11 +57,11 @@ export class Development {
      * Creates an instance of Development.
      * 
      * @param {string} dirname
-     * @param {DevelopConfig} option
+     * @param {DevelopConfig} config
      * 
      * @memberOf Development
      */
-    private constructor(private dirname: string, protected option: DevelopConfig) {
+    private constructor(private dirname: string, protected config: DevelopConfig) {
 
     }
 
@@ -84,40 +84,15 @@ export class Development {
             this.printHelp(env.help);
         }
 
-        return this.loadTasks(gulp, this.option.tasks, env)
+        return this.loadTasks(gulp, this.config.tasks, env)
             .then(tseq => {
-                tseq = this.filterTaskSequence(tseq);
-                console.log(chalk.grey('run sequenec tasks:'), tseq);
-                return runSequence(gulp, this.filterTaskSequence(tseq));
+                // console.log(chalk.grey('run sequenec tasks:'), tseq);
+                return runSequence(gulp, tseq);
             })
             .catch(err => {
                 console.error(err);
                 process.exit(1);
             });
-    }
-
-    /**
-     * filter task sequence. 
-     * 
-     * @private
-     * @param {Src[]} seq
-     * @returns {Src[]}
-     * 
-     * @memberOf Development
-     */
-    private filterTaskSequence(seq: Src[]): Src[] {
-        let rseq: Src[] = [];
-        _.each(seq, it => {
-            if (!it) {
-                return;
-            }
-            if (_.isString(it)) {
-                rseq.push(it);
-            } else if (_.isArray(it)) {
-                rseq.push(_.filter(it, itm => !!itm));
-            }
-        });
-        return rseq;
     }
 
     private bindingContext(ctx: ITaskContext): ITaskContext {
@@ -309,15 +284,15 @@ export class Development {
         }
     }
 
-    protected createLoader(option: ITaskOption, env: IEnvOption): ITaskLoader {
+    protected createLoader(option: TaskOption, env: IEnvOption): ITaskLoader {
         let loader = null;
-        if (!_.isFunction(this.option.loaderFactory)) {
+        if (!_.isFunction(this.config.loaderFactory)) {
             let factory = new LoaderFactory();
-            this.option.loaderFactory = (opt: ITaskOption) => {
+            this.config.loaderFactory = (opt: ITaskOption) => {
                 return factory.create(opt, env);
             }
         }
-        loader = this.option.loaderFactory(option, env);
+        loader = this.config.loaderFactory(option, env);
         return loader;
     }
 
