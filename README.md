@@ -122,6 +122,7 @@ Development.create(gulp, __dirname, [{
                     return 'src/config.json';
                 }
             },
+            watch: true, // add watch to this assert.
             loader: [
                 {
                     name: 'config',
@@ -150,6 +151,7 @@ Development.create(gulp, __dirname, [{
         },
         jspmconfig: {
             src: 'src/jspm-config/*.js'
+            watch: true, // add watch to this assert.
         },
         js: {
             loader: {
