@@ -1,5 +1,6 @@
 /// <reference types="chai" />
-import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskOption } from 'development-core';
+import { ITask, IEnvOption, IContextDefine, ITaskContext } from 'development-core';
+import { ITaskOption } from '../TaskOption';
 import { ITaskLoader } from '../ITaskLoader';
 export declare abstract class BaseLoader implements ITaskLoader {
     protected option: ITaskOption;

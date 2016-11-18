@@ -1,8 +1,8 @@
 
-import { ITaskOption } from 'development-core';
+import { IAsserts } from 'development-core';
 
 
-export interface NodeTaskOption extends ITaskOption {
+export interface NodeTaskOption extends IAsserts {
     /**
      * tsconfig for typescript
      * 

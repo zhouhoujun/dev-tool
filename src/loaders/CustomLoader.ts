@@ -1,4 +1,5 @@
-import { ITask, customLoader, IEnvOption, ITaskContext, ITaskOption, bindingConfig } from 'development-core';
+import { ITask, IEnvOption, ITaskContext, bindingConfig } from 'development-core';
+import { ITaskOption, customLoader } from '../TaskOption';
 import { ITaskLoader } from '../ITaskLoader';
 
 export class CustomLoader implements ITaskLoader {

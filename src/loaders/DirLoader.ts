@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
-import { ITask, IDirLoaderOption, IContextDefine, ITaskOption, ITaskContext, bindingConfig, findTaskDefineInDir, taskSourceVal, IEnvOption } from 'development-core';
+import { ITask, IContextDefine, ITaskContext, bindingConfig, findTaskDefineInDir, taskSourceVal, IEnvOption } from 'development-core';
+import { ITaskOption, IDirLoaderOption } from '../TaskOption';
 import { ModuleLoader } from './ModuleLoader';
 
 export class DirLoader extends ModuleLoader {

@@ -1,4 +1,5 @@
-import { IContextDefine, ITaskOption, findTaskDefineInModule, IEnvOption, ILoaderOption, taskDefine2Context } from 'development-core';
+import { IContextDefine, findTaskDefineInModule, IEnvOption, taskDefine2Context } from 'development-core';
+import { ITaskOption, ILoaderOption } from '../TaskOption';
 import { BaseLoader } from './BaseLoader';
 import contextDefine from '../utils/contextDefine';
 import * as chalk from 'chalk';

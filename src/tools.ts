@@ -4,12 +4,13 @@ import { Gulp, TaskCallback } from 'gulp';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './LoaderFactory';
-import { TaskOption, Operation, Src, toSequence, runSequence, ITaskContext, IAsserts, ITaskInfo, ITask, ITaskOption, IEnvOption, IDynamicTaskOption } from 'development-core';
+import { Operation, Src, toSequence, runSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption } from 'development-core';
+import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 
 export * from './DevelopConfig';
-// export * from 'development-core';
+export * from './TaskOption';
 export * from './ITaskLoader';
 export * from './LoaderFactory';
 export * from './loaders/BaseLoader';
@@ -30,12 +31,12 @@ export class Development {
      * @static
      * @param {Gulp} gulp
      * @param {string} dirname
-     * @param {(DevelopConfig | Array<ITaskOption | IAsserts | IDynamicTaskOption>)} setting
+     * @param {(DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>)} setting
      * @returns {Development}
      * 
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAsserts | IDynamicTaskOption>): Development {
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>): Development {
         let option = _.isArray(setting) ? { tasks: setting } : setting;
         let devtool = new Development(dirname, option);
         option.setupTask = option.setupTask || 'build';
@@ -213,20 +214,20 @@ export class Development {
      * @memberOf Development
      */
     protected loadAssertTasks(gulp: Gulp, ctx: ITaskContext): Promise<ITaskInfo> {
-        let optask = ctx.option;
-        if (ctx.option.asserts) {
-            let tasks: IAsserts[] = [];
+        let optask = <IAssertOption>ctx.option;
+        if (optask.asserts) {
+            let tasks: IAssertOption[] = [];
             _.each(_.keys(optask.asserts), name => {
-                let op: IAsserts;
+                let op: IAssertOption;
                 let sr = optask.asserts[name];
                 if (_.isString(sr)) {
-                    op = <IAsserts>{ src: sr, loader: [{ name: name, pipes: [], watch: true }] };
+                    op = <IAssertOption>{ src: sr, loader: [{ name: name, pipes: [], watch: true }] };
                 } else if (_.isArray(sr)) {
                     if (sr.length > 0) {
                         if (_.isString(_.first(<string[]>sr))) {
-                            op = <IAsserts>{ src: <string[]>sr, loader: [{ name: name, pipes: [], watch: true }] };
+                            op = <IAssertOption>{ src: <string[]>sr, loader: [{ name: name, pipes: [], watch: true }] };
                         } else {
-                            op = <IAsserts>{ loader: <IDynamicTaskOption[]>sr, watch: true };
+                            op = <IAssertOption>{ loader: <IDynamicTaskOption[]>sr, watch: true };
                         }
                     }
                 } else if (_.isFunction(sr)) {

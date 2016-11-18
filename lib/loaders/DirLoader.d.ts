@@ -1,4 +1,5 @@
-import { ITask, IContextDefine, ITaskOption, ITaskContext, IEnvOption } from 'development-core';
+import { ITask, IContextDefine, ITaskContext, IEnvOption } from 'development-core';
+import { ITaskOption } from '../TaskOption';
 import { ModuleLoader } from './ModuleLoader';
 export declare class DirLoader extends ModuleLoader {
     constructor(option: ITaskOption, env: IEnvOption);

@@ -1,4 +1,5 @@
-import { ITask, customLoader, IEnvOption, ITaskContext, ITaskOption } from 'development-core';
+import { ITask, IEnvOption, ITaskContext } from 'development-core';
+import { ITaskOption, customLoader } from '../TaskOption';
 import { ITaskLoader } from '../ITaskLoader';
 export declare class CustomLoader implements ITaskLoader {
     private option;

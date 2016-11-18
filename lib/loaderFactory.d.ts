@@ -1,5 +1,6 @@
 import { ITaskLoader } from './ITaskLoader';
-import { ITaskOption, IEnvOption } from 'development-core';
+import { IEnvOption } from 'development-core';
+import { ITaskOption } from './TaskOption';
 /**
  * loader factory.
  *

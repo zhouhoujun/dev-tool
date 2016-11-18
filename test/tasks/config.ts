@@ -1,4 +1,4 @@
-import { ITask, IEnvOption, bindingConfig,IContextDefine, ITaskContext, ITaskOption, ITaskConfig, taskdefine, ITaskDefine } from 'development-core';
+import { ITask, bindingConfig, IContextDefine, ITaskContext, ITaskConfig, taskdefine } from 'development-core';
 import * as tasks from './task';
 import * as _ from 'lodash';
 export * from './NodeTaskOption';

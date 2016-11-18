@@ -64,8 +64,7 @@ Development.create(gulp, __dirname, {
 ```ts
 
 import * as gulp from 'gulp';
-import { ITaskOption } from 'development-core';
-import { Development } from 'development-tool';
+import { ITaskOption, Development } from 'development-tool';
 // import 'development-tool-node';
 
 Development.create(gulp, __dirname, {
@@ -86,8 +85,8 @@ Development.create(gulp, __dirname, {
 
 import * as gulp from 'gulp';
 
-import { Pipe, TaskOption, Operation } from 'development-core';
-import { Development } from 'development-tool';
+import { Pipe, Operation } from 'development-core';
+import { TaskOption, Development } from 'development-tool';
 import { IBundlesConfig } from 'development-tool-jspm';
 const tslint = require('gulp-tslint');
 const ngAnnotate = require('gulp-ng-annotate');
@@ -151,7 +150,7 @@ Development.create(gulp, __dirname, [{
         },
         jspmconfig: {
             src: 'src/jspm-config/*.js'
-            watch: true, // add watch to this assert.
+            watch: true // add watch to this assert.
         },
         js: {
             loader: {
@@ -186,7 +185,7 @@ only dynamic task and IPipeTask (base class PipeTask) can add special pipe work.
 
 ```ts
 import * as gulp from 'gulp';
-import  { Development, IAsserts, ITaskOption } from 'development-tool';
+import  { Development, IAssertOption, ITaskOption } from 'development-tool';
 Development.create(gulp, __dirname, [
     {
         src: 'src',

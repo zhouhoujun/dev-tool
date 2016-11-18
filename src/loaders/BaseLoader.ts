@@ -1,4 +1,5 @@
-import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskOption, ILoaderOption } from 'development-core';
+import { ITask, IEnvOption, IContextDefine, ITaskContext } from 'development-core';
+import { ITaskOption, ILoaderOption } from '../TaskOption';
 import { ITaskLoader } from '../ITaskLoader';
 
 

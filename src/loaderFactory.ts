@@ -1,6 +1,8 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
-import { ITaskOption, ILoaderOption, IDynamicLoaderOption, IEnvOption } from 'development-core';
+import {  IEnvOption } from 'development-core';
+
+import { ITaskOption, ILoaderOption, IDynamicLoaderOption } from './TaskOption'
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import { CustomLoader } from './loaders/CustomLoader';

@@ -1,4 +1,5 @@
-import { ITaskOption, IContextDefine, IEnvOption } from 'development-core';
+import { IContextDefine, IEnvOption } from 'development-core';
+import { ITaskOption } from '../TaskOption';
 import contextDefine from '../utils/contextDefine';
 import { BaseLoader } from './BaseLoader';
 

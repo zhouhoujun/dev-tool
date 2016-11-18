@@ -1,4 +1,5 @@
-import { TaskOption, IEnvOption } from 'development-core';
+import { IEnvOption } from 'development-core';
+import { TaskOption } from './TaskOption';
 import { ITaskLoader } from './ITaskLoader';
 /**
  * Develop config

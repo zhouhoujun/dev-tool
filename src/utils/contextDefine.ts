@@ -1,4 +1,5 @@
-import { bindingConfig, ITask, ITaskConfig, ITaskContext, IContextDefine, IDynamicLoaderOption } from 'development-core';
+import { bindingConfig, ITask, ITaskConfig, ITaskContext, IContextDefine, } from 'development-core';
+import { IDynamicLoaderOption, IAssertOption } from '../TaskOption';
 
 export default (modules) => {
     return <IContextDefine>{
@@ -7,7 +8,7 @@ export default (modules) => {
         },
 
         tasks(context: ITaskContext): Promise<ITask[]> {
-            let lderOption: IDynamicLoaderOption = context.option.loader;
+            let lderOption: IDynamicLoaderOption = (<IAssertOption>context.option).loader;
             let dtask: ITask[] = [];
             if (lderOption.dynamicTasks) {
                 dtask = context.generateTask(lderOption.dynamicTasks);

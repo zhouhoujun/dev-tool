@@ -2,8 +2,9 @@ import * as mocha from 'mocha';
 import { expect, assert } from 'chai';
 
 import { ILoaderFactory, LoaderFactory } from '../src/loaderFactory';
-import { Operation, IDirLoaderOption, ITask, ITaskConfig, IDynamicLoaderOption, ITaskContext } from 'development-core';
+import { Operation, ITask, ITaskConfig, ITaskContext } from 'development-core';
 import { ITaskLoader } from '../src/ITaskLoader';
+import { IDirLoaderOption, IDynamicLoaderOption, IAssertOption } from '../src/TaskOption';
 
 let root = __dirname;
 import * as path from 'path';
@@ -27,8 +28,10 @@ describe('LoaderFactory', () => {
         expect(taskconfig).to.not.undefined;
         expect(taskconfig.env.config).to.equals('test');
         expect(taskconfig.oper).to.eq(Operation.build | Operation.watch);
-        expect(Array.isArray(taskconfig.option.loader)).to.false;
-        expect(Array.isArray(taskconfig.option.loader['dynamicTasks'])).to.true;
+
+        let option: IAssertOption = taskconfig.option;
+        expect(Array.isArray(option.loader)).to.false;
+        expect(Array.isArray(option.loader['dynamicTasks'])).to.true;
 
         let tasks = await loader.load(taskconfig);
         expect(tasks).not.null;
@@ -47,8 +50,10 @@ describe('LoaderFactory', () => {
         expect(taskconfig).to.not.undefined;
         expect(taskconfig.env.group).to.equals('test');
         expect(taskconfig.oper).to.eq(Operation.build);
-        expect(Array.isArray(taskconfig.option.loader)).to.false;
-        expect(Array.isArray(taskconfig.option.loader['dynamicTasks'])).to.true;
+
+        let option: IAssertOption = taskconfig.option;
+        expect(Array.isArray(option.loader)).to.false;
+        expect(Array.isArray(option.loader['dynamicTasks'])).to.true;
 
         let tasks = await loader.load(taskconfig);
         expect(tasks).not.null;
@@ -61,8 +66,10 @@ describe('LoaderFactory', () => {
         expect(nogptaskconfig).to.not.undefined;
         expect(nogptaskconfig.env.group).to.undefined;
         expect(nogptaskconfig.oper).to.eq(Operation.build);
-        expect(Array.isArray(nogptaskconfig.option.loader)).to.false;
-        expect(Array.isArray(nogptaskconfig.option.loader['dynamicTasks'])).to.true;
+
+        let option2: IAssertOption = taskconfig.option;
+        expect(Array.isArray(option2.loader)).to.false;
+        expect(Array.isArray(option2.loader['dynamicTasks'])).to.true;
 
         let ntasks = await loader.load(nogptaskconfig);
         expect(ntasks).not.null;
