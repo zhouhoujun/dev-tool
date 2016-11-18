@@ -238,7 +238,7 @@ export class Development {
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
                 }
-                op.name = op.name || name;
+                op.name = op.name || ctx.subTaskName(name);
                 op.src = op.src || (ctx.getSrc({ oper: Operation.build }) + '/**/*.' + name);
                 op.dist = op.dist || ctx.getDist({ oper: Operation.build });
                 tasks.push(op);
@@ -263,7 +263,7 @@ export class Development {
                                 return subseq[0];
                             }
 
-                            name = ctx.subTaskName(t.task)
+                            name = ctx.subTaskName(t.task, '-assert')
                             gulp.task(name, () => {
                                 return runSequence(gulp, subseq);
                             });
