@@ -9,7 +9,7 @@ export * from './LoaderFactory';
 export * from './loaders/BaseLoader';
 export declare class Development {
     private dirname;
-    protected option: DevelopConfig;
+    protected config: DevelopConfig;
     /**
      * global data.
      *
@@ -35,11 +35,11 @@ export declare class Development {
      * Creates an instance of Development.
      *
      * @param {string} dirname
-     * @param {DevelopConfig} option
+     * @param {DevelopConfig} config
      *
      * @memberOf Development
      */
-    private constructor(dirname, option);
+    private constructor(dirname, config);
     /**
      * run task.
      *
@@ -50,16 +50,6 @@ export declare class Development {
      * @memberOf Development
      */
     run(gulp: Gulp, env: IEnvOption): Promise<any>;
-    /**
-     * filter task sequence.
-     *
-     * @private
-     * @param {Src[]} seq
-     * @returns {Src[]}
-     *
-     * @memberOf Development
-     */
-    private filterTaskSequence(seq);
     private bindingContext(ctx);
     protected loadTasks(gulp: Gulp, tasks: TaskOption, env: IEnvOption): Promise<Src[]>;
     protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
@@ -85,6 +75,6 @@ export declare class Development {
      * @memberOf Development
      */
     protected loadAssertTasks(gulp: Gulp, ctx: ITaskContext): Promise<ITaskInfo>;
-    protected createLoader(option: ITaskOption, env: IEnvOption): ITaskLoader;
+    protected createLoader(option: TaskOption, env: IEnvOption): ITaskLoader;
     protected printHelp(help: boolean | string): void;
 }

@@ -28,11 +28,11 @@ export interface DevelopConfig {
     /**
      * custom loader factory.
      * 
-     * @param {ITaskOption} option
+     * @param {TaskOption} option
      * @param {IEnvOption} [env]
      * @returns {ITaskLoader}
      * 
      * @memberOf DevelopConfig
      */
-    loaderFactory?(option: ITaskOption, env?: IEnvOption): ITaskLoader;
+    loaderFactory?(option: TaskOption, env?: IEnvOption): ITaskLoader;
 }

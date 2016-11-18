@@ -226,18 +226,19 @@ export class Development {
                         if (_.isString(_.first(<string[]>sr))) {
                             op = <IAsserts>{ src: <string[]>sr, loader: [{ name: name, pipes: [], watch: true }] };
                         } else {
-                            op = <IAsserts>{ name: name, loader: <IDynamicTaskOption[]>sr, watch: true };
+                            op = <IAsserts>{ loader: <IDynamicTaskOption[]>sr, watch: true };
                         }
                     }
                 } else if (_.isFunction(sr)) {
-                    op = { loader: sr, name: name };
+                    op = { loader: sr };
                 } else {
                     op = sr;
-                    op.name = op.name || name;
-                };
+                }
+
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
                 }
+                op.name = op.name || name;
                 op.src = op.src || (ctx.getSrc({ oper: Operation.build }) + '/**/*.' + name);
                 op.dist = op.dist || ctx.getDist({ oper: Operation.build });
                 tasks.push(op);
