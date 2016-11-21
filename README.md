@@ -108,7 +108,7 @@ Development.create(gulp, __dirname, [{
         }
     },
     loader: 'development-tool-web',
-    assertsOrder: 1,
+    assertsOrder: 0.1,
     asserts: {
         css: '',
         html: ['src/*.html', 'src/*.cshtml'],
@@ -143,8 +143,8 @@ Development.create(gulp, __dirname, [{
             loader: {
                 module: 'development-assert-ts',
                 pipes: <Pipe[]>[
-                    { name: 'tscompile', toTransform: () => tslint(), order: 2 },
-                    { name: 'tscompile', toTransform: () => ngAnnotate(), order: 3 },
+                    { name: 'tscompile', toTransform: () => tslint(), order: total=> 2/total },
+                    { name: 'tscompile', toTransform: () => ngAnnotate(), order: total=> 3/total },
                 ]
             }
         },
@@ -156,7 +156,7 @@ Development.create(gulp, __dirname, [{
             loader: {
                 module: 'development-assert-js',
                 pipes: <Pipe[]>[
-                    { name: 'jscompile', toTransform: () => ngAnnotate(), order: 2 }
+                    { name: 'jscompile', toTransform: () => ngAnnotate(), order: total=> 2/total }
                 ]
             }
         }
@@ -417,7 +417,7 @@ Development.create(gulp, __dirname, [
     {
         src: 'src',
         dist: 'lib',
-        assertsOrder: 1,
+        assertsOrder: 0.1,
         asserts: {
             ts: [
                 {

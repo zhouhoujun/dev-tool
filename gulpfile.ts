@@ -16,11 +16,11 @@ Development.create(gulp, __dirname, [
         asserts: {
             ts: { loader: 'development-assert-ts' }
         },
+        assertsOrder: total => 2 / total,
         loader: [
             {
                 name: 'test',
                 src: 'test/**/*spec.ts',
-                order: 1,
                 oper: Operation.test | Operation.default,
                 pipes: <Pipe[]>[
                     () => mocha()

@@ -27,7 +27,7 @@ export class TestTask implements IDynamicTasks {
             {
                 name: 'test',
                 src: 'test/**/*spec.ts',
-                order: 1,
+                order: 0.1,
                 oper: Operation.test | Operation.release | Operation.deploy,
                 pipes: [mocha],
                 output: null
