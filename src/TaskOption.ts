@@ -1,5 +1,5 @@
 import {
-    Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts
+    Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay
     , IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext
 } from 'development-core'
 
@@ -117,6 +117,13 @@ export interface ISubTaskOption {
      * @memberOf ISubTaskOption
      */
     subTaskOrder?: Order;
+    /**
+     * sub tasks run way. default RunWay.sequence
+     * 
+     * @type {RunWay}
+     * @memberOf ISubTaskOption
+     */
+    subTaskRunWay?: RunWay
 
 }
 
@@ -167,6 +174,13 @@ export interface ITaskLoaderOption {
  */
 export interface IAssertOption extends IAsserts, ITaskLoaderOption {
 
+    /**
+     * asserts tasks run way. default RunWay.parallel
+     * 
+     * @type {RunWay}
+     * @memberOf ISubTaskOption
+     */
+    assertsRunWay?: RunWay
 }
 
 /**

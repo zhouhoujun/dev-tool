@@ -40,7 +40,15 @@ export interface DevelopConfig {
      * @type {RunWay}
      * @memberOf DevelopConfig
      */
-    runWay?: RunWay
+    runWay?: RunWay;
+
+    /**
+     * compose context.
+     * 
+     * @type {boolean}
+     * @memberOf DevelopConfig
+     */
+    compose?: boolean;
 
     /**
      * custom loader factory.

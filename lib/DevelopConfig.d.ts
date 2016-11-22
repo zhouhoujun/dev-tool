@@ -37,6 +37,13 @@ export interface DevelopConfig {
      */
     runWay?: RunWay;
     /**
+     * compose context.
+     *
+     * @type {boolean}
+     * @memberOf DevelopConfig
+     */
+    compose?: boolean;
+    /**
      * custom loader factory.
      *
      * @param {TaskOption} option

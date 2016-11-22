@@ -1,5 +1,5 @@
 /// <reference types="chai" />
-import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext } from 'development-core';
+import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext } from 'development-core';
 /**
  * development context
  *
@@ -105,6 +105,13 @@ export interface ISubTaskOption {
      * @memberOf ISubTaskOption
      */
     subTaskOrder?: Order;
+    /**
+     * sub tasks run way. default RunWay.sequence
+     *
+     * @type {RunWay}
+     * @memberOf ISubTaskOption
+     */
+    subTaskRunWay?: RunWay;
 }
 /**
  * the option for loader dynamic build task.
@@ -147,6 +154,13 @@ export interface ITaskLoaderOption {
  * @extends {ITaskLoaderOption}
  */
 export interface IAssertOption extends IAsserts, ITaskLoaderOption {
+    /**
+     * asserts tasks run way. default RunWay.parallel
+     *
+     * @type {RunWay}
+     * @memberOf ISubTaskOption
+     */
+    assertsRunWay?: RunWay;
 }
 /**
  * task option setting.

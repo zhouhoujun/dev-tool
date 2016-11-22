@@ -33,7 +33,7 @@ export declare class Development {
      *
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay?: RunWay): Development;
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay?: RunWay, compose?: boolean): Development;
     /**
      * Creates an instance of Development.
      *

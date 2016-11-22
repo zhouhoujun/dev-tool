@@ -37,10 +37,11 @@ export class Development {
      * 
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay = RunWay.sequence): Development {
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay = RunWay.sequence, compose = false): Development {
         let option = _.isArray(setting) ? { tasks: setting, runWay: runWay } : setting;
         if (!_.isUndefined(option.runWay)) {
             option.runWay = runWay;
+            option.compose = compose;
         }
         let devtool = new Development(dirname, option);
         option.setupTask = option.setupTask || 'build';
@@ -122,7 +123,9 @@ export class Development {
         let ctx = <IContext>context;
         // cfg.env = cfg.env || this.env;
         ctx.globals = this.globals;
-        ctx.parent = _.isUndefined(parent) ? this.getContext(ctx.env) : parent;
+        if (this.config.compose) {
+            ctx.parent = _.isUndefined(parent) ? this.getContext(ctx.env) : parent;
+        }
         return ctx;
     }
 
@@ -200,12 +203,14 @@ export class Development {
             });
             return this.loadTasks(gulp, optask.tasks, ctx)
                 .then(subseq => {
-
-                    let taskname = zipSequence(gulp, subseq, ctx, (name, runway) => name + (runway === RunWay.sequence ? '-sub-seq' : '-sub-par'));
-
+                    let taskname;
+                    if (optask.subTaskRunWay === RunWay.parallel) {
+                        taskname = [flattenSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-subs' : '-subp')))]
+                    } else {
+                        taskname = zipSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-subs' : '-subp')));
+                    }
                     if (taskname) {
                         return <ITaskInfo>{
-                            name: taskname,
                             order: optask.subTaskOrder,
                             taskName: taskname
                         };
@@ -272,13 +277,19 @@ export class Development {
                 .then(tseq => {
                     // asserts tasks run mutil.
                     let assertSeq = _.map(tseq, t => {
-                        return zipSequence(gulp, t.sq, ctx, (name, runway) => ctx.subTaskName(name + (runway === RunWay.sequence ? '-assert-seq' : '-assert-par')));
+                        return zipSequence(gulp, t.sq, ctx, (name, runway) => ctx.subTaskName(t.task.name, runway === RunWay.sequence ? '-asserts' : '-assertp')); // ctx.subTaskName(name + (runway === RunWay.sequence ? '-assert-seq' : '-assert-par')));
                     });
 
+                    let taskname;
+                    if (optask.assertsRunWay === RunWay.sequence) {
+                        taskname = assertSeq;
+                    } else {
+                        taskname = zipSequence(gulp, [assertSeq], ctx, (name, runway) => name + (runway === RunWay.sequence ? '-asserts' : '-assertp'));
+                    }
 
                     return <ITaskInfo>{
-                        order: ctx.option.assertsOrder,
-                        taskName: assertSeq
+                        order: optask.assertsOrder,
+                        taskName: taskname
                     }
                 });
         } else {
