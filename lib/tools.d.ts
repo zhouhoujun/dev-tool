@@ -1,8 +1,8 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
-import { Src, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption } from 'development-core';
-import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
+import { Src, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
+import { TaskOption, ITaskOption, IAssertOption, IContext } from './TaskOption';
 import { DevelopConfig } from './DevelopConfig';
 export * from './DevelopConfig';
 export * from './TaskOption';
@@ -28,11 +28,12 @@ export declare class Development {
      * @param {Gulp} gulp
      * @param {string} dirname
      * @param {(DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>)} setting
+     * @param {any} [runWay=RunWay.sequence]
      * @returns {Development}
      *
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>): Development;
+    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay?: RunWay): Development;
     /**
      * Creates an instance of Development.
      *
@@ -52,20 +53,22 @@ export declare class Development {
      * @memberOf Development
      */
     run(gulp: Gulp, env: IEnvOption): Promise<any>;
-    private bindingContext(ctx);
-    protected loadTasks(gulp: Gulp, tasks: TaskOption, env: IEnvOption): Promise<Src[]>;
+    private globalctx;
+    getContext(env: any): IContext;
+    private bindingContext(context, parent);
+    protected loadTasks(gulp: Gulp, tasks: TaskOption, parent: IContext): Promise<Src[]>;
     protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
     /**
      * load sub tasks as group task.
      *
      * @protected
      * @param {Gulp} gulp
-     * @param {ITaskContext} ctx
-     * @returns {Promise<Src>}
+     * @param {IContext} ctx
+     * @returns {Promise<ITaskInfo>}
      *
      * @memberOf Development
      */
-    protected loadSubTask(gulp: Gulp, ctx: ITaskContext): Promise<ITaskInfo>;
+    protected loadSubTask(gulp: Gulp, ctx: IContext): Promise<ITaskInfo>;
     /**
      * load asserts tasks.
      *
@@ -76,7 +79,7 @@ export declare class Development {
      *
      * @memberOf Development
      */
-    protected loadAssertTasks(gulp: Gulp, ctx: ITaskContext): Promise<ITaskInfo>;
+    protected loadAssertTasks(gulp: Gulp, ctx: IContext): Promise<ITaskInfo>;
     protected createLoader(option: TaskOption, env: IEnvOption): ITaskLoader;
     protected printHelp(help: boolean | string): void;
 }

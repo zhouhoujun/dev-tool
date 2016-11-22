@@ -1,5 +1,5 @@
-import { IEnvOption } from 'development-core';
-import { TaskOption } from './TaskOption';
+import { IEnvOption, RunWay } from 'development-core';
+import { IAssertOption, TaskOption } from './TaskOption';
 import { ITaskLoader } from './ITaskLoader';
 // import { Operation } from './Operation';
 
@@ -25,6 +25,22 @@ export interface DevelopConfig {
      * @memberOf DevelopConfig
      */
     tasks: TaskOption;
+
+    /**
+     * development tool option.
+     * 
+     * @type {IAssertOption}
+     * @memberOf DevelopConfig
+     */
+    option?: IAssertOption;
+
+    /**
+     * tasks runWay
+     * 
+     * @type {RunWay}
+     * @memberOf DevelopConfig
+     */
+    runWay?: RunWay
 
     /**
      * custom loader factory.

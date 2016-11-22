@@ -67,15 +67,38 @@ import * as gulp from 'gulp';
 import { ITaskOption, Development } from 'development-tool';
 // import 'development-tool-node';
 
-Development.create(gulp, __dirname, {
-    tasks: <ITaskOption>{
-        src: 'src',
-        dist: 'lib',
-        buildDist: 'build',
-        testSrc: 'test/**/*.spec.ts',
-        loader: 'development-tool-node'
-    }
-});
+Development.create(gulp, __dirname, [{
+    src: 'src',
+    dist: 'lib',
+    buildDist: 'build',
+    asserts:{
+        config: {
+            src(ctx) {
+                if (ctx.env.config) {
+                    return `src/config-${ctx.env.config}.json`;
+                } else {
+                    return 'src/config.json';
+                }
+            },
+            watch: true, // add watch to this assert.
+            loader: [
+                {
+                    name: 'config',
+                    oper: Operation.default,
+                    pipes: [
+                        () => cache('config_json'),
+                        () => rename('config.json'),
+                        () => jeditor()
+                    ]
+                }
+            ]
+        },
+        json: ['src/**/*.json', '!src/data/**/*.json', '!src**/jsconfig.json', '!src/config*.json']
+        ...
+    },
+    testSrc: 'test/**/*.spec.ts',
+    loader: 'development-tool-node'
+}]);
 
 ```
 
@@ -170,11 +193,13 @@ Development.create(gulp, __dirname, [{
             mainfile: 'bundle.js',
             loader: 'development-tool-jspm',
             // bundles: {
-
+            //   ...
             // }
         }
     ]
 
+}, {
+    ...
 }]);
 
 ```

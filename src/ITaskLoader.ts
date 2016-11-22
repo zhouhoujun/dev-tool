@@ -1,5 +1,5 @@
 import { ITask, IEnvOption, ITaskContext } from 'development-core';
-
+import { IContext } from './TaskOption';
 
 /**
  * task loader.
@@ -21,11 +21,11 @@ export interface ITaskLoader {
     /**
      * load context.
      * 
-     * @param {ITaskContext} context
+     * @param {IContext} context
      * @returns {Promise<ITask[]>}
      * 
      * @memberOf ITaskLoader
      */
-    loadContext(env: IEnvOption): Promise<ITaskContext>;
+    loadContext(env: IEnvOption): Promise<IContext>;
 
 }

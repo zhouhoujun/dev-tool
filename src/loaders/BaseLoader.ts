@@ -1,5 +1,5 @@
 import { ITask, IEnvOption, IContextDefine, ITaskContext } from 'development-core';
-import { ITaskOption, ILoaderOption } from '../TaskOption';
+import { ITaskOption, ILoaderOption, IContext } from '../TaskOption';
 import { ITaskLoader } from '../ITaskLoader';
 
 
@@ -12,7 +12,7 @@ export abstract class BaseLoader implements ITaskLoader {
         this.env = env;
     }
 
-    load(context: ITaskContext): Promise<ITask[]> {
+    load(context: IContext): Promise<ITask[]> {
         return this.contextDef
             .then(def => {
                 return this.loadTasks(context, def);
@@ -22,12 +22,12 @@ export abstract class BaseLoader implements ITaskLoader {
             });
     }
 
-    loadContext(env: IEnvOption): Promise<ITaskContext> {
+    loadContext(env: IEnvOption): Promise<IContext> {
         this.env = env;
         let self = this;
         return this.contextDef
             .then(def => {
-                return def.getContext({
+                return <IContext>def.getContext({
                     option: self.option,
                     env: env
                 });

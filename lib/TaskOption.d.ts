@@ -1,6 +1,16 @@
 /// <reference types="chai" />
 import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext } from 'development-core';
 /**
+ * development context
+ *
+ * @export
+ * @interface IContext
+ * @extends {ITaskContext}
+ */
+export interface IContext extends ITaskContext {
+    parent?: IContext;
+}
+/**
  * task loader option.
  *
  * @export

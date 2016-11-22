@@ -1,5 +1,5 @@
 import { ITask, IEnvOption, ITaskContext, bindingConfig } from 'development-core';
-import { ITaskOption, customLoader } from '../TaskOption';
+import { ITaskOption, customLoader, IContext } from '../TaskOption';
 import { ITaskLoader } from '../ITaskLoader';
 
 export class CustomLoader implements ITaskLoader {
@@ -12,11 +12,11 @@ export class CustomLoader implements ITaskLoader {
         return Promise.resolve(this.loader(context));
     }
 
-    private condef: Promise<ITaskContext>;
-    loadContext(env: IEnvOption): Promise<ITaskContext> {
+    private condef: Promise<IContext>;
+    loadContext(env: IEnvOption): Promise<IContext> {
         let self = this;
         this.condef = this.condef || Promise.resolve(
-            bindingConfig({
+            <IContext>bindingConfig({
                 option: self.option,
                 env: env
             }));
