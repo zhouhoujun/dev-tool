@@ -159,9 +159,18 @@ export class Development {
                         }
                     });
             })
-        ).then(tsq => {
-            return _.flatten(tsq);
-        });
+        )
+            .then(tsq => {
+                let rst: Src[] = [];
+                _.each(tsq, t => {
+                    let tk = zipSequence(gulp, t, parent);
+                    if (tk) {
+                        rst.push(tk);
+                    }
+                });
+                return rst;
+
+            });
     }
 
     protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]> {
