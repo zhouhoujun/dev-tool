@@ -134,9 +134,13 @@ Development.create(gulp, __dirname, [{
     assertsOrder: 0.1,
     asserts: {
         css: '',
+        // only build env to work .less assert files tasks, watch env auto watch .less assert files and do tasks work.
+        less: Operation.build | Operation.autoWatch,
+        // build, release and deploy env to work .config assert files tasks, watch env auto watch .config assert files and do tasks work.
+        config: Operation.default | Operation.autoWatch,
         html: ['src/*.html', 'src/*.cshtml'],
         json: ['src/**/*.json', '!src/data/**/*.json', '!src**/jsconfig.json', '!src/config*.json'],
-        config: {
+        cusconfig: {
             src(ctx) {
                 if (ctx.env.config) {
                     return `src/config-${ctx.env.config}.json`;

@@ -242,6 +242,11 @@ export class Development {
                 let sr = optask.asserts[name];
                 if (_.isString(sr)) {
                     op = <IAssertOption>{ src: sr, loader: [{ name: name, pipes: [], watch: true }] };
+                } else if (_.isNumber(sr)) {
+                    // watch with Operation.autoWatch.
+                    op = <IAssertOption>{ loader: [{ oper: sr, name: name, pipes: [] }] };
+                } else if (_.isFunction(sr)) {
+                    op = { loader: sr };
                 } else if (_.isArray(sr)) {
                     if (sr.length > 0) {
                         if (_.isString(_.first(<string[]>sr))) {
@@ -250,8 +255,6 @@ export class Development {
                             op = <IAssertOption>{ loader: <IDynamicTaskOption[]>sr, watch: true };
                         }
                     }
-                } else if (_.isFunction(sr)) {
-                    op = { loader: sr };
                 } else {
                     op = sr;
                 }
