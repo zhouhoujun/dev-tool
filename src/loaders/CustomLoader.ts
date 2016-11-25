@@ -1,10 +1,11 @@
-import { ITask, IEnvOption, ITaskContext, bindingConfig } from 'development-core';
-import { ITaskOption, customLoader, IContext } from '../TaskOption';
+import { ITask, IEnvOption, ITaskContext, bindingConfig, ITaskConfig } from 'development-core';
+import { ITaskOption, customLoader } from '../TaskOption';
+import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
 
 export class CustomLoader implements ITaskLoader {
 
-    constructor(private option: ITaskOption, private loader: customLoader) {
+    constructor(private option: ITaskOption, private loader: customLoader, private factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
 
     }
 
@@ -18,7 +19,8 @@ export class CustomLoader implements ITaskLoader {
         this.condef = this.condef || Promise.resolve(
             <IContext>bindingConfig({
                 option: self.option,
-                env: env
+                env: env,
+                createContext: self.factory
             }));
 
         return this.condef;

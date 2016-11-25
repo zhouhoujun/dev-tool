@@ -1,5 +1,5 @@
 import { ITask, IEnvOption, ITaskContext } from 'development-core';
-import { IContext } from './TaskOption';
+import { IContext } from './IContext';
 
 /**
  * task loader.

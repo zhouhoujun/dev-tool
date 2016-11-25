@@ -1,19 +1,10 @@
 import {
     Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay
-    , IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext
+    , IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
 } from 'development-core'
 
 
-/**
- * development context
- * 
- * @export
- * @interface IContext
- * @extends {ITaskContext}
- */
-export interface IContext extends ITaskContext {
-    parent?: IContext;
-}
+export type contextFactory = (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext;
 /**
  * task loader option.
  * 

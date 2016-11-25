@@ -1,15 +1,13 @@
-import { ITask, IEnvOption, IContextDefine, ITaskContext } from 'development-core';
-import { ITaskOption, ILoaderOption, IContext } from '../TaskOption';
+import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskConfig } from 'development-core';
+import { ITaskOption, ILoaderOption } from '../TaskOption';
+import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
 
 
 export abstract class BaseLoader implements ITaskLoader {
 
-    protected option: ITaskOption;
-    protected env: IEnvOption;
-    constructor(option: ITaskOption, env?: IEnvOption) {
-        this.option = option;
-        this.env = env;
+    constructor(protected option: ITaskOption, protected env?: IEnvOption, protected factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
+
     }
 
     load(context: IContext): Promise<ITask[]> {
@@ -29,7 +27,8 @@ export abstract class BaseLoader implements ITaskLoader {
             .then(def => {
                 return <IContext>def.getContext({
                     option: self.option,
-                    env: env
+                    env: env,
+                    createContext: self.factory
                 });
             })
             .catch(err => {

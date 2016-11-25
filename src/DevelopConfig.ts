@@ -1,4 +1,4 @@
-import { IEnvOption, RunWay } from 'development-core';
+import { IEnvOption, RunWay, ITaskConfig, ITaskContext } from 'development-core';
 import { IAssertOption, TaskOption } from './TaskOption';
 import { ITaskLoader } from './ITaskLoader';
 // import { Operation } from './Operation';
@@ -43,14 +43,6 @@ export interface DevelopConfig {
     runWay?: RunWay;
 
     /**
-     * compose context.
-     * 
-     * @type {boolean}
-     * @memberOf DevelopConfig
-     */
-    compose?: boolean;
-
-    /**
      * custom loader factory.
      * 
      * @param {TaskOption} option
@@ -60,4 +52,15 @@ export interface DevelopConfig {
      * @memberOf DevelopConfig
      */
     loaderFactory?(option: TaskOption, env?: IEnvOption): ITaskLoader;
+
+    /**
+     * custom context factory.
+     * 
+     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} [parent]
+     * @returns {ITaskContext}
+     * 
+     * @memberOf DevelopConfig
+     */
+    contextFactory?(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
 }

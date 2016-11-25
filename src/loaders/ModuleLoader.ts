@@ -1,4 +1,4 @@
-import { IContextDefine, findTaskDefineInModule, IEnvOption, taskDefine2Context } from 'development-core';
+import { IContextDefine, findTaskDefineInModule, IEnvOption, ITaskConfig, ITaskContext, taskDefine2Context } from 'development-core';
 import { ITaskOption, ILoaderOption } from '../TaskOption';
 import { BaseLoader } from './BaseLoader';
 import contextDefine from '../utils/contextDefine';
@@ -6,8 +6,8 @@ import * as chalk from 'chalk';
 
 export class ModuleLoader extends BaseLoader {
 
-    constructor(option: ITaskOption, env?: IEnvOption) {
-        super(option, env);
+    constructor(option: ITaskOption, env?: IEnvOption, factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
+        super(option, env, factory);
     }
 
     protected getContextDefine(): IContextDefine | Promise<IContextDefine> {

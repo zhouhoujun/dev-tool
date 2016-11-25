@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
-import { ITask, IContextDefine, ITaskContext, bindingConfig, findTaskDefineInDir, taskSourceVal, IEnvOption } from 'development-core';
+import { ITask, IContextDefine, ITaskContext, bindingConfig, findTaskDefineInDir, ITaskConfig, taskSourceVal, IEnvOption } from 'development-core';
 import { ITaskOption, IDirLoaderOption } from '../TaskOption';
 import { ModuleLoader } from './ModuleLoader';
 
 export class DirLoader extends ModuleLoader {
 
-    constructor(option: ITaskOption, env: IEnvOption) {
+    constructor(option: ITaskOption, env: IEnvOption, factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
         super(option, env);
     }
 
@@ -23,7 +23,7 @@ export class DirLoader extends ModuleLoader {
         let self = this;
         if (!loader.configModule
             && !loader.module && loader.dir) {
-            return findTaskDefineInDir(taskSourceVal(loader.dir, bindingConfig({ env: self.env, option: {} })));
+            return findTaskDefineInDir(taskSourceVal(loader.dir, bindingConfig({ env: self.env, option: {}, createContext: self.factory })));
         } else {
             return super.getContextDefine();
         }

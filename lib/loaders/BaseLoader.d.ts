@@ -1,11 +1,13 @@
 /// <reference types="chai" />
-import { ITask, IEnvOption, IContextDefine, ITaskContext } from 'development-core';
-import { ITaskOption, IContext } from '../TaskOption';
+import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskConfig } from 'development-core';
+import { ITaskOption } from '../TaskOption';
+import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
 export declare abstract class BaseLoader implements ITaskLoader {
     protected option: ITaskOption;
     protected env: IEnvOption;
-    constructor(option: ITaskOption, env?: IEnvOption);
+    protected factory: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext;
+    constructor(option: ITaskOption, env?: IEnvOption, factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext);
     load(context: IContext): Promise<ITask[]>;
     loadContext(env: IEnvOption): Promise<IContext>;
     private _contextDef;

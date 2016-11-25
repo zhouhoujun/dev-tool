@@ -1,8 +1,8 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
-import {  IEnvOption } from 'development-core';
+import { IEnvOption } from 'development-core';
 
-import { ITaskOption, ILoaderOption, IDynamicLoaderOption } from './TaskOption'
+import { ITaskOption, ILoaderOption, IDynamicLoaderOption, contextFactory } from './TaskOption'
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import { CustomLoader } from './loaders/CustomLoader';
@@ -21,11 +21,12 @@ export interface ILoaderFactory {
      * 
      * @param {ITaskOption} option
      * @param {IEnvOption} [env]
+     * @param {contextFactory} [factory]
      * @returns {ITaskLoader}
      * 
      * @memberOf ILoaderFactory
      */
-    create(option: ITaskOption, env?: IEnvOption): ITaskLoader;
+    create(option: ITaskOption, env?: IEnvOption, factory?: contextFactory): ITaskLoader;
 }
 
 
@@ -40,20 +41,20 @@ export class LoaderFactory implements ILoaderFactory {
 
     constructor() {
     }
-    create(option: ITaskOption, env?: IEnvOption): ITaskLoader {
+    create(option: ITaskOption, env?: IEnvOption, factory?: contextFactory): ITaskLoader {
 
         if (_.isString(option.loader)) {
             option.loader = {
                 module: option.loader
             };
-            return new ModuleLoader(option);
+            return new ModuleLoader(option, env, factory);
         } else if (_.isFunction(option.loader)) {
-            return new CustomLoader(option, option.loader);
+            return new CustomLoader(option, option.loader, factory);
         } else if (_.isArray(option.loader)) {
             option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: option.loader || []
             };
-            return new DynamicLoader(option);
+            return new DynamicLoader(option, env, factory);
         } else if (option.loader) {
             // if config dir.
             if (option.loader['dir']) {
@@ -65,7 +66,7 @@ export class LoaderFactory implements ILoaderFactory {
                 option.loader = <IDynamicLoaderOption>{
                     dynamicTasks: option.loader
                 };
-                return new DynamicLoader(option);
+                return new DynamicLoader(option, env, factory);
             }
 
             // if config pipe and taskName.
@@ -77,16 +78,16 @@ export class LoaderFactory implements ILoaderFactory {
             let loderOption: ILoaderOption = option.loader;
             switch (loderOption.type) {
                 case 'dir':
-                    loader = new DirLoader(option, env);
+                    loader = new DirLoader(option, env, factory);
                     break;
 
                 case 'dynamic':
-                    loader = new DynamicLoader(option);
+                    loader = new DynamicLoader(option, env, factory);
                     break;
 
                 case 'module':
                 default:
-                    loader = new ModuleLoader(option, env);
+                    loader = new ModuleLoader(option, env, factory);
                     break;
             }
             return loader;
@@ -95,7 +96,7 @@ export class LoaderFactory implements ILoaderFactory {
             option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: []
             };
-            return new DynamicLoader(option);
+            return new DynamicLoader(option, env, factory);
         }
     }
 }

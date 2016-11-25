@@ -1,15 +1,6 @@
 /// <reference types="chai" />
-import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext } from 'development-core';
-/**
- * development context
- *
- * @export
- * @interface IContext
- * @extends {ITaskContext}
- */
-export interface IContext extends ITaskContext {
-    parent?: IContext;
-}
+import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig } from 'development-core';
+export declare type contextFactory = (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext;
 /**
  * task loader option.
  *
