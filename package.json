@@ -44,7 +44,11 @@
     "@types/minimist": "^1.1.29",
     "chalk": "^1.1.3",
     "checksum": "^0.1.1",
+<<<<<<< HEAD
     "development-core": "^0.9.10",
+=======
+    "development-core": "^0.9.9",
+>>>>>>> 4a2454af86185a924e876b0909da55c86f069278
     "gulp": "^3.9.1"
   },
   "devDependencies": {
