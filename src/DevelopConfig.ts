@@ -12,12 +12,21 @@ import { ITaskLoader } from './ITaskLoader';
  */
 export interface DevelopConfig {
     /**
-     * tools setup main task.
+     * tools setup main task name.
      * 
      * @type {string}
      * @memberOf DevelopConfig
      */
     setupTask?: string;
+
+    /**
+     * tools setup start task name.
+     * 
+     * @type {string}
+     * @memberOf DevelopConfig
+     */
+    startTask?: string;
+
     /**
      * tasks config.
      * 
@@ -47,11 +56,12 @@ export interface DevelopConfig {
      * 
      * @param {TaskOption} option
      * @param {IEnvOption} [env]
+     * @param {ITaskContext} [parent]
      * @returns {ITaskLoader}
      * 
      * @memberOf DevelopConfig
      */
-    loaderFactory?(option: TaskOption, env?: IEnvOption): ITaskLoader;
+    loaderFactory?(option: TaskOption, env?: IEnvOption, parent?: ITaskContext): ITaskLoader;
 
     /**
      * custom context factory.

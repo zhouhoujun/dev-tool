@@ -40,6 +40,8 @@ export declare class Development {
      * @memberOf Development
      */
     run(gulp: Gulp, env: IEnvOption): Promise<any>;
+    startTask(gulp: Gulp, env: IEnvOption): Promise<any>;
+    setupTasks(gulp: Gulp, env: IEnvOption): Promise<Src[]>;
     private globalctx;
     getContext(env: any): IContext;
     protected loadTasks(gulp: Gulp, tasks: TaskOption, parent: IContext): Promise<Src[]>;
@@ -66,6 +68,6 @@ export declare class Development {
      * @memberOf Development
      */
     protected loadAssertTasks(gulp: Gulp, ctx: IContext): Promise<ITaskInfo>;
-    protected createLoader(option: TaskOption, env: IEnvOption): ITaskLoader;
+    protected createLoader(option: TaskOption, parent: IContext): ITaskLoader;
     protected printHelp(help: boolean | string): void;
 }

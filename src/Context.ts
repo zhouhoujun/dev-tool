@@ -1,6 +1,7 @@
-import { TaskContext, ITaskConfig, ITaskContext } from 'development-core';
+import { TaskContext, ITaskConfig, ITaskContext, ITask, TaskResult } from 'development-core';
 import { IContext } from './IContext';
 import * as _ from 'lodash';
+import { Gulp } from 'gulp';
 
 /**
  * Context.

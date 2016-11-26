@@ -1,4 +1,4 @@
-import { ITaskContext } from 'development-core'
+import { ITaskContext, ITask } from 'development-core'
 /**
  * development context
  * 

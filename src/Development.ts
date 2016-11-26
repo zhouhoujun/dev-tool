@@ -49,6 +49,15 @@ export class Development {
             return devtool.run(gulp, options);
         });
 
+        option.startTask = option.startTask || 'start';
+        gulp.task(option.startTask, (callback: TaskCallback) => {
+            var options: IEnvOption = minimist(process.argv.slice(2), {
+                string: 'env',
+                default: { env: process.env.NODE_ENV || 'development' }
+            });
+            return devtool.startTask(gulp, options);
+        })
+
         gulp.task('default', () => {
             gulp.start(option.setupTask);
         });
@@ -77,6 +86,36 @@ export class Development {
      * @memberOf Development
      */
     run(gulp: Gulp, env: IEnvOption): Promise<any> {
+        return this.setupTasks(gulp, env)
+            .then(tseq => {
+                // console.log(chalk.grey('run sequenec tasks:'), tseq);
+                let gbctx = this.getContext(env);
+                if (this.config.runWay === RunWay.parallel) {
+                    return runSequence(gulp, [flattenSequence(gulp, tseq, gbctx)]);
+                } else {
+                    return runSequence(gulp, tseq);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                process.exit(1);
+            });
+    }
+
+    startTask(gulp: Gulp, env: IEnvOption): Promise<any> {
+        return this.setupTasks(gulp, env)
+            .then((seq) => {
+                let tseq = env.task ? env.task.split(',') : seq;
+                 let gbctx = this.getContext(env);
+                if (this.config.runWay === RunWay.parallel) {
+                    return runSequence(gulp, [flattenSequence(gulp, tseq, gbctx)]);
+                } else {
+                    return runSequence(gulp, tseq);
+                }
+            });
+    }
+
+    setupTasks(gulp: Gulp, env: IEnvOption): Promise<Src[]> {
         if (!env.root) {
             env.root = this.dirname;
         }
@@ -88,14 +127,6 @@ export class Development {
 
         let gbctx = this.getContext(env);
         return this.loadTasks(gulp, this.config.tasks, gbctx)
-            .then(tseq => {
-                // console.log(chalk.grey('run sequenec tasks:'), tseq);
-                if (this.config.runWay === RunWay.parallel) {
-                    return runSequence(gulp, [flattenSequence(gulp, tseq, gbctx)]);
-                } else {
-                    return runSequence(gulp, tseq);
-                }
-            })
             .catch(err => {
                 console.error(err);
                 process.exit(1);
@@ -121,7 +152,7 @@ export class Development {
             _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
                 optask.dist = optask.dist || 'dist';
                 // console.log(chalk.grey('begin load task via loader:'), optask.loader);
-                let loader = this.createLoader(optask, parent.env);
+                let loader = this.createLoader(optask, parent);
 
                 return loader.loadContext(parent.env)
                     .then(ctx => {
@@ -295,16 +326,15 @@ export class Development {
         }
     }
 
-    protected createLoader(option: TaskOption, env: IEnvOption): ITaskLoader {
-        let loader = null;
+    protected createLoader(option: TaskOption, parent: IContext): ITaskLoader {
         if (!_.isFunction(this.config.loaderFactory)) {
             let factory = new LoaderFactory();
-            this.config.loaderFactory = (opt: ITaskOption) => {
-                return factory.create(opt, env, this.config.contextFactory);
-            }
+            return factory.create(option, parent.env, (cfg, p) => {
+                return this.config.contextFactory(cfg, p || parent);
+            });
+        } else {
+            return this.config.loaderFactory(option, parent.env);
         }
-        loader = this.config.loaderFactory(option, env);
-        return loader;
     }
 
 
