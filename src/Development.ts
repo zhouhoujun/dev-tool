@@ -10,9 +10,9 @@ import { IContext } from './IContext';
 import { Context } from './Context';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
+import { EventEmitter } from 'events';
 
-
-export class Development {
+export class Development extends EventEmitter {
 
     /**
      * create development tool.
@@ -40,27 +40,7 @@ export class Development {
         })
 
         let devtool = new Development(dirname, option);
-        option.setupTask = option.setupTask || 'build';
-        gulp.task(option.setupTask, (callback: TaskCallback) => {
-            var options: IEnvOption = minimist(process.argv.slice(2), {
-                string: 'env',
-                default: { env: process.env.NODE_ENV || 'development' }
-            });
-            return devtool.run(gulp, options);
-        });
-
-        option.startTask = option.startTask || 'start';
-        gulp.task(option.startTask, (callback: TaskCallback) => {
-            var options: IEnvOption = minimist(process.argv.slice(2), {
-                string: 'env',
-                default: { env: process.env.NODE_ENV || 'development' }
-            });
-            return devtool.startTask(gulp, options);
-        })
-
-        gulp.task('default', () => {
-            gulp.start(option.setupTask);
-        });
+        devtool.setup(gulp);
         return devtool;
     }
 
@@ -72,8 +52,13 @@ export class Development {
      * 
      * @memberOf Development
      */
-    private constructor(private dirname: string, protected config: DevelopConfig) {
-
+    public constructor(private dirname: string, protected config: DevelopConfig) {
+        super();
+        if (config.evnets) {
+            _.each(_.keys(config.evnets), key => {
+                this.on(key, config.evnets[key]);
+            });
+        }
     }
 
     /**
@@ -87,31 +72,23 @@ export class Development {
      */
     run(gulp: Gulp, env: IEnvOption): Promise<any> {
         return this.setupTasks(gulp, env)
-            .then(tseq => {
-                // console.log(chalk.grey('run sequenec tasks:'), tseq);
+            .then(seq => {
+                let tseq = env.task ? env.task.split(',') : seq;
                 let gbctx = this.getContext(env);
+                this.emit('beforRun', tseq, gbctx);
                 if (this.config.runWay === RunWay.parallel) {
                     return runSequence(gulp, [flattenSequence(gulp, tseq, gbctx)]);
                 } else {
                     return runSequence(gulp, tseq);
                 }
             })
+            .then(() => {
+                let gbctx = this.getContext(env);
+                this.emit('afterRun', gbctx);
+            })
             .catch(err => {
                 console.error(err);
                 process.exit(1);
-            });
-    }
-
-    startTask(gulp: Gulp, env: IEnvOption): Promise<any> {
-        return this.setupTasks(gulp, env)
-            .then((seq) => {
-                let tseq = env.task ? env.task.split(',') : seq;
-                 let gbctx = this.getContext(env);
-                if (this.config.runWay === RunWay.parallel) {
-                    return runSequence(gulp, [flattenSequence(gulp, tseq, gbctx)]);
-                } else {
-                    return runSequence(gulp, tseq);
-                }
             });
     }
 
@@ -126,11 +103,44 @@ export class Development {
         }
 
         let gbctx = this.getContext(env);
+        this.emit('beforSetup', gbctx);
         return this.loadTasks(gulp, this.config.tasks, gbctx)
+            .then(tsq => {
+                this.emit('afterSetup', tsq, gbctx);
+                return tsq;
+            })
             .catch(err => {
                 console.error(err);
                 process.exit(1);
             });
+    }
+
+    setup(gulp: Gulp) {
+        let config = this.config;
+        config.setupTask = config.setupTask || 'build';
+        gulp.task(config.setupTask, (callback: TaskCallback) => {
+            var options: IEnvOption = minimist(process.argv.slice(2), {
+                string: 'env',
+                default: { env: process.env.NODE_ENV || 'development' }
+            });
+            return this.run(gulp, options);
+        });
+
+        config.startTask = config.startTask || 'start';
+        gulp.task(config.startTask, (callback: TaskCallback) => {
+            var options: IEnvOption = minimist(process.argv.slice(2), {
+                string: 'env',
+                default: { env: process.env.NODE_ENV || 'development' }
+            });
+            if (!options.task) {
+                return Promise.reject('start task can not empty!');
+            }
+            return this.run(gulp, options);
+        })
+
+        gulp.task('default', () => {
+            gulp.start(config.setupTask);
+        });
     }
 
     private globalctx: IContext;
@@ -171,7 +181,7 @@ export class Development {
                             ])
                                 .then(tks => {
                                     console.log(chalk.green('tasks loaded.'));
-                                    return this.setup(gulp, ctx, tks[0], tks[1], tks[2]);
+                                    return this.setupTask(gulp, ctx, tks[0], tks[1], tks[2]);
                                 });
                         }
                     });
@@ -190,14 +200,9 @@ export class Development {
             });
     }
 
-    protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]> {
+    protected setupTask(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]> {
         return Promise.resolve(toSequence(gulp, tasks, ctx))
             .then(tsqs => {
-                // if (_.isFunction(context.option['runTasks'])) {
-                //     return context.option['runTasks'](context.oper, tsqs, subGroupTask, assertsTask);
-                // } else if (_.isArray(context.option['runTasks'])) {
-                //     tsqs = context.option['runTasks'];
-                // } else 
                 if (ctx.runTasks) {
                     return ctx.runTasks(tsqs, assertsTask, subGroupTask);
                 }

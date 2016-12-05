@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskLoader } from './ITaskLoader';
@@ -5,7 +6,8 @@ import { ITaskConfig, Src, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicT
 import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
 import { IContext } from './IContext';
 import { DevelopConfig } from './DevelopConfig';
-export declare class Development {
+import { EventEmitter } from 'events';
+export declare class Development extends EventEmitter {
     private dirname;
     protected config: DevelopConfig;
     /**
@@ -29,7 +31,7 @@ export declare class Development {
      *
      * @memberOf Development
      */
-    private constructor(dirname, config);
+    constructor(dirname: string, config: DevelopConfig);
     /**
      * run task.
      *
@@ -40,12 +42,12 @@ export declare class Development {
      * @memberOf Development
      */
     run(gulp: Gulp, env: IEnvOption): Promise<any>;
-    startTask(gulp: Gulp, env: IEnvOption): Promise<any>;
     setupTasks(gulp: Gulp, env: IEnvOption): Promise<Src[]>;
+    setup(gulp: Gulp): void;
     private globalctx;
     getContext(env: any): IContext;
     protected loadTasks(gulp: Gulp, tasks: TaskOption, parent: IContext): Promise<Src[]>;
-    protected setup(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
+    protected setupTask(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
     /**
      * load sub tasks as group task.
      *

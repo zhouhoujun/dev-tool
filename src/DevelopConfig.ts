@@ -1,4 +1,4 @@
-import { IEnvOption, RunWay, ITaskConfig, ITaskContext } from 'development-core';
+import { IEnvOption, RunWay, ITaskConfig, ITaskContext, IMap } from 'development-core';
 import { IAssertOption, TaskOption } from './TaskOption';
 import { ITaskLoader } from './ITaskLoader';
 // import { Operation } from './Operation';
@@ -73,4 +73,12 @@ export interface DevelopConfig {
      * @memberOf DevelopConfig
      */
     contextFactory?(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
+
+    /**
+     * development evnets.
+     * 
+     * @type {IMap<Function>}
+     * @memberOf DevelopConfig
+     */
+    evnets?: IMap<Function>;
 }
