@@ -6,14 +6,21 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var _ = require('lodash');
 var minimist = require('minimist');
 var LoaderFactory_1 = require('./LoaderFactory');
 var development_core_1 = require('development-core');
 var Context_1 = require('./Context');
 var chalk = require('chalk');
+var events_1 = require('events');
 
-var Development = function () {
+var Development = function (_events_1$EventEmitte) {
+    _inherits(Development, _events_1$EventEmitte);
+
     /**
      * Creates an instance of Development.
      *
@@ -25,8 +32,16 @@ var Development = function () {
     function Development(dirname, config) {
         _classCallCheck(this, Development);
 
-        this.dirname = dirname;
-        this.config = config;
+        var _this = _possibleConstructorReturn(this, (Development.__proto__ || Object.getPrototypeOf(Development)).call(this));
+
+        _this.dirname = dirname;
+        _this.config = config;
+        if (config.evnets) {
+            _.each(_.keys(config.evnets), function (key) {
+                _this.on(key, config.evnets[key]);
+            });
+        }
+        return _this;
     }
     /**
      * create development tool.
@@ -55,7 +70,29 @@ var Development = function () {
          * @memberOf Development
          */
         value: function run(gulp, env) {
-            var _this = this;
+            var _this2 = this;
+
+            return this.setupTasks(gulp, env).then(function (seq) {
+                var tseq = env.task ? env.task.split(',') : seq;
+                var gbctx = _this2.getContext(env);
+                _this2.emit('beforRun', tseq, gbctx);
+                if (_this2.config.runWay === development_core_1.RunWay.parallel) {
+                    return development_core_1.runSequence(gulp, [development_core_1.flattenSequence(gulp, tseq, gbctx)]);
+                } else {
+                    return development_core_1.runSequence(gulp, tseq);
+                }
+            }).then(function () {
+                var gbctx = _this2.getContext(env);
+                _this2.emit('afterRun', gbctx);
+            }).catch(function (err) {
+                console.error(err);
+                process.exit(1);
+            });
+        }
+    }, {
+        key: 'setupTasks',
+        value: function setupTasks(gulp, env) {
+            var _this3 = this;
 
             if (!env.root) {
                 env.root = this.dirname;
@@ -65,16 +102,42 @@ var Development = function () {
                 this.printHelp(env.help);
             }
             var gbctx = this.getContext(env);
-            return this.loadTasks(gulp, this.config.tasks, gbctx).then(function (tseq) {
-                // console.log(chalk.grey('run sequenec tasks:'), tseq);
-                if (_this.config.runWay === development_core_1.RunWay.parallel) {
-                    return development_core_1.runSequence(gulp, [development_core_1.flattenSequence(gulp, tseq, gbctx)]);
-                } else {
-                    return development_core_1.runSequence(gulp, tseq);
-                }
+            this.emit('beforSetup', gbctx);
+            return this.loadTasks(gulp, this.config.tasks, gbctx).then(function (tsq) {
+                _this3.emit('afterSetup', tsq, gbctx);
+                return tsq;
             }).catch(function (err) {
                 console.error(err);
                 process.exit(1);
+            });
+        }
+    }, {
+        key: 'setup',
+        value: function setup(gulp) {
+            var _this4 = this;
+
+            var config = this.config;
+            config.setupTask = config.setupTask || 'build';
+            gulp.task(config.setupTask, function (callback) {
+                var options = minimist(process.argv.slice(2), {
+                    string: 'env',
+                    default: { env: process.env.NODE_ENV || 'development' }
+                });
+                return _this4.run(gulp, options);
+            });
+            config.startTask = config.startTask || 'start';
+            gulp.task(config.startTask, function (callback) {
+                var options = minimist(process.argv.slice(2), {
+                    string: 'env',
+                    default: { env: process.env.NODE_ENV || 'development' }
+                });
+                if (!options.task) {
+                    return Promise.reject('start task can not empty!');
+                }
+                return _this4.run(gulp, options);
+            });
+            gulp.task('default', function () {
+                gulp.start(config.setupTask);
             });
         }
     }, {
@@ -92,12 +155,12 @@ var Development = function () {
     }, {
         key: 'loadTasks',
         value: function loadTasks(gulp, tasks, parent) {
-            var _this2 = this;
+            var _this5 = this;
 
             return Promise.all(_.map(_.isArray(tasks) ? tasks : [tasks], function (optask) {
-                optask.dist = optask.dist || 'dist';
+                // optask.dist = optask.dist || 'dist';
                 // console.log(chalk.grey('begin load task via loader:'), optask.loader);
-                var loader = _this2.createLoader(optask, parent.env);
+                var loader = _this5.createLoader(optask, parent);
                 return loader.loadContext(parent.env).then(function (ctx) {
                     console.log(chalk.green('task context loaded.'));
                     if (ctx.env.help) {
@@ -107,9 +170,9 @@ var Development = function () {
                         }
                         return [];
                     } else {
-                        return Promise.all([loader.load(ctx), _this2.loadAssertTasks(gulp, ctx), _this2.loadSubTask(gulp, ctx)]).then(function (tks) {
+                        return Promise.all([loader.load(ctx), _this5.loadAssertTasks(gulp, ctx), _this5.loadSubTask(gulp, ctx)]).then(function (tks) {
                             console.log(chalk.green('tasks loaded.'));
-                            return _this2.setup(gulp, ctx, tks[0], tks[1], tks[2]);
+                            return _this5.setupTask(gulp, ctx, tks[0], tks[1], tks[2]);
                         });
                     }
                 });
@@ -125,14 +188,9 @@ var Development = function () {
             });
         }
     }, {
-        key: 'setup',
-        value: function setup(gulp, ctx, tasks, assertsTask, subGroupTask) {
+        key: 'setupTask',
+        value: function setupTask(gulp, ctx, tasks, assertsTask, subGroupTask) {
             return Promise.resolve(development_core_1.toSequence(gulp, tasks, ctx)).then(function (tsqs) {
-                // if (_.isFunction(context.option['runTasks'])) {
-                //     return context.option['runTasks'](context.oper, tsqs, subGroupTask, assertsTask);
-                // } else if (_.isArray(context.option['runTasks'])) {
-                //     tsqs = context.option['runTasks'];
-                // } else 
                 if (ctx.runTasks) {
                     return ctx.runTasks(tsqs, assertsTask, subGroupTask);
                 }
@@ -156,18 +214,18 @@ var Development = function () {
     }, {
         key: 'loadSubTask',
         value: function loadSubTask(gulp, ctx) {
-            var _this3 = this;
+            var _this6 = this;
 
             if (ctx.option['tasks']) {
                 var _ret = function () {
                     var optask = ctx.option;
                     _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], function (subopt) {
                         subopt.name = ctx.subTaskName(subopt.name);
-                        subopt.src = subopt.src || optask.src;
-                        subopt.dist = subopt.dist || optask.dist;
+                        // subopt.src = subopt.src || optask.src;
+                        // subopt.dist = subopt.dist || optask.dist;
                     });
                     return {
-                        v: _this3.loadTasks(gulp, optask.tasks, ctx).then(function (subseq) {
+                        v: _this6.loadTasks(gulp, optask.tasks, ctx).then(function (subseq) {
                             var taskname = void 0;
                             if (optask.subTaskRunWay === development_core_1.RunWay.parallel) {
                                 taskname = [development_core_1.flattenSequence(gulp, subseq, ctx, function (name, runway) {
@@ -209,7 +267,7 @@ var Development = function () {
     }, {
         key: 'loadAssertTasks',
         value: function loadAssertTasks(gulp, ctx) {
-            var _this4 = this;
+            var _this7 = this;
 
             var optask = ctx.option;
             if (optask.asserts) {
@@ -241,12 +299,12 @@ var Development = function () {
                         }
                         op.name = op.name || ctx.subTaskName(name);
                         op.src = op.src || ctx.getSrc({ oper: development_core_1.Operation.build }) + '/**/*.' + name;
-                        op.dist = op.dist || ctx.getDist({ oper: development_core_1.Operation.build });
+                        // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
                         tasks.push(op);
                     });
                     return {
                         v: Promise.all(_.map(tasks, function (task) {
-                            return _this4.loadTasks(gulp, task, ctx).then(function (sq) {
+                            return _this7.loadTasks(gulp, task, ctx).then(function (sq) {
                                 return {
                                     task: task,
                                     sq: sq
@@ -282,20 +340,17 @@ var Development = function () {
         }
     }, {
         key: 'createLoader',
-        value: function createLoader(option, env) {
-            var _this5 = this;
+        value: function createLoader(option, parent) {
+            var _this8 = this;
 
-            var loader = null;
             if (!_.isFunction(this.config.loaderFactory)) {
-                (function () {
-                    var factory = new LoaderFactory_1.LoaderFactory();
-                    _this5.config.loaderFactory = function (opt) {
-                        return factory.create(opt, env, _this5.config.contextFactory);
-                    };
-                })();
+                var factory = new LoaderFactory_1.LoaderFactory();
+                return factory.create(option, parent.env, function (cfg, p) {
+                    return _this8.config.contextFactory(cfg, p || parent);
+                });
+            } else {
+                return this.config.loaderFactory(option, parent.env);
             }
-            loader = this.config.loaderFactory(option, env);
-            return loader;
         }
     }, {
         key: 'printHelp',
@@ -324,23 +379,13 @@ var Development = function () {
                 return ctx;
             };
             var devtool = new Development(dirname, option);
-            option.setupTask = option.setupTask || 'build';
-            gulp.task(option.setupTask, function (callback) {
-                var options = minimist(process.argv.slice(2), {
-                    string: 'env',
-                    default: { env: process.env.NODE_ENV || 'development' }
-                });
-                return devtool.run(gulp, options);
-            });
-            gulp.task('default', function () {
-                gulp.start(option.setupTask);
-            });
+            devtool.setup(gulp);
             return devtool;
         }
     }]);
 
     return Development;
-}();
+}(events_1.EventEmitter);
 
 exports.Development = Development;
 //# sourceMappingURL=sourcemaps/Development.js.map

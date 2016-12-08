@@ -33,7 +33,7 @@ export class Development extends EventEmitter {
         }
         option.contextFactory = factory || ((cfg, parent?) => {
             let ctx = new Context(cfg, parent);
-            if (parent && parent['add']) {
+            if (parent && parent.add) {
                 (<IContext>parent).add(ctx);
             }
             return ctx;
@@ -160,7 +160,7 @@ export class Development extends EventEmitter {
     protected loadTasks(gulp: Gulp, tasks: TaskOption, parent: IContext): Promise<Src[]> {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
-                optask.dist = optask.dist || 'dist';
+                // optask.dist = optask.dist || 'dist';
                 // console.log(chalk.grey('begin load task via loader:'), optask.loader);
                 let loader = this.createLoader(optask, parent);
 
@@ -229,8 +229,8 @@ export class Development extends EventEmitter {
             let optask = <ITaskOption>ctx.option;
             _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
                 subopt.name = ctx.subTaskName(subopt.name);
-                subopt.src = subopt.src || optask.src;
-                subopt.dist = subopt.dist || optask.dist;
+                // subopt.src = subopt.src || optask.src;
+                // subopt.dist = subopt.dist || optask.dist;
             });
             return this.loadTasks(gulp, optask.tasks, ctx)
                 .then(subseq => {
@@ -295,7 +295,7 @@ export class Development extends EventEmitter {
                 }
                 op.name = op.name || ctx.subTaskName(name);
                 op.src = op.src || (ctx.getSrc({ oper: Operation.build }) + '/**/*.' + name);
-                op.dist = op.dist || ctx.getDist({ oper: Operation.build });
+                // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
                 tasks.push(op);
             });
 
