@@ -1,4 +1,3 @@
-/// <reference types="chai" />
 import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskConfig } from 'development-core';
 import { ITaskOption } from '../TaskOption';
 import { IContext } from '../IContext';

@@ -1,4 +1,3 @@
-/// <reference types="chai" />
 import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig } from 'development-core';
 export declare type contextFactory = (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext;
 /**
