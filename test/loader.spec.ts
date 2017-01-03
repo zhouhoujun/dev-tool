@@ -9,14 +9,15 @@ import { IDirLoaderOption, IDynamicLoaderOption, IAssertOption } from '../src/Ta
 let root = __dirname;
 import * as path from 'path';
 
-describe('LoaderFactory', () => {
+describe('LoaderFactory', function () {
     var factory: ILoaderFactory;
+    this.timeout(3000);
 
     beforeEach(() => {
         factory = new LoaderFactory();
     })
 
-    it('create dynamic loader', async function () {
+    it('create dynamic loader', async () => {
         let loader: ITaskLoader = factory.create({
             src: 'src',
             loader: []
@@ -38,7 +39,7 @@ describe('LoaderFactory', () => {
         expect(tasks.length).eq(0);
     });
 
-    it('create dynamic loader with module', async function () {
+    it('create dynamic loader with module', async  () => {
         let loader: ITaskLoader = factory.create({
             src: 'src',
             loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
@@ -76,7 +77,7 @@ describe('LoaderFactory', () => {
         expect(ntasks.length).eq(1);
     });
 
-    it('create directory loader', async function () {
+    it('create directory loader', async  () => {
         let loader: ITaskLoader = factory.create({
             src: 'src',
             loader: <IDirLoaderOption>{ dir: path.join(root, './tasks') }
@@ -114,7 +115,7 @@ describe('LoaderFactory', () => {
     });
 
 
-    it('create taskDefine object loader', async function () {
+    it('create taskDefine object loader', async  () => {
         let loader: ITaskLoader = factory.create({
             src: 'src',
             loader: {
