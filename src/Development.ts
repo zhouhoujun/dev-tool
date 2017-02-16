@@ -3,8 +3,8 @@ import { Gulp, TaskCallback } from 'gulp';
 
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
-import { LoaderFactory } from './LoaderFactory';
-import { Operation, ITaskConfig, Src, toSequence, runSequence, bindingConfig, zipSequence, flattenSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
+import { LoaderFactory } from './loaderFactory';
+import { Operation, ITaskConfig, Src, toSequence, runSequence, zipSequence, flattenSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
