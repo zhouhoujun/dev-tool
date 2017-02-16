@@ -4,5 +4,5 @@ export * from './IContext';
 export * from './Context';
 export * from './Development';
 export * from './ITaskLoader';
-export * from './LoaderFactory';
+export * from './loaderFactory';
 export * from './loaders/BaseLoader';

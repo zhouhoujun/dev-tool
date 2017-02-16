@@ -12,7 +12,7 @@ const cache = require('gulp-cached');
 const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
-const babel = require('gulp-babel');
+// const babel = require('gulp-babel');
 
 
 @dynamicTask
@@ -62,9 +62,6 @@ export class TypeScriptTask implements IDynamicTasks {
                         let option = <NodeTaskOption>config.option;
                         if (config.oper === Operation.release || config.oper === Operation.deploy) {
                             return tsmap.js
-                                .pipe(babel(option.tsBabelOption || {
-                                    presets: ['es2015']
-                                }))
                                 .pipe(uglify())
                                 .pipe(sourcemaps.write('./sourcemaps'))
                                 .pipe(gulp.dest(config.getDist(dt)));
