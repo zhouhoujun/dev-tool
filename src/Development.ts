@@ -272,7 +272,7 @@ export class Development extends EventEmitter {
                 let op: IAssertOption;
                 let sr = optask.asserts[name];
                 if (_.isString(sr)) {
-                    op = <IAssertOption>{ src: sr, loader: [{ name: name, pipes: [], watch: true }] };
+                    op = <IAssertOption>{ src: sr };
                 } else if (_.isNumber(sr)) {
                     // watch with Operation.autoWatch.
                     op = <IAssertOption>{ loader: [{ oper: sr, name: name, pipes: [] }] };
@@ -280,8 +280,8 @@ export class Development extends EventEmitter {
                     op = { loader: sr };
                 } else if (_.isArray(sr)) {
                     if (sr.length > 0) {
-                        if (_.isString(_.first(<string[]>sr))) {
-                            op = <IAssertOption>{ src: <string[]>sr, loader: [{ name: name, pipes: [], watch: true }] };
+                        if (!_.some(<string[]>sr, it => !_.isString(it))) {
+                            op = <IAssertOption>{ src: <string[]>sr };
                         } else {
                             op = <IAssertOption>{ loader: <IDynamicTaskOption[]>sr, watch: true };
                         }
@@ -292,6 +292,9 @@ export class Development extends EventEmitter {
 
                 if (_.isNull(op) || _.isUndefined(op)) {
                     return;
+                }
+                if (!op.loader) {
+                    op.loader = [{ name: name, pipes: [], watch: true }]
                 }
                 op.name = op.name || ctx.subTaskName(name);
                 op.src = op.src || (ctx.getSrc({ oper: Operation.build }) + '/**/*.' + name);

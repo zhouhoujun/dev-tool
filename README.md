@@ -96,7 +96,8 @@ Development.create(gulp, __dirname, [{
                 }
             ]
         },
-        json: ['src/**/*.json', '!src/data/**/*.json', '!src**/jsconfig.json', '!src/config*.json']
+        json: ['src/**/*.json', '!src/data/**/*.json', '!src**/jsconfig.json', '!src/config*.json'],
+        copysth:{ src:['src/**/*.jpeg', 'package.json'], oper: Operation.deploy }
         ...
     },
     testSrc: 'test/**/*.spec.ts',
@@ -158,6 +159,7 @@ Development.create(gulp, __dirname, [
             pdf: Operation.default,
             html: 'src/*.html',
             json:['src/**/*.json', '!src/data/**/*.json', '!src**/jsconfig.json', '!src/config*.json'],
+            copysth:{ src:['src/**/*.jpeg', 'package.json'], oper: Operation.deploy }
             config: {
                 src(ctx) {
                     if (ctx.env.config) {
