@@ -88,7 +88,7 @@ describe('LoaderFactory', function () {
         expect(taskconfig).to.not.null;
         expect(taskconfig).to.not.undefined;
         expect(taskconfig.env.config).eq('test');
-        expect(taskconfig.oper).eq(Operation.deploy);
+        expect(taskconfig.oper & Operation.deploy).eq(Operation.deploy);
         expect(taskconfig.option.src).to.eq('src');
 
         let tasks = await loader.load(taskconfig);
