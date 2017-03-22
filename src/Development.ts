@@ -4,7 +4,7 @@ import { Gulp, TaskCallback } from 'gulp';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './loaderFactory';
-import { Operation, ITaskConfig, Src, toSequence, runSequence, zipSequence, flattenSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
+import { Operation, ITaskConfig, Src, toSequence, runSequence, zipSequence, currentOperation, flattenSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
@@ -160,13 +160,16 @@ export class Development extends EventEmitter {
     protected loadTasks(gulp: Gulp, tasks: TaskOption, parent: IContext): Promise<Src[]> {
         return Promise.all<Src[]>(
             _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
+                if (optask.oper && (this.globalctx.oper & optask.oper) <= 0) {
+                    return [];
+                }
                 // optask.dist = optask.dist || 'dist';
                 // console.log(chalk.grey('begin load task via loader:'), optask.loader);
                 let loader = this.createLoader(optask, parent);
 
                 return loader.loadContext(parent.env)
                     .then(ctx => {
-                        console.log(chalk.green('task context loaded.'));
+                        // console.log(chalk.green('task context loaded.'));
                         if (ctx.env.help) {
                             if (ctx.printHelp) {
                                 console.log(chalk.grey('...development default help...'));
@@ -180,7 +183,7 @@ export class Development extends EventEmitter {
                                 this.loadSubTask(gulp, ctx)
                             ])
                                 .then(tks => {
-                                    console.log(chalk.green('tasks loaded.'));
+                                    // console.log(chalk.green('tasks loaded.'));
                                     return this.setupTask(gulp, ctx, tks[0], tks[1], tks[2]);
                                 });
                         }

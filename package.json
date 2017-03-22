@@ -1,6 +1,6 @@
 {
     "name": "development-tool",
-    "version": "0.11.0",
+    "version": "1.0.0",
     "description": "development tools, tasks component, gulp task manager, tasks loader,  run tasks in sequence via Promise. easy to load tasks module, generate asserts task, compose tasks.",
     "main": "./lib/tools.js",
     "typings": "./lib/tools",
@@ -17,13 +17,15 @@
         "development",
         "tool",
         "gulp",
+        "task",
+        "task manager",
+        "docker",
+        "publish",
+        "project",
         "promise",
         "front-end",
         "component",
         "generate",
-        "tasks",
-        "loader",
-        "task manager",
         "typescript",
         "metadata",
         "node"
@@ -44,7 +46,7 @@
         "@types/minimist": "^1.1.29",
         "chalk": "^1.1.3",
         "checksum": "^0.1.1",
-        "development-core": "^0.11.0",
+        "development-core": "^1.0.0",
         "gulp": "^3.9.1"
     },
     "devDependencies": {
