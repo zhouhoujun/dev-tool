@@ -45,7 +45,7 @@ import  { Development } from 'development-tool';
 ```ts
 import * as gulp from 'gulp';
 import * as _ from 'lodash';
-import { Pipe, Operation, IMap, IDynamicTaskOption, RunWay } from 'development-core';
+import { Pipe, Operation, IMap, IDynamicTaskOption } from 'development-core';
 import { Development, ITaskOption } from 'development-tool';
 import { IBundlesConfig, IBundleGroup } from 'development-tool-systemjs';
 import { IWebTaskOption } from 'development-tool-web';
@@ -90,14 +90,6 @@ Development.create(gulp, __dirname, [
                 oper: Operation.deploy,
                 loader: [{
                     pipes: [(ctx) => replace('"script": "dist/index.js",', '"script": "index.js",')]
-                }]
-
-            },
-            docker: {
-                src: 'docker-compose.yml',
-                oper: Operation.deploy,
-                loader: [{
-                    pipes: [(ctx) => replace(/build:/gi, '# build:')]
                 }]
 
             }
@@ -153,12 +145,15 @@ Development.create(gulp, __dirname, [
             jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
             ttf: Operation.default, woff: Operation.default, eot: Operation.default, xlsx: Operation.default,
             pdf: Operation.default,
+            bootstrapfonts: {
+                src: 'node_modules/bootstrap-sass/assets/fonts/**',
+                dist: ctx => ctx.parent.toDistPath('./fonts')
+            },
             scss: {
                 src: 'client/**/*.scss',
                 loader: [{
                     oper: Operation.default | Operation.autoWatch,
                     pipes: [
-                        () => cache('sass_files'),
                         (ctx) => sass({
                             outputStyle: 'compressed',
                             includePaths: [
@@ -262,7 +257,7 @@ Development.create(gulp, __dirname, [
                 dist: 'dist/development/jspm-config',
                 releaseDist: 'dist/production/jspm-config',
                 oper: Operation.default | Operation.autoWatch,
-                loader: [{pipes: []}]
+                loader: [{ pipes: []}]
             },
             js: ['client/**/*.js', '!client/jspm-config/*.js']
         },
@@ -337,7 +332,7 @@ Development.create(gulp, __dirname, [
                 },
                 depsExclude: ['angular-i18n', 'jquery', 'rxjs', 'app', 'ag-grid', '@angularclass'],
                 bundleDeps: (ctx, deps) => {
-                    let libs = ['css', 'json', 'lodash', 'text', 'zone.js', 'reflect-metadata', 'moment', 'core-js-shim'];
+                    let libs = ['css', 'json', 'lodash', 'text', 'zone.js', 'reflect-metadata', 'moment', 'core-js-shim']; // ,  'bootstrap', 'normalize.css', 'spectrum', 'html2canvas', 'moment', 'highcharts'];
                     let angularlibs = _.filter(deps, it => {
                         return it.indexOf('@angular') === 0 && it.indexOf('@angularclass') < 0;
                     });
@@ -354,7 +349,7 @@ Development.create(gulp, __dirname, [
                         tools: {
                             combine: true,
                             items: _.filter(deps, function (d) {
-                                return libs.indexOf(d) < 0 && angularlibs.indexOf(d) < 0;
+                                return d.indexOf('skspruce') < 0 && libs.indexOf(d) < 0 && angularlibs.indexOf(d) < 0;
                             }),
                             exclude: ['libs', 'angularlibs']
                         }
@@ -385,28 +380,21 @@ Development.create(gulp, __dirname, [
         tasks: [
             {
                 src: 'dist/**',
-                loader: [
-                    {
-                        name: 'clean-development',
-                        task: (ctx) => del('dist/development')
-                    }
-                ]
+                loader: [{ name: 'clean-development', task: (ctx) => del('dist/development')}]
             },
             {
                 name: 'deploy-server',
                 src: 'docker-compose.yml',
                 dist: './publish',
                 exportImage: true,
-                images: ['test_web', 'test_nginx'],
-                service: 'test.com',
-                user: 'test',
-                psw: 'test',
+                images: ['webgui_webapp', 'webgui_nginx'],
+                service: 'www.devdocker.skspruce.com',
+                user: 'ism',
+                psw: '123.com',
                 loader: 'development-tool-docker'
-            }
-        ]
+            }]
     }
 ]);
-
 ```
 
 ## docker-compose.yml
