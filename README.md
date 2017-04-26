@@ -245,12 +245,16 @@ Development.create(gulp, __dirname, [
             },
             ts: {
                 src: ['client/**/*.ts', 'test/**/*.ts'],
-                loader: {
-                    module: 'development-assert-ts',
-                    pipes: <Pipe[]>[
-                        { toTransform: () => tslint(), order: total => 2 / total }
-                    ]
-                }
+                tsPipes: <Pipe[]>[
+                     (ctx: ITaskContext) =>  inlineNg2Template({ base:  '/app' }),
+                     () => tslint()
+                     // { toTransform: (ctx) => { console.log('/-------------------\ninlineNg2Template'); return inlineNg2Template({ base:  ctx.toDistPath('./app') , target: 'es5' })}, order: total => 1 / total },
+                     // { toTransform: () => tslint(), order: total => 2 / total }
+                ],
+                // pipes: [
+                     //... js pipe task.
+                // ],
+                loader: 'development-assert-ts'
             },
             tsx: {
                 loader: 'development-assert-ts'
