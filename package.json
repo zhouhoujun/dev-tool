@@ -1,6 +1,6 @@
 {
     "name": "development-tool",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "development tools, tasks component, gulp task manager, tasks loader,  run tasks in sequence via Promise. easy to load tasks module, generate asserts task, compose tasks.",
     "main": "./lib/tools.js",
     "typings": "./lib/tools",
