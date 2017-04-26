@@ -4,13 +4,18 @@ import { Gulp, TaskCallback } from 'gulp';
 import * as minimist from 'minimist';
 import { ITaskLoader } from './ITaskLoader';
 import { LoaderFactory } from './loaderFactory';
-import { Operation, ITaskConfig, Src, toSequence, runSequence, zipSequence, currentOperation, flattenSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
+import { Operation, ITaskConfig, Src, toSequence, runSequence, zipSequence, sortOrder, currentOperation, flattenSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
 import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 import { EventEmitter } from 'events';
+
+interface TaskSeq {
+    opt: ITaskOption,
+    seq: Src[]
+}
 
 export class Development extends EventEmitter {
 
@@ -157,9 +162,10 @@ export class Development extends EventEmitter {
     }
 
 
-    protected loadTasks(gulp: Gulp, tasks: TaskOption, parent: IContext): Promise<Src[]> {
+    protected loadTasks(gulp: Gulp, taskOptions: TaskOption, parent: IContext): Promise<Src[]> {
+        let tasks = _.isArray(taskOptions) ? <ITaskOption[]>taskOptions : [<ITaskOption>taskOptions];
         return Promise.all<Src[]>(
-            _.map(_.isArray(tasks) ? <ITaskOption[]>tasks : [<ITaskOption>tasks], optask => {
+            _.map(tasks, optask => {
                 if (optask.oper && (this.globalctx.oper & optask.oper) <= 0) {
                     return [];
                 }
@@ -192,10 +198,22 @@ export class Development extends EventEmitter {
         )
             .then(tsq => {
                 let rst: Src[] = [];
-                _.each(tsq, t => {
-                    let tk = zipSequence(gulp, t, parent);
-                    if (tk) {
-                        rst.push(tk);
+                let tasklist: TaskSeq[] = _.map(tsq, (sq, idx) => {
+                    return <TaskSeq>{
+                        opt: tasks[idx],
+                        seq: sq
+                    }
+                });
+
+                let ordertask = sortOrder(tasklist, itm => itm.opt.order, parent);
+                _.each(ordertask, (t, idx) => {
+                    if (_.isArray(t)) {
+                        rst.push(_.filter(_.map(t, it => zipSequence(gulp, it.seq, parent)), it => it));
+                    } else {
+                        let tk = zipSequence(gulp, t.seq, parent);
+                        if (tk) {
+                            rst.push(tk);
+                        }
                     }
                 });
                 return rst;
@@ -231,6 +249,14 @@ export class Development extends EventEmitter {
         if (ctx.option['tasks']) {
             let optask = <ITaskOption>ctx.option;
             _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
+                if (!subopt.order) {
+                    let subOrder = ctx.to(optask.subTaskOrder);
+                    if (!_.isNumber(subOrder) && subOrder) {
+                        optask.assertsRunWay = optask.assertsRunWay || subOrder.runWay;
+                    } else if (optask.subTaskRunWay) {
+                        subopt.order = { runWay: optask.subTaskRunWay };
+                    }
+                }
                 subopt.name = ctx.subTaskName(subopt.name);
                 // subopt.src = subopt.src || optask.src;
                 // subopt.dist = subopt.dist || optask.dist;
@@ -238,11 +264,11 @@ export class Development extends EventEmitter {
             return this.loadTasks(gulp, optask.tasks, ctx)
                 .then(subseq => {
                     let taskname;
-                    if (optask.subTaskRunWay === RunWay.parallel) {
-                        taskname = [flattenSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-subs' : '-subp')))]
-                    } else {
-                        taskname = zipSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-subs' : '-subp')));
-                    }
+                    // if (optask.subTaskRunWay === RunWay.parallel) {
+                    //     taskname = [flattenSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-subs' : '-subp')))]
+                    // } else {
+                    taskname = zipSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-sub-seq' : '-sub-paral')));
+                    // }
                     if (taskname) {
                         return <ITaskInfo>{
                             order: optask.subTaskOrder,
@@ -269,6 +295,13 @@ export class Development extends EventEmitter {
      */
     protected loadAssertTasks(gulp: Gulp, ctx: IContext): Promise<ITaskInfo> {
         let optask = <IAssertOption>ctx.option;
+
+        let assertOrder = ctx.to(optask.assertsOrder);
+        if (!_.isNumber(assertOrder) && assertOrder) {
+            optask.assertsRunWay = optask.assertsRunWay || assertOrder.runWay;
+        }
+        optask.assertsRunWay = optask.assertsRunWay || RunWay.parallel;
+
         if (optask.asserts) {
             let tasks: IAssertOption[] = [];
             _.each(_.keys(optask.asserts), name => {
@@ -300,32 +333,38 @@ export class Development extends EventEmitter {
                     op.loader = [{ name: name, pipes: [], watch: true }]
                 }
                 op.name = op.name || ctx.subTaskName(name);
-                op.src = op.src || (ctx.getSrc({ oper: Operation.build }) + '/**/*.' + name);
+                op.src = op.src || (ctx.getSrc({ oper: Operation.default }) + '/**/*.' + name);
                 // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
+                if (!op.order) {
+                    if (optask.assertsRunWay) {
+                        op.order = { runWay: optask.assertsRunWay };
+                    } else if (!_.isNumber(assertOrder)) {
+                        op.order = { runWay: assertOrder.runWay };
+                    }
+                }
                 tasks.push(op);
             });
 
-            return Promise.all(_.map(tasks, task => {
-                return this.loadTasks(gulp, <ITaskOption>task, ctx)
-                    .then(sq => {
-                        return {
-                            task: task,
-                            sq: sq
-                        }
-                    });
-            }))
+            return this.loadTasks(gulp, tasks, ctx)
+                // .then(sq => {
+                //     return {
+                //         task: task,
+                //         sq: sq
+                //     }
+                // })
+
                 .then(tseq => {
                     // asserts tasks run mutil.
-                    let assertSeq = _.map(tseq, t => {
-                        return zipSequence(gulp, t.sq, ctx, (name, runway) => ctx.subTaskName(t.task.name, runway === RunWay.sequence ? '-asserts' : '-assertp')); // ctx.subTaskName(name + (runway === RunWay.sequence ? '-assert-seq' : '-assert-par')));
-                    });
+                    // let assertSeq = _.map(tseq, t => {
+                    //     return zipSequence(gulp, t.sq, ctx, (name, runway) => ctx.subTaskName(t.task.name, runway === RunWay.sequence ? '-asserts-seq' : '-assert-paral'));
+                    // });
 
                     let taskname;
-                    if (optask.assertsRunWay === RunWay.sequence) {
-                        taskname = assertSeq;
-                    } else {
-                        taskname = zipSequence(gulp, [assertSeq], ctx, (name, runway) => name + (runway === RunWay.sequence ? '-asserts' : '-assertp'));
-                    }
+                    // if (optask.assertsRunWay === RunWay.sequence) {
+                    //     taskname = assertSeq;
+                    // } else {
+                    taskname = zipSequence(gulp, tseq, ctx, (name, runway) => name + (runway === RunWay.sequence ? '-asserts-seq' : '-assert-paral'));
+                    // }
 
                     return <ITaskInfo>{
                         order: optask.assertsOrder,

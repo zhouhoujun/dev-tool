@@ -168,7 +168,7 @@ export interface IAssertOption extends IAsserts, ITaskLoaderOption {
     oper?: Operation;
     /**
      * asserts tasks run way. default RunWay.parallel
-     * 
+     *
      * @type {RunWay}
      * @memberOf ISubTaskOption
      */

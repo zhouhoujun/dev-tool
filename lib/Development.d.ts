@@ -46,7 +46,7 @@ export declare class Development extends EventEmitter {
     setup(gulp: Gulp): void;
     private globalctx;
     getContext(env: any): IContext;
-    protected loadTasks(gulp: Gulp, tasks: TaskOption, parent: IContext): Promise<Src[]>;
+    protected loadTasks(gulp: Gulp, taskOptions: TaskOption, parent: IContext): Promise<Src[]>;
     protected setupTask(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]>;
     /**
      * load sub tasks as group task.
