@@ -245,6 +245,8 @@ Development.create(gulp, __dirname, [
             },
             ts: {
                 src: ['client/**/*.ts', 'test/**/*.ts'],
+                // will run after anthor assert complete.
+                order: <IOrder>{ value: 1, runWay: RunWay.sequence },
                 tsPipes: <Pipe[]>[
                      (ctx: ITaskContext) =>  inlineNg2Template({ base:  '/app' }),
                      () => tslint()
