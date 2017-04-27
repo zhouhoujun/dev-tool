@@ -77,7 +77,7 @@ Development.create(gulp, __dirname, [
         src: 'server',
         dist: 'dist',
         testSrc: 'server/test/**/*.spec.ts',
-        cleanSrc: ['dist/views', 'dist/*.*'],
+        cleanSrc: 'dist/!(development|production)',
         asserts: {
             css: '', less: '',
             jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
