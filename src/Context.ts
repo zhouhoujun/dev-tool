@@ -1,7 +1,10 @@
-import { TaskContext, ITaskConfig, ITaskContext, ITask, TaskResult } from 'development-core';
+import { TaskContext, zipSequence, ITaskConfig, Src, Operation,
+     IEnvOption, ITaskContext, ITaskInfo,RunWay, IDynamicTaskOption, ITask, TaskResult } from 'development-core';
 import { IContext } from './IContext';
 import * as _ from 'lodash';
-import { Gulp } from 'gulp';
+import * as gulp from 'gulp';
+import { Gulp, TaskCallback } from 'gulp';
+import { TaskOption, IAssertOption } from './TaskOption';
 
 /**
  * Context.
@@ -13,146 +16,127 @@ import { Gulp } from 'gulp';
  */
 export class Context extends TaskContext implements IContext {
 
+    private _gulp: Gulp;
+    get gulp(){
+        return  this._gulp || gulp;
+    }
+    set gulp(gulp: Gulp){
+        this._gulp = gulp;
+    }
     // private children: IContext[] = [];
     constructor(cfg: ITaskConfig, parent?: ITaskContext) {
         super(cfg, parent);
     }
 
-    // /**
-    //  * add sub IContext
-    //  * 
-    //  * @param {IContext} context
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // add(context: IContext): void {
-    //     context.parent = this;
-    //     this.children.push(context);
-    // }
-    // /**
-    //  * remove sub IContext.
-    //  * 
-    //  * @param {IContext} [context]
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // remove(context?: IContext): IContext[] {
-    //     let items = _.remove(this.children, context);
-    //     _.each(items, i => {
-    //         if (i) {
-    //             i.parent = null;
-    //         }
-    //     });
-    //     return items;
-    // }
+    /**
+     * load tasks.
+     *
+     * @returns {Promise<Src[]>}
+     *
+     * @memberof IContext
+     */
+    loadTasks(parent: IContext): Promise<Src[]>{
+        return Promise.all<Src[]>(
+            this.children.map((ctx: IContext)=>{
+                let isContext = ctx instanceof Context;
+                return Promise.all([
+                    isContext? ctx.loadAssertTasks(): [],
+                    isContext? ctx.loadTasks(): []
+                ])
+            })
+        )
+        .then()
 
-    // /**
-    //  * find sub context via express.
-    //  * 
-    //  * @param {(IContext | ((item: IContext) => boolean))} express
-    //  * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-    //  * @returns {IContext}
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // find(express: IContext | ((item: IContext) => boolean), mode?: string): IContext {
-    //     let context: IContext;
-    //     this.each(item => {
-    //         if (context) {
-    //             return false;
-    //         }
-    //         let isFinded = _.isFunction(express) ? express(item) : (<IContext>express) === item;
-    //         if (isFinded) {
-    //             context = item;
-    //             return false;
-    //         }
-    //         return true;
-    //     }, mode);
-    //     return context;
-    // }
+    }
 
-    // /**
-    //  * filter items.
-    //  * 
-    //  * @param {(((item: IContext) => void | boolean))} express
-    //  * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-    //  * @returns {IContext[]}
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // filter(express: ((item: IContext) => void | boolean), mode?: string): IContext[] {
-    //     let contexts: IContext[] = [];
-    //     this.each(item => {
-    //         if (express(item)) {
-    //             contexts.push(item);
-    //         }
-    //     }, mode);
-    //     return contexts;
-    // }
-    // /**
-    //  * find parent context via express.
-    //  * 
-    //  * @param {(IContext | ((item: IContext) => boolean))} express
-    //  * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // each(express: ((item: IContext) => void | boolean), mode?: string) {
-    //     mode = mode || '';
-    //     let r;
-    //     switch (mode) {
-    //         case 'route':
-    //             r = this.route(express);
-    //             break;
-    //         case 'children':
-    //             r = this.eachChildren(express);
-    //             break;
+    /**
+     * load asserts tasks.
+     *
+     * @returns {Promise<Src[]>}
+     *
+     * @memberof IContext
+     */
+    loadAssertTasks(): Promise<Src[]>{
+        let optask = <IAssertOption>this.option;
 
-    //         case 'traverse':
-    //             r = this.trans(express);
-    //             break;
-    //         default:
-    //             r = this.trans(express);
-    //             break;
-    //     }
-    //     return r;
-    // }
+        let assertOrder = this.to(optask.assertsOrder);
+        if (!_.isNumber(assertOrder) && assertOrder) {
+            optask.assertsRunWay = optask.assertsRunWay || assertOrder.runWay;
+        }
+        optask.assertsRunWay = optask.assertsRunWay || RunWay.parallel;
 
-    // eachChildren(express: ((item: IContext) => void | boolean)) {
-    //     _.each(this.children, item => {
-    //         return express(item);
-    //     });
-    // }
+        if (optask.asserts) {
+            let tasks: IAssertOption[] = [];
 
-    // /**
-    //  * do express work in routing.
-    //  * 
-    //  * @param {(((item: IContext) => void | boolean))} express
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // route(express: ((item: IContext) => void | boolean)) {
-    //     if (!express(this)) {
-    //         return false;
-    //     };
-    //     if (this.parent && this.parent['route']) {
-    //         return (<IContext>this.parent).route(express);
-    //     }
-    // }
-    // /**
-    //  * translate all sub context to do express work.
-    //  * 
-    //  * @param {(((item: IContext) => void | boolean))} express
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // trans(express: ((item: IContext) => void | boolean)) {
-    //     if (express(this) === false) {
-    //         return false;
-    //     }
-    //     _.each(this.children, item => {
-    //         return item.trans(express);
-    //     });
-    //     return true;
-    // }
+            _.mapKeys(optask.asserts, (sr, name) => {
+                let op: IAssertOption;
+                // let sr = optask.asserts[name];
+                if (_.isString(sr)) {
+                    op = <IAssertOption>{ src: sr };
+                } else if (_.isNumber(sr)) {
+                    // watch with Operation.autoWatch.
+                    op = <IAssertOption>{ loader: [{ oper: sr, name: name, pipes: [] }] };
+                } else if (_.isFunction(sr)) {
+                    op = { loader: sr };
+                } else if (_.isArray(sr)) {
+                    if (sr.length > 0) {
+                        if (!_.some(<string[]>sr, it => !_.isString(it))) {
+                            op = <IAssertOption>{ src: <string[]>sr };
+                        } else {
+                            op = <IAssertOption>{ loader: <IDynamicTaskOption[]>sr, watch: true };
+                        }
+                    }
+                } else {
+                    op = sr;
+                }
+
+                if (_.isNull(op) || _.isUndefined(op)) {
+                    return;
+                }
+                if (!op.loader) {
+                    op.loader = [{ name: name, pipes: [], watch: true }]
+                }
+                op.name = op.name || this.subTaskName(name);
+                op.src = op.src || (this.getSrc({ oper: Operation.default }) + '/**/*.' + name);
+                // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
+                if (!op.order) {
+                    if (optask.assertsRunWay) {
+                        op.order = { runWay: optask.assertsRunWay };
+                    } else if (!_.isNumber(assertOrder)) {
+                        op.order = { runWay: assertOrder.runWay };
+                    }
+                }
+                tasks.push(op);
+            });
+
+            
+            return this.loadTasks(tasks, ctx)
+                .then(tseq => {
+                    let taskname;
+                    taskname = zipSequence(gulp, tseq, ctx, (name, runway) => name + (runway === RunWay.sequence ? '-asserts-seq' : '-assert-paral'));
+
+                    return <ITaskInfo>{
+                        order: optask.assertsOrder,
+                        taskName: taskname
+                    }
+                });
+        } else {
+            return Promise.resolve(null);
+        }
+    }
+
+    /**
+     * run task in this context.
+     *
+     * @param {IEnvOption} env
+     * @returns {Promise<any>}
+     *
+     * @memberof IContext
+     */
+    run(env: IEnvOption): Promise<any>{
+        return null;
+    }
+
+
+
 }

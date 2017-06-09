@@ -1,4 +1,6 @@
-import { ITaskContext, ITask } from 'development-core'
+import { ITaskContext, Src, Src, IEnvOption } from 'development-core';
+import { Gulp, TaskCallback } from 'gulp';
+import { TaskOption } from './TaskOption';
 /**
  * development context
  * 
@@ -7,68 +9,39 @@ import { ITaskContext, ITask } from 'development-core'
  * @extends {ITaskContext}
  */
 export interface IContext extends ITaskContext {
-    // /**
-    //  * add sub IContext
-    //  * 
-    //  * @param {IContext} context
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // add(context: IContext): void;
-    // /**
-    //  * remove sub IContext.
-    //  * 
-    //  * @param {IContext} [context]
-    //  * @returns {IContext[]}
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // remove(context?: IContext): IContext[] ;
+    /**
+     * the gulp instance.
+     *
+     * @type {Gulp}
+     * @memberof IContext
+     */
+    gulp: Gulp;
 
-    // /**
-    //  * find sub context via express.
-    //  * 
-    //  * @param {(IContext | ((item: IContext) => boolean))} express
-    //  * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-    //  * @returns {IContext}
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // find(express: IContext | ((item: IContext) => boolean), mode?: string): IContext
+    /**
+     * load tasks.
+     *
+     * @returns {Promise<Src[]>}
+     *
+     * @memberof IContext
+     */
+    loadTasks(): Promise<Src[]>;
 
-    // /**
-    //  * filter items.
-    //  * 
-    //  * @param {(((item: IContext) => void | boolean))} express
-    //  * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-    //  * @returns {IContext[]}
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // filter(express: ((item: IContext) => void | boolean), mode?: string): IContext[]
-    // /**
-    //  * find parent context via express.
-    //  * 
-    //  * @param {(IContext | ((item: IContext) => boolean))} express
-    //  * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // each(express: ((item: IContext) => void | boolean), mode?: string);
-    // /**
-    //  * do express work in routing.
-    //  * 
-    //  * @param {(((item: IContext) => void | boolean))} express
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // route(express: ((item: IContext) => void | boolean));
-    // /**
-    //  * translate all sub context to do express work.
-    //  * 
-    //  * @param {(((item: IContext) => void | boolean))} express
-    //  * 
-    //  * @memberOf IContext
-    //  */
-    // trans(express: ((item: IContext) => void | boolean));
+    /**
+     * load asserts tasks.
+     *
+     * @returns {Promise<Src[]>}
+     *
+     * @memberof IContext
+     */
+    loadAssertTasks(): Promise<Src[]>;
+
+    /**
+     * run task in this context.
+     *
+     * @param {IEnvOption} env
+     * @returns {Promise<any>}
+     *
+     * @memberof IContext
+     */
+    run(env: IEnvOption): Promise<any>;
 }

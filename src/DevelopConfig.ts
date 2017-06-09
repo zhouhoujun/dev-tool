@@ -6,14 +6,14 @@ import { ITaskLoader } from './ITaskLoader';
 
 /**
  * Develop config
- * 
+ *
  * @export
  * @interface DevelopConfig
  */
 export interface DevelopConfig {
     /**
      * tools setup main task name.
-     * 
+     *
      * @type {string}
      * @memberOf DevelopConfig
      */
@@ -21,7 +21,7 @@ export interface DevelopConfig {
 
     /**
      * tools setup start task name.
-     * 
+     *
      * @type {string}
      * @memberOf DevelopConfig
      */
@@ -29,7 +29,7 @@ export interface DevelopConfig {
 
     /**
      * tasks config.
-     * 
+     *
      * @type {TaskOption}
      * @memberOf DevelopConfig
      */
@@ -37,7 +37,7 @@ export interface DevelopConfig {
 
     /**
      * development tool option.
-     * 
+     *
      * @type {IAssertOption}
      * @memberOf DevelopConfig
      */
@@ -45,7 +45,7 @@ export interface DevelopConfig {
 
     /**
      * tasks runWay
-     * 
+     *
      * @type {RunWay}
      * @memberOf DevelopConfig
      */
@@ -65,18 +65,18 @@ export interface DevelopConfig {
 
     /**
      * custom context factory.
-     * 
+     *
      * @param {ITaskConfig} cfg
      * @param {ITaskContext} [parent]
      * @returns {ITaskContext}
-     * 
+     *
      * @memberOf DevelopConfig
      */
     contextFactory?(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
 
     /**
      * development evnets.
-     * 
+     *
      * @type {IMap<Function>}
      * @memberOf DevelopConfig
      */
