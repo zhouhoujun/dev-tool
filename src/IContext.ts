@@ -1,6 +1,7 @@
-import { ITaskContext, Src, Src, IEnvOption } from 'development-core';
+import { ITaskContext, Src, IEnvOption } from 'development-core';
 import { Gulp, TaskCallback } from 'gulp';
 import { TaskOption } from './TaskOption';
+import { ILoaderFactory } from './loaderFactory';
 /**
  * development context
  * 
@@ -9,6 +10,9 @@ import { TaskOption } from './TaskOption';
  * @extends {ITaskContext}
  */
 export interface IContext extends ITaskContext {
+
+    factory: ILoaderFactory;
+
     /**
      * the gulp instance.
      *

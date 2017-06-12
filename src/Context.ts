@@ -1,11 +1,16 @@
-import { TaskContext, zipSequence, ITaskConfig, Src, Operation,
-     IEnvOption, ITaskContext, ITaskInfo,RunWay, IDynamicTaskOption, ITask, TaskResult } from 'development-core';
+import {
+    TaskContext, zipSequence, ITaskConfig, Src, Operation,
+    IEnvOption, ITaskContext, ITaskInfo, RunWay, IDynamicTaskOption, ITask, TaskResult
+} from 'development-core';
 import { IContext } from './IContext';
 import * as _ from 'lodash';
 import * as gulp from 'gulp';
 import { Gulp, TaskCallback } from 'gulp';
 import { TaskOption, IAssertOption } from './TaskOption';
+import { ILoaderFactory, LoaderFactory } from './loaderFactory';
 
+
+const factory = new LoaderFactory();
 /**
  * Context.
  * 
@@ -17,15 +22,24 @@ import { TaskOption, IAssertOption } from './TaskOption';
 export class Context extends TaskContext implements IContext {
 
     private _gulp: Gulp;
-    get gulp(){
-        return  this._gulp || gulp;
+    get gulp() {
+        return this._gulp || gulp;
     }
-    set gulp(gulp: Gulp){
+    set gulp(gulp: Gulp) {
         this._gulp = gulp;
     }
     // private children: IContext[] = [];
-    constructor(cfg: ITaskConfig, parent?: ITaskContext) {
+    constructor(cfg: ITaskConfig, parent?: IContext) {
         super(cfg, parent);
+    }
+
+    private __factory: ILoaderFactory;
+    get factory(): ILoaderFactory {
+        return this.__factory || factory;
+    }
+
+    set factory(fac: ILoaderFactory) {
+        this.__factory = fac;
     }
 
     /**
@@ -35,17 +49,28 @@ export class Context extends TaskContext implements IContext {
      *
      * @memberof IContext
      */
-    loadTasks(parent: IContext): Promise<Src[]>{
+    loadTasks(): Promise<Src[]> {
+        this.each((ctx: IContext) => {
+
+            ctx.loadAssertTasks();
+
+        });
         return Promise.all<Src[]>(
-            this.children.map((ctx: IContext)=>{
+            this.children.map((ctx: IContext) => {
                 let isContext = ctx instanceof Context;
                 return Promise.all([
-                    isContext? ctx.loadAssertTasks(): [],
-                    isContext? ctx.loadTasks(): []
+                    this.findTasks()
+                    isContext? ctx.loadAssertTasks() : [],
+                    isContext ? ctx.loadTasks() : []
                 ])
+                    .then(src => {
+
+                    })
             })
         )
-        .then()
+            .then(srcs => {
+
+            });
 
     }
 
@@ -56,7 +81,7 @@ export class Context extends TaskContext implements IContext {
      *
      * @memberof IContext
      */
-    loadAssertTasks(): Promise<Src[]>{
+    loadAssertTasks(): Promise<Src[]> {
         let optask = <IAssertOption>this.option;
 
         let assertOrder = this.to(optask.assertsOrder);
@@ -109,7 +134,7 @@ export class Context extends TaskContext implements IContext {
                 tasks.push(op);
             });
 
-            
+
             return this.loadTasks(tasks, ctx)
                 .then(tseq => {
                     let taskname;
@@ -133,7 +158,7 @@ export class Context extends TaskContext implements IContext {
      *
      * @memberof IContext
      */
-    run(env: IEnvOption): Promise<any>{
+    run(env: IEnvOption): Promise<any> {
         return null;
     }
 
