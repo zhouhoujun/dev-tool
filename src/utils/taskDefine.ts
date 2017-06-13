@@ -1,12 +1,8 @@
-import { bindingConfig, ITask, ITaskConfig, ITaskContext, IContextDefine, } from 'development-core';
+import { ITask, ITaskContext, ITaskDefine, } from 'development-core';
 import { IDynamicLoaderOption, IAssertOption } from '../TaskOption';
 
 export default (modules) => {
-    return <IContextDefine>{
-        getContext(config: ITaskConfig): ITaskContext {
-            return bindingConfig(config);
-        },
-
+    return <ITaskDefine>{
         tasks(context: ITaskContext): Promise<ITask[]> {
             let lderOption: IDynamicLoaderOption = (<IAssertOption>context.option).loader;
             let dtask: ITask[] = [];

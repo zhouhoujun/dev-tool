@@ -1,4 +1,4 @@
-import { ITask, IEnvOption, IContextDefine, ITaskContext, ITaskConfig } from 'development-core';
+import { ITask, ITaskDefine, IContextDefine, ITaskContext } from 'development-core';
 import { ITaskOption, ILoaderOption } from '../TaskOption';
 import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
@@ -6,56 +6,54 @@ import { ITaskLoader } from '../ITaskLoader';
 
 export abstract class BaseLoader implements ITaskLoader {
 
-    constructor(protected option: ITaskOption, protected env?: IEnvOption, protected factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
-
+    constructor(protected ctx: IContext) {
     }
 
-    load(context: IContext): Promise<ITask[]> {
-        return this.contextDef
+    get option(): ITaskOption {
+        return this.ctx.option as ITaskOption;
+    }
+    load(): Promise<ITask[]> {
+        return this.taskDef
+            .then((def) => {
+                if (def.loadConfig) {
+                    this.ctx.loadConfig(def.loadConfig(this.ctx.option, this.ctx.oper));
+                }
+                if (def['getContext']) {
+                    let customCtx = (<IContextDefine>def).getContext(this.ctx.getConfig());
+                    this.ctx.loadConfig(customCtx.getConfig());
+                }
+                return def;
+            })
             .then(def => {
-                return this.loadTasks(context, def);
+                return this.loadTasks(this.ctx, def);
             })
             .catch(err => {
                 console.error(err);
             });
     }
 
-    loadContext(env: IEnvOption): Promise<IContext> {
-        this.env = env;
-        let self = this;
-        return this.contextDef
-            .then(def => {
-                return <IContext>def.getContext({
-                    option: self.option,
-                    env: env,
-                    createContext: self.factory
-                });
-            })
-            .catch(err => {
-                console.error(err);
-            });
-    }
-
-    private _contextDef: Promise<IContextDefine>;
-    protected get contextDef(): Promise<IContextDefine> {
-        if (!this._contextDef) {
-            this._contextDef = Promise.resolve(this.getContextDefine());
+    private _taskDef: Promise<ITaskDefine>;
+    protected get taskDef(): Promise<ITaskDefine> {
+        if (!this._taskDef) {
+            this._taskDef = Promise.resolve(this.loadTaskDefine());
         }
 
-        return this._contextDef;
+        return this._taskDef;
     }
 
 
-    protected loadTasks(context: ITaskContext, def: IContextDefine): Promise<ITask[]> {
+    protected loadTasks(context: ITaskContext, def: ITaskDefine): Promise<ITask[]> {
         if (def.tasks) {
             return def.tasks(context);
+        } else if (def.loadTasks) {
+            return def.loadTasks(context);
         } else {
             let mdl = this.getTaskModule();
             return context.findTasks(mdl);
         }
     }
 
-    protected abstract getContextDefine(): IContextDefine | Promise<IContextDefine>;
+    protected abstract loadTaskDefine(): ITaskDefine | Promise<ITaskDefine>;
 
     protected getConfigModule(): string | Object {
         let loader: ILoaderOption = this.option.loader;

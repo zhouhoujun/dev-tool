@@ -1,17 +1,15 @@
-import { IContextDefine, IEnvOption, ITaskConfig, ITaskContext } from 'development-core';
-import { ITaskOption } from '../TaskOption';
-import contextDefine from '../utils/contextDefine';
+import { ITaskDefine } from 'development-core';
+import taskDefine from '../utils/taskDefine';
 import { BaseLoader } from './BaseLoader';
-
+import { IContext } from '../IContext';
 export class DynamicLoader extends BaseLoader {
 
-    constructor(option: ITaskOption, env?: IEnvOption, factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
-        super(option, env, factory);
+    constructor(ctx: IContext) {
+        super(ctx);
     }
 
-
-    protected getContextDefine(): IContextDefine | Promise<IContextDefine> {
-        return contextDefine(this.getTaskModule())
+    protected loadTaskDefine(): ITaskDefine | Promise<ITaskDefine> {
+        return taskDefine(this.getTaskModule())
     }
 }
 

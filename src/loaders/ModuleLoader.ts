@@ -1,36 +1,35 @@
-import { IContextDefine, findTaskDefineInModule, IEnvOption, ITaskConfig, ITaskContext, taskDefine2Context } from 'development-core';
+import { ITaskDefine } from 'development-core';
 import { ITaskOption, ILoaderOption } from '../TaskOption';
 import { BaseLoader } from './BaseLoader';
-import contextDefine from '../utils/contextDefine';
+import { IContext } from '../IContext';
+import taskDefine from '../utils/taskDefine';
 import * as chalk from 'chalk';
 
 export class ModuleLoader extends BaseLoader {
 
-    constructor(option: ITaskOption, env?: IEnvOption, factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
-        super(option, env, factory);
+    constructor(ctx: IContext) {
+        super(ctx);
     }
 
-    protected getContextDefine(): IContextDefine | Promise<IContextDefine> {
+    protected loadTaskDefine(): ITaskDefine | Promise<ITaskDefine> {
         return new Promise((resolve, reject) => {
             let loader = <ILoaderOption>this.option.loader;
             if (loader) {
-                if (loader.contextDefine) {
-                    resolve(loader.contextDefine);
-                } else if (loader.taskDefine) {
-                    resolve(taskDefine2Context(loader.taskDefine));
+                if (loader.taskDefine) {
+                    resolve(loader.taskDefine);
                 } else {
                     let mdl = this.getConfigModule();
-                    findTaskDefineInModule(mdl)
+                    this.ctx.findTaskDefine(mdl)
                         .then(def => {
                             if (def) {
                                 resolve(def);
                             } else {
-                                resolve(contextDefine(this.getTaskModule()));
+                                resolve(taskDefine(this.getTaskModule()));
                             }
                         })
                         .catch(err => {
                             console.error(chalk.red(err));
-                            resolve(contextDefine(this.getTaskModule()));
+                            resolve(taskDefine(this.getTaskModule()));
                         });
                 }
             } else {

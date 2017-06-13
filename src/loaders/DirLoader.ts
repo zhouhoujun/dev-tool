@@ -1,31 +1,31 @@
 import * as _ from 'lodash';
-import { ITask, IContextDefine, ITaskContext, bindingConfig, findTaskDefineInDir, ITaskConfig, taskSourceVal, IEnvOption } from 'development-core';
-import { ITaskOption, IDirLoaderOption } from '../TaskOption';
+import { ITask, ITaskDefine, ITaskContext } from 'development-core';
+import { IDirLoaderOption } from '../TaskOption';
 import { ModuleLoader } from './ModuleLoader';
+import { IContext } from '../IContext';
 
 export class DirLoader extends ModuleLoader {
 
-    constructor(option: ITaskOption, env: IEnvOption, factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext) {
-        super(option, env);
+    constructor(ctx: IContext) {
+        super(ctx);
     }
 
-    loadTasks(context: ITaskContext, def: IContextDefine): Promise<ITask[]> {
+    loadTasks(context: ITaskContext, def: ITaskDefine): Promise<ITask[]> {
         let loader: IDirLoaderOption = this.option.loader;
         if (loader.dir) {
-            return context.findTasksInDir(taskSourceVal(loader.dir, context));
+            return context.findTasksInDir(loader.dir);
         } else {
             return super.loadTasks(context, def);
         }
     }
 
-    protected getContextDefine(): IContextDefine | Promise<IContextDefine> {
+    protected loadTaskDefine(): ITaskDefine | Promise<ITaskDefine> {
         let loader: IDirLoaderOption = this.option.loader;
-        let self = this;
         if (!loader.configModule
             && !loader.module && loader.dir) {
-            return findTaskDefineInDir(taskSourceVal(loader.dir, bindingConfig({ env: self.env, option: {}, createContext: self.factory })));
+            return this.ctx.findTaskDefineInDir(loader.dir);
         } else {
-            return super.getContextDefine();
+            return super.loadTaskDefine();
         }
     }
 }

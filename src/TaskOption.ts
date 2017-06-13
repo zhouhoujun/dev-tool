@@ -1,6 +1,6 @@
 import {
     Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation
-    , IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
+    , IMap, Src, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
 } from 'development-core'
 
 
@@ -52,14 +52,6 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
      * @memberOf ILoaderOption
      */
     taskDefine?: ITaskDefine;
-
-    /**
-     * context define.
-     * 
-     * @type {IContextDefine}
-     * @memberOf ILoaderOption
-     */
-    contextDefine?: IContextDefine;
 }
 
 /**
@@ -108,13 +100,7 @@ export interface ISubTaskOption {
      * @memberOf ISubTaskOption
      */
     subTaskOrder?: Order;
-    /**
-     * sub tasks run way. default RunWay.sequence
-     * 
-     * @type {RunWay}
-     * @memberOf ISubTaskOption
-     */
-    subTaskRunWay?: RunWay
+    
 
 }
 
@@ -155,6 +141,12 @@ export interface ITaskLoaderOption {
 
 }
 
+
+export interface TaskSeq {
+    opt: ITaskOption,
+    seq: Src[]
+}
+
 /**
  * assert option
  * 
@@ -172,7 +164,36 @@ export interface IAssertOption extends IAsserts, ITaskLoaderOption {
      * @type {RunWay}
      * @memberOf ISubTaskOption
      */
-    assertsRunWay?: RunWay
+    assertsRunWay?: RunWay;
+
+    /**
+     * tasks to deal with IAsserts.
+     *
+     * @type {IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>}
+     * @memberOf IAsserts
+     */
+    asserts?: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>;
+
+    /**
+     * set sub asserts task order in this task sequence.
+     *
+     * @type {Order}
+     * @memberOf IAsserts
+     */
+    assertsOrder?: Order;
+
+    /**
+     * current assert order.
+     */
+    order?: Order;
+
+    /**
+     * sub tasks run way. default RunWay.sequence
+     * 
+     * @type {RunWay}
+     * @memberOf ISubTaskOption
+     */
+    runWay?: RunWay
 }
 
 /**

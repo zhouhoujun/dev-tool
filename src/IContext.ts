@@ -11,7 +11,7 @@ import { ILoaderFactory } from './loaderFactory';
  */
 export interface IContext extends ITaskContext {
 
-    factory: ILoaderFactory;
+    loaderFactory: ILoaderFactory;
 
     /**
      * the gulp instance.
@@ -29,15 +29,6 @@ export interface IContext extends ITaskContext {
      * @memberof IContext
      */
     loadTasks(): Promise<Src[]>;
-
-    /**
-     * load asserts tasks.
-     *
-     * @returns {Promise<Src[]>}
-     *
-     * @memberof IContext
-     */
-    loadAssertTasks(): Promise<Src[]>;
 
     /**
      * run task in this context.

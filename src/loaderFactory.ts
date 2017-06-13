@@ -1,11 +1,10 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
 import { IEnvOption } from 'development-core';
-
+import { IContext } from './IContext';
 import { ITaskOption, ILoaderOption, IDynamicLoaderOption, contextFactory } from './TaskOption'
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
-import { CustomLoader } from './loaders/CustomLoader';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
 
@@ -17,16 +16,14 @@ import * as chalk from 'chalk';
  */
 export interface ILoaderFactory {
     /**
-     * create loader.
+     * create loader;
      * 
-     * @param {ITaskOption} option
-     * @param {IEnvOption} [env]
-     * @param {contextFactory} [factory]
+     * @param {IContext} context
      * @returns {ITaskLoader}
      * 
-     * @memberOf ILoaderFactory
+     * @memberof ILoaderFactory
      */
-    create(option: ITaskOption, env?: IEnvOption, factory?: contextFactory): ITaskLoader;
+    create(context: IContext): ITaskLoader;
 }
 
 
@@ -41,24 +38,27 @@ export class LoaderFactory implements ILoaderFactory {
 
     constructor() {
     }
-    create(option: ITaskOption, env?: IEnvOption, factory?: contextFactory): ITaskLoader {
-
+    create(context: IContext): ITaskLoader {
+        let option = context.option as ITaskOption;
         if (_.isString(option.loader)) {
             option.loader = {
                 module: option.loader
             };
-            return new ModuleLoader(option, env, factory);
+            return new ModuleLoader(context);
         } else if (_.isFunction(option.loader)) {
-            return new CustomLoader(option, option.loader, factory);
+            option.loader = <IDynamicLoaderOption>{
+                dynamicTasks: context.to(option.loader) as IDynamicLoaderOption[]
+            };
+            return new DynamicLoader(context);
         } else if (_.isArray(option.loader)) {
             option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: option.loader || []
             };
-            return new DynamicLoader(option, env, factory);
+            return new DynamicLoader(context);
         } else if (option.loader) {
             // if config dir.
             if (option.loader['dir']) {
-                return new DirLoader(option, env);
+                return new DirLoader(context);
             }
 
             // dynamic task name.
@@ -66,28 +66,28 @@ export class LoaderFactory implements ILoaderFactory {
                 option.loader = <IDynamicLoaderOption>{
                     dynamicTasks: option.loader
                 };
-                return new DynamicLoader(option, env, factory);
+                return new DynamicLoader(context);
             }
 
             // if config pipe and taskName.
             if (option.loader['dynamicTasks']) {
-                return new DynamicLoader(option);
+                return new DynamicLoader(context);
             }
 
             let loader: ITaskLoader = null;
             let loderOption: ILoaderOption = option.loader;
             switch (loderOption.type) {
                 case 'dir':
-                    loader = new DirLoader(option, env, factory);
+                    loader = new DirLoader(context);
                     break;
 
                 case 'dynamic':
-                    loader = new DynamicLoader(option, env, factory);
+                    loader = new DynamicLoader(context);
                     break;
 
                 case 'module':
                 default:
-                    loader = new ModuleLoader(option, env, factory);
+                    loader = new ModuleLoader(context);
                     break;
             }
             return loader;
@@ -96,7 +96,7 @@ export class LoaderFactory implements ILoaderFactory {
             option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: []
             };
-            return new DynamicLoader(option, env, factory);
+            return new DynamicLoader(context);
         }
     }
 }
