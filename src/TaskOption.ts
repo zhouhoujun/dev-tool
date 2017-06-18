@@ -162,7 +162,7 @@ export interface IAssertOption extends IAsserts, ITaskLoaderOption {
      * asserts tasks run way. default RunWay.parallel
      *
      * @type {RunWay}
-     * @memberOf ISubTaskOption
+     * @memberOf IAssertOption
      */
     assertsRunWay?: RunWay;
 
@@ -191,7 +191,7 @@ export interface IAssertOption extends IAsserts, ITaskLoaderOption {
      * sub tasks run way. default RunWay.sequence
      * 
      * @type {RunWay}
-     * @memberOf ISubTaskOption
+     * @memberOf IAssertOption
      */
     runWay?: RunWay
 }
@@ -205,13 +205,7 @@ export interface IAssertOption extends IAsserts, ITaskLoaderOption {
  * @extends {ISubTaskOption}
  */
 export interface ITaskOption extends IAssertOption, ISubTaskOption {
-    /**
-     * the src file filter string. default 'src'.
-     * 
-     * @type {TaskSource}
-     * @memberOf ITaskOption
-     */
-    src?: TaskSource;
+
 }
 
 

@@ -8,7 +8,6 @@ import { Operation, ITaskConfig, Src, toSequence, runSequence, zipSequence, sort
 import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
-import { DevelopConfig } from './DevelopConfig';
 import * as chalk from 'chalk';
 import { EventEmitter } from 'events';
 
@@ -17,7 +16,7 @@ interface TaskSeq {
     seq: Src[]
 }
 
-export class Development extends EventEmitter {
+export class Development extends Context {
 
     /**
      * create development tool.
@@ -25,26 +24,30 @@ export class Development extends EventEmitter {
      * @static
      * @param {Gulp} gulp
      * @param {string} dirname
-     * @param {(DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>)} setting
+     * @param {(ITaskConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>)} setting
      * @param {any} [runWay=RunWay.sequence]
      * @returns {Development}
      * 
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: DevelopConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay = RunWay.sequence, factory?: (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext): Development {
-        let option = _.isArray(setting) ? { tasks: setting, runWay: runWay } : setting;
+    static create(gulp: Gulp, dirname: string, setting: ITaskConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay = RunWay.sequence): Development {
+        let config:ITaskConfig;
+        let option: ITaskOption;
+        if( _.isArray(setting)){
+             let env: IEnvOption = minimist(process.argv.slice(2), {
+                string: 'env',
+                default: { env: process.env.NODE_ENV || 'development', root: dirname }
+            });
+             config = { option : <ITaskOption>{ tasks: setting, runWay: runWay }, env: env};
+         } else {
+             config = setting;
+         }
+        option = config.option as ITaskOption;
         if (!_.isUndefined(option.runWay)) {
             option.runWay = runWay;
         }
-        option.contextFactory = factory || ((cfg, parent?) => {
-            let ctx = new Context(cfg, parent);
-            if (parent && parent.add) {
-                (<IContext>parent).add(ctx);
-            }
-            return ctx;
-        })
 
-        let devtool = new Development(dirname, option);
+        let devtool = new Development(config);
         devtool.setup(gulp);
         return devtool;
     }
@@ -52,18 +55,13 @@ export class Development extends EventEmitter {
     /**
      * Creates an instance of Development.
      * 
-     * @param {string} dirname
-     * @param {DevelopConfig} config
+     * @param {ITaskConfig} config 
+     * @param {IContext} [parent] 
      * 
-     * @memberOf Development
+     * @memberof Development
      */
-    public constructor(private dirname: string, protected config: DevelopConfig) {
-        super();
-        if (config.evnets) {
-            _.each(_.keys(config.evnets), key => {
-                this.on(key, config.evnets[key]);
-            });
-        }
+    public constructor(protected config: ITaskConfig, parent?: IContext) {
+        super(config, parent);
     }
 
     /**
