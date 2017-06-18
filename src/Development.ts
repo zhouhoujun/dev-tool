@@ -31,21 +31,22 @@ export class Development extends Context {
      * @memberOf Development
      */
     static create(gulp: Gulp, dirname: string, setting: ITaskConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay = RunWay.sequence): Development {
-        let config:ITaskConfig;
+        let config: ITaskConfig;
         let option: ITaskOption;
-        if( _.isArray(setting)){
-             let env: IEnvOption = minimist(process.argv.slice(2), {
+        if (_.isArray(setting)) {
+            let env: IEnvOption = minimist(process.argv.slice(2), {
                 string: 'env',
                 default: { env: process.env.NODE_ENV || 'development', root: dirname }
             });
-             config = { option : <ITaskOption>{ tasks: setting, runWay: runWay }, env: env};
-         } else {
-             config = setting;
-         }
-        option = config.option as ITaskOption;
-        if (!_.isUndefined(option.runWay)) {
-            option.runWay = runWay;
+            config = { option: <ITaskOption>{ tasks: setting, runWay: runWay }, env: env };
+        } else {
+            config = setting;
+            option = config.option as ITaskOption;
+            if (!_.isUndefined(option.runWay)) {
+                option.runWay = runWay;
+            }
         }
+
 
         let devtool = new Development(config);
         devtool.setup(gulp);
