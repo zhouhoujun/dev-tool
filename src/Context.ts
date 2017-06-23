@@ -97,15 +97,23 @@ export class Context extends TaskContext implements IContext {
      * @memberof IContext
      */
     run(): Promise<any> {
-        return this.loadTasks()
-            .then(tseq => {
-                let opt = this.option as ITaskOption;
-                if (opt.runWay === RunWay.parallel) {
-                    return this.runSequence([this.flattenSequence(tseq)]);
-                } else {
-                    return this.runSequence(tseq);
-                }
-            });
+        if (this.env.help) {
+            return Promise.resolve(this.help())
+        } else {
+            return this.loadTasks()
+                .then(tseq => {
+                    let opt = this.option as ITaskOption;
+                    if (opt.runWay === RunWay.parallel) {
+                        return this.runSequence([this.flattenSequence(tseq)]);
+                    } else {
+                        return this.runSequence(tseq);
+                    }
+                });
+        }
+    }
+
+    help() {
+        this.cfg.printHelp && this.cfg.printHelp(_.isBoolean(this.env.help) ? '' : this.env.help);
     }
 
 

@@ -39,4 +39,11 @@ export interface IContext extends ITaskContext {
      * @memberof IContext
      */
     run(env: IEnvOption): Promise<any>;
+
+    /**
+     * help
+     *
+     * @memberof IContext
+     */
+    help();
 }
