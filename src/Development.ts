@@ -101,6 +101,52 @@ export class Development extends Context {
     }
 
 
+    setup(): Promise<Src[]> {
+        let gulp = this.gulp;
+        let isRoot = !this.parent;
+        let btsk = isRoot ? 'build' : `build-${this.toStr(this.option.name)}`;
+        gulp.task(btsk, (callback: TaskCallback) => {
+            let env: IEnvOption = minimist(process.argv.slice(2), {
+                string: 'env',
+                default: { env: process.env.NODE_ENV || 'development' }
+            });
+            this.setConfig({
+                env: env
+            });
+            return this.run();
+        });
+
+        gulp.task(isRoot ? 'start' : `start-${this.toStr(this.option.name)}`, (callback: TaskCallback) => {
+            let env: IEnvOption = minimist(process.argv.slice(2), {
+                string: 'env',
+                default: { env: process.env.NODE_ENV || 'development' }
+            });
+            if (!env.task) {
+                return Promise.reject('start task can not empty!');
+            }
+            this.setConfig({
+                env: env
+            });
+            let tasks = env.task.split(',');
+            return this.find<Context>(ctx => tasks.indexOf(ctx.toStr(ctx.option.name)) >= 0)
+                .run();
+        });
+
+        if (!this.parent) {
+            gulp.task('default', () => {
+                gulp.start('build');
+            });
+        }
+
+        return Promise.resolve([btsk]);
+    }
+
+    builder(){
+        let opt = this.option as ITaskOption;
+        opt.asserts
+    }
+
+
     printHelp(help: string) {
         if (help === 'en') {
 

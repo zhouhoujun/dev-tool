@@ -19,8 +19,13 @@ export abstract class BaseLoader implements ITaskLoader {
                     this.ctx.setConfig(def.loadConfig(this.ctx.option, this.ctx.oper));
                 }
                 if (def['getContext']) {
-                    let customCtx = (<IContextDefine>def).getContext(this.ctx.getConfig());
+                    let cdef = def as IContextDefine;
+                    let customCtx = cdef.getContext(this.ctx.getConfig());
                     this.ctx.setConfig(customCtx.getConfig());
+                }
+                if (def['setContext']) {
+                    let cdef = def as IContextDefine;
+                    cdef.setContext(this.ctx);
                 }
                 return def;
             })
