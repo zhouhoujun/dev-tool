@@ -85,18 +85,23 @@ export class Development extends Context {
 
     /**
      * Creates an instance of Development.
-     * 
+     *
      * @param {ITaskConfig} config
      * @param {IContext} [parent]
-     * 
+     *
      * @memberof Development
      */
     public constructor(protected config: ITaskConfig, parent?: IContext) {
         super(config, parent);
+        if (!this.cfg.printHelp) {
+            this.setConfig({
+                printHelp: this.printHelp
+            })
+        };
     }
 
 
-    help(help: boolean | string) {
+    printHelp(help: string) {
         if (help === 'en') {
 
             console.log(`
@@ -137,7 +142,7 @@ export class Development extends Context {
 
     // /**
     //  * run task.
-    //  * 
+    //  *
     //  * @param {Gulp} gulp
     //  * @param {IEnvOption} env
     //  * @returns {Promise<any>}

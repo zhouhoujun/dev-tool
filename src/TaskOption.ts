@@ -100,7 +100,6 @@ export interface ISubTaskOption {
      * @memberOf ISubTaskOption
      */
     subTaskOrder?: Order;
-    
 
 }
 
@@ -157,7 +156,6 @@ export interface TaskSeq {
  */
 export interface IAssertOption extends IAsserts, ITaskLoaderOption {
 
-    oper?: Operation;
     /**
      * asserts tasks run way. default RunWay.parallel
      *
@@ -181,19 +179,6 @@ export interface IAssertOption extends IAsserts, ITaskLoaderOption {
      * @memberOf IAsserts
      */
     assertsOrder?: Order;
-
-    /**
-     * current assert order.
-     */
-    order?: Order;
-
-    /**
-     * sub tasks run way. default RunWay.sequence
-     * 
-     * @type {RunWay}
-     * @memberOf IAssertOption
-     */
-    runWay?: RunWay
 }
 
 /**
