@@ -1,5 +1,5 @@
 import { ITaskDefine } from 'development-core';
-import { ITaskOption, ILoaderOption } from '../TaskOption';
+import { ILoaderOption } from '../TaskOption';
 import { BaseLoader } from './BaseLoader';
 import { IContext } from '../IContext';
 import taskDefine from '../utils/taskDefine';

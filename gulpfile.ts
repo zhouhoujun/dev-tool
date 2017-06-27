@@ -16,7 +16,6 @@ Development.create(gulp, __dirname, [
         asserts: {
             ts: { loader: 'development-assert-ts' }
         },
-        assertsOrder: total => 2 / total,
         loader: [
             {
                 name: 'test',

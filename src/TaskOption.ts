@@ -1,6 +1,6 @@
 import {
     Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation
-    , IMap, Src, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
+    , IAssertOption, IMap, Src, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
 } from 'development-core'
 
 
@@ -87,7 +87,7 @@ export interface IDirLoaderOption extends ILoaderOption {
 export interface ISubTaskOption {
     /**
      * sub tasks.
-     * 
+     *
      * @type {TaskOption}
      * @memberOf ISubTaskOption
      */
@@ -95,11 +95,18 @@ export interface ISubTaskOption {
 
     /**
      * set sub task order in this task sequence.
-     * 
+     *
      * @type {Order}
      * @memberOf ISubTaskOption
      */
     subTaskOrder?: Order;
+
+    /**
+     * sub task run way.
+     *
+     * @type {RunWay}@memberof ISubTaskOption
+     */
+    subTaskRunWay?: RunWay;
 
 }
 
@@ -147,41 +154,6 @@ export interface TaskSeq {
 }
 
 /**
- * assert option
- * 
- * @export
- * @interface IAssertOption
- * @extends {IAsserts}
- * @extends {ITaskLoaderOption}
- */
-export interface IAssertOption extends IAsserts, ITaskLoaderOption {
-
-    /**
-     * asserts tasks run way. default RunWay.parallel
-     *
-     * @type {RunWay}
-     * @memberOf IAssertOption
-     */
-    assertsRunWay?: RunWay;
-
-    /**
-     * tasks to deal with IAsserts.
-     *
-     * @type {IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>}
-     * @memberOf IAsserts
-     */
-    asserts?: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>;
-
-    /**
-     * set sub asserts task order in this task sequence.
-     *
-     * @type {Order}
-     * @memberOf IAsserts
-     */
-    assertsOrder?: Order;
-}
-
-/**
  * task option setting.
  * 
  * @export
@@ -189,7 +161,7 @@ export interface IAssertOption extends IAsserts, ITaskLoaderOption {
  * @extends {IAssertOption}
  * @extends {ISubTaskOption}
  */
-export interface ITaskOption extends IAssertOption, ISubTaskOption {
+export interface ITaskOption extends IAssertOption, ISubTaskOption, ITaskLoaderOption {
 
 }
 

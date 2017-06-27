@@ -10,7 +10,7 @@ export interface ITaskLoader {
     /**
      * load task.
      * @returns {Promise<ITask[]>}
-     * 
+     *
      * @memberOf ITaskLoader
      */
     load(): Promise<ITask[]>;

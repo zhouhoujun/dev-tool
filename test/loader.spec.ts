@@ -2,9 +2,10 @@ import * as mocha from 'mocha';
 import { expect, assert } from 'chai';
 
 import { ILoaderFactory, LoaderFactory } from '../src/loaderFactory';
-import { Operation, ITask, ITaskConfig, ITaskContext } from 'development-core';
+import { Operation, ITask, ITaskConfig } from 'development-core';
 import { ITaskLoader } from '../src/ITaskLoader';
-import { IDirLoaderOption, IDynamicLoaderOption, IAssertOption } from '../src/TaskOption';
+import { IDirLoaderOption, IDynamicLoaderOption, ITaskOption } from '../src/TaskOption';
+import { Context } from '../src/Context';
 
 let root = __dirname;
 import * as path from 'path';
@@ -18,131 +19,156 @@ describe('LoaderFactory', function () {
     })
 
     it('create dynamic loader', async () => {
-        let loader: ITaskLoader = factory.create({
-            src: 'src',
-            loader: []
+        let ctx = new Context({
+            option: {
+                src: 'src',
+                loader: []
+            },
+            env: { config: 'test', watch: true }
         });
 
-        let taskconfig: ITaskContext = await loader.loadContext({ config: 'test', watch: true });
 
-        expect(taskconfig).to.not.null;
-        expect(taskconfig).to.not.undefined;
-        expect(taskconfig.env.config).to.equals('test');
-        expect(taskconfig.oper).to.eq(Operation.build | Operation.watch);
+        let loader: ITaskLoader = factory.create(ctx);
+        expect(ctx).to.not.null;
+        expect(ctx).to.not.undefined;
+        expect(ctx.env.config).to.equals('test');
+        expect(ctx.oper).to.eq(Operation.build | Operation.watch);
 
-        let option: IAssertOption = taskconfig.option;
+        let option: ITaskOption = ctx.option;
         expect(Array.isArray(option.loader)).to.false;
         expect(Array.isArray(option.loader['dynamicTasks'])).to.true;
 
-        let tasks = await loader.load(taskconfig);
+        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(0);
     });
 
-    it('create dynamic loader with module', async  () => {
-        let loader: ITaskLoader = factory.create({
-            src: 'src',
-            loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
+    it('create dynamic loader with module', async () => {
+        let ctx = new Context({
+            option: {
+                src: 'src',
+                loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
+            },
+            env: { config: 'test', group: 'test' }
         });
 
-        let taskconfig: ITaskContext = await loader.loadContext({ config: 'test', group: 'test' });
+        let loader: ITaskLoader = factory.create(ctx);
 
-        expect(taskconfig).to.not.null;
-        expect(taskconfig).to.not.undefined;
-        expect(taskconfig.env.group).to.equals('test');
-        expect(taskconfig.oper).to.eq(Operation.build);
+        expect(ctx).to.not.null;
+        expect(ctx).to.not.undefined;
+        expect(ctx.env.group).to.equals('test');
+        expect(ctx.oper).to.eq(Operation.build);
 
-        let option: IAssertOption = taskconfig.option;
+        let option: ITaskOption = ctx.option;
         expect(Array.isArray(option.loader)).to.false;
         expect(Array.isArray(option.loader['dynamicTasks'])).to.true;
 
-        let tasks = await loader.load(taskconfig);
+
+        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(1);
 
 
-        let nogptaskconfig: ITaskContext = await loader.loadContext({ config: 'test' });
+        let nogpctx = new Context({
+            option: {
+                src: 'src',
+                loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
+            },
+            env: { config: 'test' }
+        });
+        let loader2: ITaskLoader = factory.create(nogpctx);
 
-        expect(nogptaskconfig).to.not.null;
-        expect(nogptaskconfig).to.not.undefined;
-        expect(nogptaskconfig.env.group).to.undefined;
-        expect(nogptaskconfig.oper).to.eq(Operation.build);
+        expect(nogpctx).to.not.null;
+        expect(nogpctx).to.not.undefined;
+        expect(nogpctx.env.group).to.undefined;
+        expect(nogpctx.oper).to.eq(Operation.build);
 
-        let option2: IAssertOption = taskconfig.option;
+        let option2: ITaskOption = ctx.option;
         expect(Array.isArray(option2.loader)).to.false;
         expect(Array.isArray(option2.loader['dynamicTasks'])).to.true;
 
-        let ntasks = await loader.load(nogptaskconfig);
+        let ntasks = await loader2.load();
         expect(ntasks).not.null;
         expect(ntasks.length).eq(1);
     });
 
-    it('create directory loader', async  () => {
-        let loader: ITaskLoader = factory.create({
-            src: 'src',
-            loader: <IDirLoaderOption>{ dir: path.join(root, './tasks') }
-        });
+    it('create directory loader', async () => {
 
-        let taskconfig: ITaskContext = await loader.loadContext({ config: 'test', deploy: true });
+        let ctx = new Context({
+            option: {
+                src: 'src',
+                loader: <IDirLoaderOption>{ dir: path.join(root, './tasks') }
+            },
+            env: { config: 'test', deploy: true }
+        })
+        let loader: ITaskLoader = factory.create(ctx);
 
-        expect(taskconfig).to.not.null;
-        expect(taskconfig).to.not.undefined;
-        expect(taskconfig.env.config).eq('test');
-        expect(taskconfig.oper & Operation.deploy).eq(Operation.deploy);
-        expect(taskconfig.option.src).to.eq('src');
+        expect(ctx).to.not.null;
+        expect(ctx).to.not.undefined;
+        expect(ctx.env.config).eq('test');
+        expect(ctx.oper & Operation.deploy).eq(Operation.deploy);
+        expect(ctx.option.src).to.eq('src');
 
-        let tasks = await loader.load(taskconfig);
+        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(2);
     });
 
 
     it('create module loader', async function () {
-        let loader: ITaskLoader = factory.create({
-            src: 'src',
-            loader: path.join(root, './tasks/config.ts')
+        let ctx = new Context({
+            option: {
+                src: 'src',
+                loader: path.join(root, './tasks/config.ts'),
+            },
+            env: {
+                config: 'test',
+                release: true
+            }
         });
+        let loader: ITaskLoader = factory.create(ctx);
 
-        let taskconfig: ITaskContext = await loader.loadContext({ config: 'test', release: true });
-        expect(taskconfig).to.not.null;
-        expect(taskconfig).to.not.undefined;
-        expect(taskconfig.env.config).to.equals('test');
-        expect(taskconfig.oper).eq(Operation.release);
+        expect(ctx).to.not.null;
+        expect(ctx).to.not.undefined;
+        expect(ctx.env.config).to.equals('test');
+        expect(ctx.oper).eq(Operation.release);
 
-        let tasks = await loader.load(taskconfig);
+        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(2);
     });
 
 
-    it('create taskDefine object loader', async  () => {
-        let loader: ITaskLoader = factory.create({
-            src: 'src',
-            loader: {
-                taskDefine: {
-                    loadConfig(option, env): ITaskConfig {
-                        // register default asserts.
-                        return <ITaskConfig>{
-                            env: env,
-                            option: option
+    it('create taskDefine object loader', async () => {
+        let ctx = new Context({
+            option: {
+                src: 'src',
+                loader: {
+                    taskDefine: {
+                        loadConfig(option, env): ITaskConfig {
+                            // register default asserts.
+                            return <ITaskConfig>{
+                                env: env,
+                                option: option
+                            }
+                        },
+
+                        loadTasks(config: ITaskConfig): Promise<ITask[]> {
+                            return Promise.resolve([]);
                         }
-                    },
-
-                    loadTasks(config: ITaskConfig): Promise<ITask[]> {
-                        return Promise.resolve([]);
                     }
-                }
-            }
+                },
+            },
+            env: { config: 'test', release: true }
         });
+        let loader: ITaskLoader = factory.create(ctx);
 
-        let taskconfig: ITaskContext = await loader.loadContext({ config: 'test', release: true });
+        expect(ctx).to.not.null;
+        expect(ctx).to.not.undefined;
+        expect(ctx.env.config).to.equals('test');
+        expect(ctx.oper).to.eq(Operation.release);
 
-        expect(taskconfig).to.not.null;
-        expect(taskconfig).to.not.undefined;
-        expect(taskconfig.env.config).to.equals('test');
-        expect(taskconfig.oper).to.eq(Operation.release);
-
-        let tasks = await loader.load(taskconfig);
+        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(0);
 

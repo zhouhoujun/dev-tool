@@ -1,4 +1,3 @@
-export * from './DevelopConfig';
 export * from './TaskOption';
 export * from  './IContext';
 export * from  './Context';

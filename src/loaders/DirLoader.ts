@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { ITask, ITaskDefine, ITaskContext } from 'development-core';
 import { IDirLoaderOption } from '../TaskOption';
 import { ModuleLoader } from './ModuleLoader';

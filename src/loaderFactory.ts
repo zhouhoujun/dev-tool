@@ -1,8 +1,7 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
-import { IEnvOption } from 'development-core';
 import { IContext } from './IContext';
-import { ITaskOption, ILoaderOption, IDynamicLoaderOption, contextFactory } from './TaskOption'
+import { ITaskOption, ILoaderOption, IDynamicLoaderOption } from './TaskOption'
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import * as _ from 'lodash';

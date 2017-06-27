@@ -1,6 +1,4 @@
-import { ITaskContext, Src, IEnvOption } from 'development-core';
-import { Gulp, TaskCallback } from 'gulp';
-import { TaskOption } from './TaskOption';
+import { ITaskContext, Src } from 'development-core';
 import { ILoaderFactory } from './loaderFactory';
 /**
  * development context
@@ -12,5 +10,13 @@ import { ILoaderFactory } from './loaderFactory';
 export interface IContext extends ITaskContext {
 
     loaderFactory: ILoaderFactory;
+
+    /**
+     * start.
+     *
+     * @returns {Promise<Src[]>}
+     * @memberof IContext
+     */
+    start(): Promise<Src[]>
 
 }

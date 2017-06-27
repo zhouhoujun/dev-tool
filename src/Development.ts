@@ -1,14 +1,9 @@
 import * as _ from 'lodash';
-import { Gulp, TaskCallback } from 'gulp';
-
-import * as minimist from 'minimist';
-import { ITaskLoader } from './ITaskLoader';
-import { LoaderFactory } from './loaderFactory';
-import { Operation, ITaskConfig, Src, toSequence, runSequence, zipSequence, sortOrder, currentOperation, flattenSequence, ITaskContext, ITaskInfo, ITask, IEnvOption, IDynamicTaskOption, RunWay } from 'development-core';
-import { TaskOption, ITaskOption, IAssertOption } from './TaskOption';
+import { Gulp } from 'gulp';
+import { Operation, ITaskConfig, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
+import { TaskOption, ITaskOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
-import * as chalk from 'chalk';
 
 interface TaskSeq {
     opt: ITaskOption,
@@ -23,24 +18,21 @@ export class Development extends Context {
      * @static
      * @param {Gulp} gulp
      * @param {string} dirname
-     * @param {(ITaskConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>)} setting
+     * @param {(ITaskConfig | Array<IAssertOption | ITaskOption | IDynamicTaskOption>)} setting
      * @param {any} [runWay=RunWay.sequence]
      * @returns {Development}
      * 
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: ITaskConfig | Array<ITaskOption | IAssertOption | IDynamicTaskOption>, runWay = RunWay.sequence): Development {
+    static create(gulp: Gulp, dirname: string, setting: ITaskConfig | Array<IAssertOption | ITaskOption | IDynamicTaskOption>, name = '', runWay = RunWay.sequence): Development {
         let config: ITaskConfig;
         let option: ITaskOption;
         if (_.isArray(setting)) {
-            let env: IEnvOption = minimist(process.argv.slice(2), {
-                string: 'env',
-                default: { env: process.env.NODE_ENV || 'development', root: dirname }
-            });
-            config = { option: <ITaskOption>{ tasks: setting, runWay: runWay }, env: env };
+            config = { option: <ITaskOption>{ name: name, tasks: setting, runWay: runWay } };
         } else {
             config = setting;
             option = config.option as ITaskOption;
+            option.name = option.name || name;
             if (!_.isUndefined(option.runWay)) {
                 option.runWay = runWay;
             }
@@ -48,38 +40,7 @@ export class Development extends Context {
 
 
         let devtool = new Development(config);
-
-        gulp.task('build', (callback: TaskCallback) => {
-            let env: IEnvOption = minimist(process.argv.slice(2), {
-                string: 'env',
-                default: { env: process.env.NODE_ENV || 'development' }
-            });
-            devtool.setConfig({
-                env: env
-            });
-            return devtool.run();
-        });
-
-        gulp.task('start', (callback: TaskCallback) => {
-            let env: IEnvOption = minimist(process.argv.slice(2), {
-                string: 'env',
-                default: { env: process.env.NODE_ENV || 'development' }
-            });
-            if (!env.task) {
-                return Promise.reject('start task can not empty!');
-            }
-            devtool.setConfig({
-                env: env
-            });
-            let tasks = env.task.split(',');
-            return devtool.find<Context>(ctx => tasks.indexOf(ctx.toStr(ctx.option.name)) >= 0)
-                .run();
-        })
-
-        gulp.task('default', () => {
-            gulp.start('build');
-        });
-
+        devtool.start();
         return devtool;
     }
 
@@ -91,63 +52,31 @@ export class Development extends Context {
      *
      * @memberof Development
      */
-    public constructor(protected config: ITaskConfig, parent?: IContext) {
+    public constructor(config: ITaskConfig, parent?: IContext) {
         super(config, parent);
         if (!this.cfg.printHelp) {
             this.setConfig({
                 printHelp: this.printHelp
             })
         };
+        this.builder();
     }
 
 
-    setup(): Promise<Src[]> {
-        let gulp = this.gulp;
-        let isRoot = !this.parent;
-        let btsk = isRoot ? 'build' : `build-${this.toStr(this.option.name)}`;
-        gulp.task(btsk, (callback: TaskCallback) => {
-            let env: IEnvOption = minimist(process.argv.slice(2), {
-                string: 'env',
-                default: { env: process.env.NODE_ENV || 'development' }
-            });
-            this.setConfig({
-                env: env
-            });
-            return this.run();
-        });
 
-        gulp.task(isRoot ? 'start' : `start-${this.toStr(this.option.name)}`, (callback: TaskCallback) => {
-            let env: IEnvOption = minimist(process.argv.slice(2), {
-                string: 'env',
-                default: { env: process.env.NODE_ENV || 'development' }
-            });
-            if (!env.task) {
-                return Promise.reject('start task can not empty!');
-            }
-            this.setConfig({
-                env: env
-            });
-            let tasks = env.task.split(',');
-            return this.find<Context>(ctx => tasks.indexOf(ctx.toStr(ctx.option.name)) >= 0)
-                .run();
-        });
-
-        if (!this.parent) {
-            gulp.task('default', () => {
-                gulp.start('build');
-            });
-        }
-
-        return Promise.resolve([btsk]);
-    }
-
-    builder(){
+    /**
+     * build context component.
+     *
+     * @protected
+     * @memberof Development
+     */
+    protected builder() {
         let opt = this.option as ITaskOption;
-        opt.asserts
+        this.buildContext(opt, this);
     }
 
 
-    printHelp(help: string) {
+    protected printHelp(help: string) {
         if (help === 'en') {
 
             console.log(`
@@ -185,299 +114,116 @@ export class Development extends Context {
         }
     }
 
+    /**
+     * build asserts tasks.
+     *
+     * @protected
+     * @param {ITaskContext} ctx
+     *
+     * @memberOf Development
+     */
+    protected buildAssertContext(ctx: IContext) {
+        let optask = <ITaskOption>ctx.option;
 
-    // /**
-    //  * run task.
-    //  *
-    //  * @param {Gulp} gulp
-    //  * @param {IEnvOption} env
-    //  * @returns {Promise<any>}
-    //  * 
-    //  * @memberOf Development
-    //  */
-    // run(env: IEnvOption): Promise<any> {
-    //     return this.setupTasks(gulp, env)
-    //         .then(seq => {
-    //             let tseq = env.task ? env.task.split(',') : seq;
-    //             let gbctx = this.getContext(env);
-    //             this.emit('beforRun', tseq, gbctx);
-    //             if (this.config.runWay === RunWay.parallel) {
-    //                 return runSequence(gulp, [flattenSequence(gulp, tseq, gbctx)]);
-    //             } else {
-    //                 return runSequence(gulp, tseq);
-    //             }
-    //         })
-    //         .then(() => {
-    //             let gbctx = this.getContext(env);
-    //             this.emit('afterRun', gbctx);
-    //         })
-    //         .catch(err => {
-    //             console.error(err);
-    //             process.exit(1);
-    //         });
-    // }
-
-    // setupTasks(gulp: Gulp, env: IEnvOption): Promise<Src[]> {
-    //     if (!env.root) {
-    //         env.root = this.dirname;
-    //     }
-
-    //     if (env.help) {
-    //         console.log(chalk.grey('... main help  ...'));
-    //         this.printHelp(env.help);
-    //     }
-
-    //     let gbctx = this.getContext(env);
-    //     this.emit('beforSetup', gbctx);
-    //     return this.loadTasks(gulp, this.config.tasks, gbctx)
-    //         .then(tsq => {
-    //             this.emit('afterSetup', tsq, gbctx);
-    //             return tsq;
-    //         })
-    //         .catch(err => {
-    //             console.error(err);
-    //             process.exit(1);
-    //         });
-    // }
+        let assertOrder = ctx.to(optask.assertsOrder);
+        if (!_.isNumber(assertOrder) && assertOrder) {
+            optask.assertsRunWay = optask.assertsRunWay || assertOrder.runWay;
+        }
+        optask.assertsRunWay = optask.assertsRunWay || RunWay.parallel;
 
 
+        let tasks: ITaskOption[] = [];
+        _.each(_.keys(optask.asserts), name => {
+            let op: ITaskOption;
+            let sr = optask.asserts[name];
+            if (_.isString(sr)) {
+                op = <ITaskOption>{ src: sr };
+            } else if (_.isNumber(sr)) {
+                // watch with Operation.autoWatch.
+                op = <ITaskOption>{ loader: [{ oper: sr, name: name, pipes: [] }] };
+            } else if (_.isFunction(sr)) {
+                op = <ITaskOption>{ loader: sr };
+            } else if (_.isArray(sr)) {
+                if (sr.length > 0) {
+                    if (!_.some(<string[]>sr, it => !_.isString(it))) {
+                        op = <ITaskOption>{ src: <string[]>sr };
+                    } else {
+                        op = <ITaskOption>{ loader: <IDynamicTaskOption[]>sr, watch: true };
+                    }
+                }
+            } else {
+                op = sr;
+            }
 
-    // private globalctx: IContext;
-    // getContext(env) {
-    //     if (!this.globalctx || this.globalctx.env !== env) {
-    //         let option = this.config.option || {};
-    //         this.globalctx = <IContext>this.config.contextFactory({
-    //             env: env,
-    //             option: option
-    //         });
-    //     }
+            if (_.isNull(op) || _.isUndefined(op)) {
+                return;
+            }
+            if (!op.loader) {
+                op.loader = [{ name: name, pipes: [], watch: true }]
+            }
+            op.name = op.name || ctx.subTaskName(name);
+            op.src = op.src || (ctx.getSrc({ oper: Operation.default }) + '/**/*.' + name);
+            // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
+            if (!op.order) {
+                if (optask.assertsRunWay) {
+                    op.order = { runWay: optask.assertsRunWay };
+                } else if (!_.isNumber(assertOrder)) {
+                    op.order = { runWay: assertOrder.runWay };
+                }
+            }
+            tasks.push(op);
+        });
 
-    //     return this.globalctx;
-    // }
+        this.buildContext(tasks, ctx);
+    }
 
-    // /**
-    //  * load asserts tasks.
-    //  * 
-    //  * @protected
-    //  * @param {Gulp} gulp
-    //  * @param {ITaskContext} ctx
-    //  * @returns {Promise<Src>}
-    //  * 
-    //  * @memberOf Development
-    //  */
-    // protected loadAssertTasks(gulp: Gulp, ctx: IContext): Promise<ITaskInfo> {
-    //     let optask = <IAssertOption>ctx.option;
+    protected buildContext(taskOptions: TaskOption, parent: IContext) {
+        let tasks: ITaskOption[] = _.isArray(taskOptions) ? taskOptions : [taskOptions];
 
-    //     let assertOrder = ctx.to(optask.assertsOrder);
-    //     if (!_.isNumber(assertOrder) && assertOrder) {
-    //         optask.assertsRunWay = optask.assertsRunWay || assertOrder.runWay;
-    //     }
-    //     optask.assertsRunWay = optask.assertsRunWay || RunWay.parallel;
+        tasks.forEach(optask => {
+            if (optask.oper && this.oper && (this.oper & optask.oper) <= 0) {
+                return;
+            }
+            let ctx = new Context(optask, parent);
+            if (optask.asserts) {
+                let assert = new Context({ name: 'assert', asserts: optask.asserts }, ctx);
+                this.buildAssertContext(assert);
+            }
+            if (optask.tasks) {
+                this.buildSubContext(ctx);
+            }
+        });
+    }
 
-    //     if (optask.asserts) {
-    //         let tasks: IAssertOption[] = [];
-    //         _.each(_.keys(optask.asserts), name => {
-    //             let op: IAssertOption;
-    //             let sr = optask.asserts[name];
-    //             if (_.isString(sr)) {
-    //                 op = <IAssertOption>{ src: sr };
-    //             } else if (_.isNumber(sr)) {
-    //                 // watch with Operation.autoWatch.
-    //                 op = <IAssertOption>{ loader: [{ oper: sr, name: name, pipes: [] }] };
-    //             } else if (_.isFunction(sr)) {
-    //                 op = { loader: sr };
-    //             } else if (_.isArray(sr)) {
-    //                 if (sr.length > 0) {
-    //                     if (!_.some(<string[]>sr, it => !_.isString(it))) {
-    //                         op = <IAssertOption>{ src: <string[]>sr };
-    //                     } else {
-    //                         op = <IAssertOption>{ loader: <IDynamicTaskOption[]>sr, watch: true };
-    //                     }
-    //                 }
-    //             } else {
-    //                 op = sr;
-    //             }
+    /**
+     * build sub context.
+     *
+     * @protected
+     * @param {IContext} ctx
+     *
+     * @memberOf Development
+     */
+    protected buildSubContext(ctx: IContext) {
 
-    //             if (_.isNull(op) || _.isUndefined(op)) {
-    //                 return;
-    //             }
-    //             if (!op.loader) {
-    //                 op.loader = [{ name: name, pipes: [], watch: true }]
-    //             }
-    //             op.name = op.name || ctx.subTaskName(name);
-    //             op.src = op.src || (ctx.getSrc({ oper: Operation.default }) + '/**/*.' + name);
-    //             // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
-    //             if (!op.order) {
-    //                 if (optask.assertsRunWay) {
-    //                     op.order = { runWay: optask.assertsRunWay };
-    //                 } else if (!_.isNumber(assertOrder)) {
-    //                     op.order = { runWay: assertOrder.runWay };
-    //                 }
-    //             }
-    //             tasks.push(op);
-    //         });
+        let optask = <ITaskOption>ctx.option;
+        console.log('task options:', optask);
+        if (!optask.tasks) {
+            return;
+        }
+        let tasks = _.isArray(optask.tasks) ? optask.tasks : [optask.tasks];
+        let subtasks = tasks.map(subopt => {
+            if (!subopt.order) {
+                let subOrder = ctx.to(optask.subTaskOrder);
+                if (!_.isNumber(subOrder) && subOrder) {
+                    optask.order = optask.order || subOrder.runWay;
+                } else if (optask.subTaskRunWay) {
+                    subopt.order = { runWay: optask.subTaskRunWay };
+                }
+            }
+            subopt.name = ctx.subTaskName(subopt.name);
+            return subopt;
+        });
+        this.buildContext(subtasks, ctx);
 
-    //         return this.loadTasks(gulp, tasks, ctx)
-    //             // .then(sq => {
-    //             //     return {
-    //             //         task: task,
-    //             //         sq: sq
-    //             //     }
-    //             // })
-
-    //             .then(tseq => {
-    //                 // asserts tasks run mutil.
-    //                 // let assertSeq = _.map(tseq, t => {
-    //                 //     return zipSequence(gulp, t.sq, ctx, (name, runway) => ctx.subTaskName(t.task.name, runway === RunWay.sequence ? '-asserts-seq' : '-assert-paral'));
-    //                 // });
-
-    //                 let taskname;
-    //                 // if (optask.assertsRunWay === RunWay.sequence) {
-    //                 //     taskname = assertSeq;
-    //                 // } else {
-    //                 taskname = zipSequence(gulp, tseq, ctx, (name, runway) => name + (runway === RunWay.sequence ? '-asserts-seq' : '-assert-paral'));
-    //                 // }
-
-    //                 return <ITaskInfo>{
-    //                     order: optask.assertsOrder,
-    //                     taskName: taskname
-    //                 }
-    //             });
-    //     } else {
-    //         return Promise.resolve(null);
-    //     }
-    // }
-
-
-    // protected createLoader(option: TaskOption, parent: IContext): ITaskLoader {
-    //     if (!_.isFunction(this.config.loaderFactory)) {
-    //         let factory = new LoaderFactory();
-    //         return factory.create(option, parent.env, (cfg, p) => {
-    //             return this.config.contextFactory(cfg, p || parent);
-    //         });
-    //     } else {
-    //         return this.config.loaderFactory(option, parent.env);
-    //     }
-    // }
-
-    // protected loadTasks(gulp: Gulp, taskOptions: TaskOption, parent: IContext): Promise<Src[]> {
-    //     let tasks = _.isArray(taskOptions) ? <ITaskOption[]>taskOptions : [<ITaskOption>taskOptions];
-    //     return Promise.all<Src[]>(
-    //         _.map(tasks, optask => {
-    //             if (optask.oper && (this.globalctx.oper & optask.oper) <= 0) {
-    //                 return [];
-    //             }
-    //             // optask.dist = optask.dist || 'dist';
-    //             // console.log(chalk.grey('begin load task via loader:'), optask.loader);
-    //             let loader = this.createLoader(optask, parent);
-
-    //             return loader.loadContext(parent.env)
-    //                 .then(ctx => {
-    //                     // console.log(chalk.green('task context loaded.'));
-    //                     if (ctx.env.help) {
-    //                         if (ctx.printHelp) {
-    //                             console.log(chalk.grey('...development default help...'));
-    //                             ctx.printHelp(_.isString(ctx.env.help) ? ctx.env.help : '');
-    //                         }
-    //                         return [];
-    //                     } else {
-    //                         return Promise.all([
-    //                             loader.load(ctx),
-    //                             this.loadAssertTasks(gulp, ctx),
-    //                             this.loadSubTask(gulp, ctx)
-    //                         ])
-    //                             .then(tks => {
-    //                                 // console.log(chalk.green('tasks loaded.'));
-    //                                 return this.setupTask(gulp, ctx, tks[0], tks[1], tks[2]);
-    //                             });
-    //                     }
-    //                 });
-    //         })
-    //     )
-    //         .then(tsq => {
-    //             let rst: Src[] = [];
-    //             let tasklist: TaskSeq[] = _.map(tsq, (sq, idx) => {
-    //                 return <TaskSeq>{
-    //                     opt: tasks[idx],
-    //                     seq: sq
-    //                 }
-    //             });
-
-    //             let ordertask = sortOrder(tasklist, itm => itm.opt.order, parent);
-    //             _.each(ordertask, (t, idx) => {
-    //                 if (_.isArray(t)) {
-    //                     rst.push(_.filter(_.map(t, it => zipSequence(gulp, it.seq, parent)), it => it));
-    //                 } else {
-    //                     let tk = zipSequence(gulp, t.seq, parent);
-    //                     if (tk) {
-    //                         rst.push(tk);
-    //                     }
-    //                 }
-    //             });
-    //             return rst;
-
-    //         });
-    // }
-
-    // protected setupTask(gulp: Gulp, ctx: ITaskContext, tasks: ITask[], assertsTask: ITaskInfo, subGroupTask: ITaskInfo): Promise<Src[]> {
-    //     return Promise.resolve(toSequence(gulp, tasks, ctx))
-    //         .then(tsqs => {
-    //             if (ctx.runTasks) {
-    //                 return ctx.runTasks(tsqs, assertsTask, subGroupTask);
-    //             }
-    //             // console.log(assertsTask);
-    //             ctx.addToSequence(tsqs, assertsTask);
-    //             ctx.addToSequence(tsqs, subGroupTask);
-
-    //             return tsqs;
-    //         });
-    // }
-
-    // /**
-    //  * load sub tasks as group task.
-    //  * 
-    //  * @protected
-    //  * @param {Gulp} gulp
-    //  * @param {IContext} ctx
-    //  * @returns {Promise<ITaskInfo>}
-    //  * 
-    //  * @memberOf Development
-    //  */
-    // protected loadSubTask(gulp: Gulp, ctx: IContext): Promise<ITaskInfo> {
-    //     if (ctx.option['tasks']) {
-    //         let optask = <ITaskOption>ctx.option;
-    //         _.each(_.isArray(optask.tasks) ? optask.tasks : [optask.tasks], subopt => {
-    //             if (!subopt.order) {
-    //                 let subOrder = ctx.to(optask.subTaskOrder);
-    //                 if (!_.isNumber(subOrder) && subOrder) {
-    //                     optask.assertsRunWay = optask.assertsRunWay || subOrder.runWay;
-    //                 } else if (optask.subTaskRunWay) {
-    //                     subopt.order = { runWay: optask.subTaskRunWay };
-    //                 }
-    //             }
-    //             subopt.name = ctx.subTaskName(subopt.name);
-    //             // subopt.src = subopt.src || optask.src;
-    //             // subopt.dist = subopt.dist || optask.dist;
-    //         });
-    //         return this.loadTasks(gulp, optask.tasks, ctx)
-    //             .then(subseq => {
-    //                 let taskname;
-    //                 // if (optask.subTaskRunWay === RunWay.parallel) {
-    //                 //     taskname = [flattenSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-subs' : '-subp')))]
-    //                 // } else {
-    //                 taskname = zipSequence(gulp, subseq, ctx, (name, runway) => ctx.subTaskName(name, (runway === RunWay.sequence ? '-sub-seq' : '-sub-paral')));
-    //                 // }
-    //                 if (taskname) {
-    //                     return <ITaskInfo>{
-    //                         order: optask.subTaskOrder,
-    //                         taskName: taskname
-    //                     };
-    //                 } else {
-    //                     return null;
-    //                 }
-    //             });
-    //     } else {
-    //         return Promise.resolve(null);
-    //     }
-    // }
+    }
 }
