@@ -48,6 +48,7 @@ export abstract class BaseLoader implements ITaskLoader {
 
 
     protected loadTasks(context: ITaskContext, def: ITaskDefine): Promise<ITask[]> {
+        def = def || {};
         if (def.tasks) {
             return def.tasks(context);
         } else if (def.loadTasks) {

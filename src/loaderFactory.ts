@@ -9,17 +9,17 @@ import * as chalk from 'chalk';
 
 /**
  * loader factory.
- * 
+ *
  * @export
  * @interface ILoaderFactory
  */
 export interface ILoaderFactory {
     /**
      * create loader;
-     * 
+     *
      * @param {IContext} context
      * @returns {ITaskLoader}
-     * 
+     *
      * @memberof ILoaderFactory
      */
     create(context: IContext): ITaskLoader;
@@ -28,7 +28,7 @@ export interface ILoaderFactory {
 
 /**
  * loader factory.
- * 
+ *
  * @export
  * @class LoaderFactory
  * @implements {ILoaderFactory}
@@ -91,7 +91,7 @@ export class LoaderFactory implements ILoaderFactory {
             }
             return loader;
         } else {
-            console.log(chalk.cyan(<string>option.name), chalk.yellow('loader not setting, use dynamic loader.'))
+            console.log(chalk.cyan(<string>option.name), chalk.gray('loader not setting, use dynamic loader.'))
             option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: []
             };

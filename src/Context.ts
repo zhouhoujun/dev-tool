@@ -8,6 +8,21 @@ import { ILoaderFactory, LoaderFactory } from './loaderFactory';
 
 
 const factory = new LoaderFactory();
+
+/**
+* create Context instance.
+*
+* @static
+* @param {(ITaskConfig | TaskOption)} cfg
+* @param {IContext} [parent]
+* @returns {IContext}
+* @memberof Context
+*/
+export function createConextInstance(cfg: ITaskConfig | TaskOption, parent?: IContext): IContext {
+    let config: ITaskConfig = cfg['option'] ? cfg : { option: cfg };
+    return new Context(config, parent);
+}
+
 /**
  * Context.
  *
@@ -20,11 +35,10 @@ export class Context extends TaskContext implements IContext {
 
     // private children: IContext[] = [];
     constructor(cfg: ITaskConfig | TaskOption, parent?: IContext) {
-        let config: ITaskConfig = cfg['option'] ? cfg : { option: cfg };
-        console.log('cfg:', config);
-        super(config, parent);
+        super(cfg, parent);
     }
 
+    private loading = false;
     private _loaderfactory: ILoaderFactory;
     get loaderFactory(): ILoaderFactory {
         return this._loaderfactory || factory;
@@ -34,26 +48,44 @@ export class Context extends TaskContext implements IContext {
         this._loaderfactory = fac;
     }
 
-
     addTask(...task: ITask[]) {
+        if (this.loading) {
+            super.addTask(...task);
+            return;
+        }
+
         this.getLoaderTasks()
             .then(tasks => {
                 super.addTask(...task);
             });
+
     }
 
     removeTask(task: ITask): ITask[] | Promise<ITask[]> {
+        if (this.loading) {
+            return super.removeTask(task);
+        }
+
         return this.getLoaderTasks()
             .then(tasks => {
                 return super.removeTask(task);
             });
+
     }
 
     private _loaderTasks: Promise<ITask[]>;
     protected getLoaderTasks(): Promise<ITask[]> {
         if (!this._loaderTasks) {
+            this.loading = true;
             this._loaderTasks = this.loaderFactory.create(this)
-                .load();
+                .load()
+                .then(tks => {
+                    this.loading = false;
+                    return tks;
+                }, err => {
+                    this.loading = false;
+                    console.log(err);
+                });
         }
         return this._loaderTasks
     }
@@ -75,6 +107,16 @@ export class Context extends TaskContext implements IContext {
             });
     }
 
+    // todo: debug.
+    // setup() {
+    //     return super.setup()
+    //         .then((data) => {
+    //             console.log('task seq:', data);
+    //             return data;
+    //         })
+
+    // }
+
     start(): Promise<Src[]> {
         let gulp = this.gulp;
         let isRoot = !this.parent;
@@ -94,7 +136,7 @@ export class Context extends TaskContext implements IContext {
 
         if (!this.parent) {
             gulp.task('default', () => {
-                gulp.start('build');
+                gulp.start(btsk);
             });
         }
 

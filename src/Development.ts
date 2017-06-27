@@ -3,32 +3,39 @@ import { Gulp } from 'gulp';
 import { Operation, ITaskConfig, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { TaskOption, ITaskOption } from './TaskOption';
 import { IContext } from './IContext';
-import { Context } from './Context';
+import { Context, createConextInstance } from './Context';
 
 interface TaskSeq {
     opt: ITaskOption,
     seq: Src[]
 }
 
+/**
+ * Development.
+ *
+ * @export
+ * @class Development
+ * @extends {Context}
+ */
 export class Development extends Context {
 
     /**
      * create development tool.
-     * 
+     *
      * @static
      * @param {Gulp} gulp
-     * @param {string} dirname
+     * @param {string} root  root path.
      * @param {(ITaskConfig | Array<IAssertOption | ITaskOption | IDynamicTaskOption>)} setting
      * @param {any} [runWay=RunWay.sequence]
      * @returns {Development}
-     * 
+     *
      * @memberOf Development
      */
-    static create(gulp: Gulp, dirname: string, setting: ITaskConfig | Array<IAssertOption | ITaskOption | IDynamicTaskOption>, name = '', runWay = RunWay.sequence): Development {
+    static create(gulp: Gulp, root: string, setting: ITaskConfig | Array<IAssertOption | ITaskOption | IDynamicTaskOption>, name = '', runWay = RunWay.sequence): Development {
         let config: ITaskConfig;
         let option: ITaskOption;
         if (_.isArray(setting)) {
-            config = { option: <ITaskOption>{ name: name, tasks: setting, runWay: runWay } };
+            config = { option: <ITaskOption>{ name: name, tasks: setting, runWay: runWay, loader: [] } };
         } else {
             config = setting;
             option = config.option as ITaskOption;
@@ -38,31 +45,28 @@ export class Development extends Context {
             }
         }
 
-
-        let devtool = new Development(config);
+        let devtool = new Development(config, root);
         devtool.start();
         return devtool;
     }
 
     /**
      * Creates an instance of Development.
-     *
      * @param {ITaskConfig} config
+     * @param {string} root root path.
      * @param {IContext} [parent]
-     *
      * @memberof Development
      */
-    public constructor(config: ITaskConfig, parent?: IContext) {
+    public constructor(config: ITaskConfig, root: string, parent?: IContext) {
         super(config, parent);
-        if (!this.cfg.printHelp) {
-            this.setConfig({
-                printHelp: this.printHelp
-            })
-        };
+
+        this.setConfig({
+            env: { root: root },
+            printHelp: this.cfg.printHelp || this.printHelp
+        })
+
         this.builder();
     }
-
-
 
     /**
      * build context component.
@@ -86,10 +90,10 @@ export class Development extends Context {
                  *  --env  development or production;
                  *  --context app setting
                  *  --root path, set relative path of the development tool root.
-                 *  --watch  watch src file change or not. if changed will auto update to node service. 
-                 *  --release release web app or not. if [--env production], default to release. 
+                 *  --watch  watch src file change or not. if changed will auto update to node service.
+                 *  --release release web app or not. if [--env production], default to release.
                  *  --test  need auto load test file to node service.
-                 *  --deploy run deploy tasks to deploy project.  
+                 *  --deploy run deploy tasks to deploy project.
                  *  --serve start node web service or not.
                  *  --task taskname  spruce task taskname
                  **/`);
@@ -104,9 +108,9 @@ export class Development extends Context {
                  *  --context 设置配置文件;
                  *  --root path, 设置编译环境相对路径
                  *  --watch  是否需要动态监听文件变化
-                 *  --release 是否release编译, [--env production] 默认release 
+                 *  --release 是否release编译, [--env production] 默认release
                  *  --test  启动自动化测试
-                 *  --deploy 运行加载deploy tasks, 编译发布项目。  
+                 *  --deploy 运行加载deploy tasks, 编译发布项目。
                  *  --serve  是否在开发模式下 开启node web服务
                  *  --task taskname  运行单独任务taskname
                  **/`);
@@ -124,12 +128,7 @@ export class Development extends Context {
      */
     protected buildAssertContext(ctx: IContext) {
         let optask = <ITaskOption>ctx.option;
-
-        let assertOrder = ctx.to(optask.assertsOrder);
-        if (!_.isNumber(assertOrder) && assertOrder) {
-            optask.assertsRunWay = optask.assertsRunWay || assertOrder.runWay;
-        }
-        optask.assertsRunWay = optask.assertsRunWay || RunWay.parallel;
+        // console.log('assert options:', optask);
 
 
         let tasks: ITaskOption[] = [];
@@ -164,16 +163,10 @@ export class Development extends Context {
             op.name = op.name || ctx.subTaskName(name);
             op.src = op.src || (ctx.getSrc({ oper: Operation.default }) + '/**/*.' + name);
             // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
-            if (!op.order) {
-                if (optask.assertsRunWay) {
-                    op.order = { runWay: optask.assertsRunWay };
-                } else if (!_.isNumber(assertOrder)) {
-                    op.order = { runWay: assertOrder.runWay };
-                }
-            }
+            op.runWay = op.runWay || optask.assertsRunWay || RunWay.parallel;
             tasks.push(op);
         });
-
+        // console.log('assert tasks:', tasks);
         this.buildContext(tasks, ctx);
     }
 
@@ -184,9 +177,9 @@ export class Development extends Context {
             if (optask.oper && this.oper && (this.oper & optask.oper) <= 0) {
                 return;
             }
-            let ctx = new Context(optask, parent);
+            let ctx = createConextInstance(optask, parent);
             if (optask.asserts) {
-                let assert = new Context({ name: 'assert', asserts: optask.asserts }, ctx);
+                let assert = createConextInstance(_.extend({ name: 'asserts', loader: [], asserts: optask.asserts, order: optask.assertsOrder, assertsRunWay: optask.assertsRunWay }), ctx);
                 this.buildAssertContext(assert);
             }
             if (optask.tasks) {
@@ -206,7 +199,7 @@ export class Development extends Context {
     protected buildSubContext(ctx: IContext) {
 
         let optask = <ITaskOption>ctx.option;
-        console.log('task options:', optask);
+        // console.log('task options:', optask);
         if (!optask.tasks) {
             return;
         }
