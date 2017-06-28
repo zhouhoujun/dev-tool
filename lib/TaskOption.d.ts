@@ -39,7 +39,6 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
     /**
      * custom task define
      *
-     *
      * @memberOf ILoaderOption
      */
     taskDefine?: ITaskDefine;
@@ -111,7 +110,7 @@ export interface IDynamicLoaderOption extends ILoaderOption {
      */
     dynamicTasks?: IDynamicTaskOption | IDynamicTaskOption[];
 }
-export declare type customLoader = (context: ITaskContext) => ITask[] | Promise<ITask[]>;
+export declare type TaskLoader = (ctx?: ITaskContext) => ITask[] | Promise<ITask[]>;
 /**
  * task loader option.
  *
@@ -122,10 +121,10 @@ export interface ITaskLoaderOption {
     /**
      * task loader
      *
-     * @type {(string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
+     * @type {(string | TaskLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
      * @memberOf ITaskLoaderOption
      */
-    loader?: string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
+    loader?: string | TaskLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
 }
 export interface TaskSeq {
     opt: ITaskOption;

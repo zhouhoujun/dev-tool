@@ -1,4 +1,4 @@
-import { TaskContext, ITaskConfig, Src, ITask } from 'development-core';
+import { ITaskContext, TaskContext, ITaskConfig, Src, ITask } from 'development-core';
 import { IContext } from './IContext';
 import { TaskOption } from './TaskOption';
 import { ILoaderFactory } from './loaderFactory';
@@ -25,6 +25,15 @@ export declare class Context extends TaskContext implements IContext {
     private loading;
     private _loaderfactory;
     loaderFactory: ILoaderFactory;
+    /**
+     * create new context;
+     *
+     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} [parent] default current context.
+     * @returns {ITaskContext}
+     * @memberof TaskContext
+     */
+    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
     addTask(...task: ITask[]): void;
     removeTask(task: ITask): ITask[] | Promise<ITask[]>;
     private _loaderTasks;

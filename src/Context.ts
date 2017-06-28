@@ -1,6 +1,7 @@
 import {
-    TaskContext, ITaskConfig, Src, ITask
+    ITaskContext, TaskContext, ITaskConfig, Src, ITask
 } from 'development-core';
+import * as _ from 'lodash';
 import { TaskCallback } from 'gulp';
 import { IContext } from './IContext';
 import { TaskOption } from './TaskOption';
@@ -46,6 +47,18 @@ export class Context extends TaskContext implements IContext {
 
     set loaderFactory(fac: ILoaderFactory) {
         this._loaderfactory = fac;
+    }
+
+    /**
+     * create new context;
+     *
+     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} [parent] default current context.
+     * @returns {ITaskContext}
+     * @memberof TaskContext
+     */
+    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
+        return new Context(cfg, _.isUndefined(parent) ? this : parent as IContext);
     }
 
     addTask(...task: ITask[]) {

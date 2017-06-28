@@ -4,6 +4,7 @@ import { IContext } from './IContext';
 import { ITaskOption, ILoaderOption, IDynamicLoaderOption } from './TaskOption'
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
+import { CustomLoader, TaskLoader } from './loaders/CustomLoader';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
 
@@ -45,10 +46,17 @@ export class LoaderFactory implements ILoaderFactory {
             };
             return new ModuleLoader(context);
         } else if (_.isFunction(option.loader)) {
-            option.loader = <IDynamicLoaderOption>{
-                dynamicTasks: context.to(option.loader) as IDynamicLoaderOption[]
-            };
-            return new DynamicLoader(context);
+            if (context.isTask(option.loader)) {
+                option.loader = {
+                    module: option.loader
+                }
+                return new ModuleLoader(context);
+            } else {
+                option.loader = <IDynamicLoaderOption>{
+                    dynamicTasks: context.to(option.loader) as IDynamicLoaderOption[]
+                };
+                return new CustomLoader(context, option.loader as TaskLoader);
+            }
         } else if (_.isArray(option.loader)) {
             option.loader = <IDynamicLoaderOption>{
                 dynamicTasks: option.loader || []

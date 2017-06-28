@@ -7,7 +7,7 @@ import {
 export type contextFactory = (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext;
 /**
  * task loader option.
- * 
+ *
  * @export
  * @interface ILoaderOption
  * @extends {IPipeOption}
@@ -16,14 +16,14 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
 
     /**
      * loader type, default module.
-     * 
+     *
      * @type {string}
      * @memberOf ILoaderOption
      */
     type?: string;
     /**
      * module name or url
-     * 
+     *
      * @type {string | Object}
      * @memberOf ILoaderOption
      */
@@ -31,7 +31,7 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
 
     /**
      * config module name or url.
-     * 
+     *
      * @type {string | Object}
      * @memberOf ILoaderOption
      */
@@ -39,7 +39,7 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
 
     /**
      * config module name or url.
-     * 
+     *
      * @type {string | Object}
      * @memberOf ILoaderOption
      */
@@ -47,8 +47,7 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
 
     /**
      * custom task define
-     * 
-     * 
+     *
      * @memberOf ILoaderOption
      */
     taskDefine?: ITaskDefine;
@@ -56,7 +55,7 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
 
 /**
  * loader to load tasks from directory.
- * 
+ *
  * @export
  * @interface DirLoaderOption
  * @extends {ILoaderOption}
@@ -64,14 +63,14 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
 export interface IDirLoaderOption extends ILoaderOption {
     /**
      * loader dir
-     * 
+     *
      * @type {TaskSource}
      * @memberOf ILoaderOption
      */
     dir?: TaskSource
     /**
-     * config in directory. 
-     * 
+     * config in directory.
+     *
      * @type {string}
      * @memberOf DirLoaderOption
      */
@@ -80,7 +79,7 @@ export interface IDirLoaderOption extends ILoaderOption {
 
 /**
  * sub task option.
- * 
+ *
  * @export
  * @interface ISubTaskOption
  */
@@ -112,7 +111,7 @@ export interface ISubTaskOption {
 
 /**
  * the option for loader dynamic build task.
- * 
+ *
  * @export
  * @interface IDynamicLoaderOption
  * @extends {ILoaderOption}
@@ -120,7 +119,7 @@ export interface ISubTaskOption {
 export interface IDynamicLoaderOption extends ILoaderOption {
     /**
      * dynamic task
-     * 
+     *
      * @type {(IDynamicTaskOption | IDynamicTaskOption[])}
      * @memberOf IDynamicLoaderOption
      */
@@ -128,22 +127,22 @@ export interface IDynamicLoaderOption extends ILoaderOption {
 }
 
 
-export type customLoader = (context: ITaskContext) => ITask[] | Promise<ITask[]>;
+export type TaskLoader = (ctx?: ITaskContext) => ITask[] | Promise<ITask[]>;
 
 /**
  * task loader option.
- * 
+ *
  * @export
  * @interface TaskLoaderOption
  */
 export interface ITaskLoaderOption {
     /**
      * task loader
-     * 
-     * @type {(string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
+     *
+     * @type {(string | TaskLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
      * @memberOf ITaskLoaderOption
      */
-    loader?: string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
+    loader?: string | TaskLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
 
 }
 
@@ -155,7 +154,7 @@ export interface TaskSeq {
 
 /**
  * task option setting.
- * 
+ *
  * @export
  * @interface ITaskOption
  * @extends {IAssertOption}
@@ -164,7 +163,6 @@ export interface TaskSeq {
 export interface ITaskOption extends IAssertOption, ISubTaskOption, ITaskLoaderOption {
 
 }
-
 
 /**
  * task option.
