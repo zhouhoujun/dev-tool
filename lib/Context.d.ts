@@ -21,7 +21,7 @@ export declare function createConextInstance(cfg: ITaskConfig | TaskOption, pare
  * @implements {IContext}
  */
 export declare class Context extends TaskContext implements IContext {
-    constructor(cfg: ITaskConfig | TaskOption, parent?: IContext);
+    constructor(cfg: ITaskConfig, parent?: IContext);
     private loading;
     private _loaderfactory;
     loaderFactory: ILoaderFactory;

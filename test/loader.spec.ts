@@ -20,7 +20,7 @@ describe('LoaderFactory', function () {
 
     it('create dynamic loader', async () => {
         let ctx = new Context({
-            option: {
+            option: <ITaskOption>{
                 src: 'src',
                 loader: []
             },
@@ -45,7 +45,7 @@ describe('LoaderFactory', function () {
 
     it('create dynamic loader with module', async () => {
         let ctx = new Context({
-            option: {
+            option: <ITaskOption>{
                 src: 'src',
                 loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
             },
@@ -70,7 +70,7 @@ describe('LoaderFactory', function () {
 
 
         let nogpctx = new Context({
-            option: {
+            option: <ITaskOption>{
                 src: 'src',
                 loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
             },
@@ -95,7 +95,7 @@ describe('LoaderFactory', function () {
     it('create directory loader', async () => {
 
         let ctx = new Context({
-            option: {
+            option: <ITaskOption>{
                 src: 'src',
                 loader: <IDirLoaderOption>{ dir: path.join(root, './tasks') }
             },
@@ -117,7 +117,7 @@ describe('LoaderFactory', function () {
 
     it('create module loader', async function () {
         let ctx = new Context({
-            option: {
+            option: <ITaskOption>{
                 src: 'src',
                 loader: path.join(root, './tasks/config.ts'),
             },
@@ -141,7 +141,7 @@ describe('LoaderFactory', function () {
 
     it('create taskDefine object loader', async () => {
         let ctx = new Context({
-            option: {
+            option: <ITaskOption>{
                 src: 'src',
                 loader: {
                     taskDefine: {

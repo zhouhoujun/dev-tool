@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 export * from './NodeTaskOption';
 
 
-@taskdefine
+@taskdefine()
 export class ContextDefine implements IContextDefine {
     getContext(config: ITaskConfig): ITaskContext {
         // register default asserts.

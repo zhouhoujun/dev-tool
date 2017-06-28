@@ -15,7 +15,7 @@ const uglify = require('gulp-uglify');
 // const babel = require('gulp-babel');
 
 
-@dynamicTask
+@dynamicTask()
 export class TestTask implements IDynamicTasks {
     tasks() {
         let nodeDynamicTasks: IDynamicTaskOption[] = [

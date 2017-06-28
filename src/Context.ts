@@ -19,7 +19,7 @@ const factory = new LoaderFactory();
 * @memberof Context
 */
 export function createConextInstance(cfg: ITaskConfig | TaskOption, parent?: IContext): IContext {
-    let config: ITaskConfig = cfg['option'] ? cfg : { option: cfg };
+    let config: ITaskConfig = (cfg['option'] ? cfg : { option: cfg }) as ITaskConfig;
     return new Context(config, parent);
 }
 
@@ -34,7 +34,7 @@ export function createConextInstance(cfg: ITaskConfig | TaskOption, parent?: ICo
 export class Context extends TaskContext implements IContext {
 
     // private children: IContext[] = [];
-    constructor(cfg: ITaskConfig | TaskOption, parent?: IContext) {
+    constructor(cfg: ITaskConfig, parent?: IContext) {
         super(cfg, parent);
     }
 
@@ -85,6 +85,7 @@ export class Context extends TaskContext implements IContext {
                 }, err => {
                     this.loading = false;
                     console.log(err);
+                    return null;
                 });
         }
         return this._loaderTasks
@@ -104,6 +105,7 @@ export class Context extends TaskContext implements IContext {
             .catch(err => {
                 console.error(err);
                 process.exit(1);
+                return null;
             });
     }
 

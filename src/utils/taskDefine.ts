@@ -4,7 +4,7 @@ import { IDynamicLoaderOption, ITaskOption } from '../TaskOption';
 export default (modules) => {
     return <ITaskDefine>{
         tasks(context: ITaskContext): Promise<ITask[]> {
-            let lderOption: IDynamicLoaderOption = (<ITaskOption>context.option).loader;
+            let lderOption: IDynamicLoaderOption = (<ITaskOption>context.option).loader as IDynamicLoaderOption;
             let dtask: ITask[] = [];
             if (lderOption.dynamicTasks) {
                 dtask = context.generateTask(lderOption.dynamicTasks);

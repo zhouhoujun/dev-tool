@@ -16,7 +16,7 @@ export abstract class BaseLoader implements ITaskLoader {
         return this.taskDef
             .then((def) => {
                 if (def.loadConfig) {
-                    this.ctx.setConfig(def.loadConfig(this.ctx.option, this.ctx.oper));
+                    this.ctx.setConfig(def.loadConfig(this.ctx.option, this.ctx.env));
                 }
                 if (def['getContext']) {
                     let cdef = def as IContextDefine;
@@ -34,6 +34,7 @@ export abstract class BaseLoader implements ITaskLoader {
             })
             .catch(err => {
                 console.error(err);
+                return null;
             });
     }
 
@@ -62,12 +63,12 @@ export abstract class BaseLoader implements ITaskLoader {
     protected abstract loadTaskDefine(): ITaskDefine | Promise<ITaskDefine>;
 
     protected getConfigModule(): string | Object {
-        let loader: ILoaderOption = this.option.loader;
+        let loader: ILoaderOption = this.option.loader as ILoaderOption;
         return loader.configModule || loader.module;
     }
 
     protected getTaskModule(): string | Object {
-        let loader: ILoaderOption = this.option.loader;
+        let loader: ILoaderOption = this.option.loader as ILoaderOption;
         return loader.taskModule || loader.module;
     }
 }
