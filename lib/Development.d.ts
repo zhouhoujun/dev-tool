@@ -1,7 +1,7 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
 import { ITaskConfig, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
-import { TaskOption, ITaskOption } from './TaskOption';
+import { ITaskOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
 /**
@@ -33,31 +33,5 @@ export declare class Development extends Context {
      * @memberof Development
      */
     constructor(config: ITaskConfig, root: string, parent?: IContext);
-    /**
-     * build context component.
-     *
-     * @protected
-     * @memberof Development
-     */
-    protected builder(): void;
     protected printHelp(help: string): void;
-    /**
-     * build asserts tasks.
-     *
-     * @protected
-     * @param {ITaskContext} ctx
-     *
-     * @memberOf Development
-     */
-    protected buildAssertContext(ctx: IContext): void;
-    protected buildContext(taskOptions: TaskOption, parent: IContext): void;
-    /**
-     * build sub context.
-     *
-     * @protected
-     * @param {IContext} ctx
-     *
-     * @memberOf Development
-     */
-    protected buildSubContext(ctx: IContext): void;
 }

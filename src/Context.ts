@@ -1,14 +1,16 @@
 import {
-    ITaskContext, TaskContext, ITaskConfig, Src, ITask
+    ITaskContext, TaskContext, ITaskConfig, IAssertOption, Src, ITask, IDynamicTaskOption, Operation, RunWay, Builder
 } from 'development-core';
 import * as _ from 'lodash';
 import { TaskCallback } from 'gulp';
 import { IContext } from './IContext';
-import { TaskOption } from './TaskOption';
+import { ITaskOption, TaskOption } from './TaskOption';
 import { ILoaderFactory, LoaderFactory } from './loaderFactory';
+import { ContextBuilder } from './Builder'
 
 
 const factory = new LoaderFactory();
+const builder = new ContextBuilder();
 
 /**
 * create Context instance.
@@ -37,6 +39,7 @@ export class Context extends TaskContext implements IContext {
     // private children: IContext[] = [];
     constructor(cfg: ITaskConfig, parent?: IContext) {
         super(cfg, parent);
+        this._builder = builder;
     }
 
     private loading = false;
@@ -57,8 +60,8 @@ export class Context extends TaskContext implements IContext {
      * @returns {ITaskContext}
      * @memberof TaskContext
      */
-    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
-        return new Context(cfg, _.isUndefined(parent) ? this : parent as IContext);
+    createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext {
+        return createConextInstance(cfg, _.isUndefined(parent) ? this : parent as IContext);
     }
 
     addTask(...task: ITask[]) {
@@ -130,6 +133,11 @@ export class Context extends TaskContext implements IContext {
     //             return data;
     //         })
 
+    // }
+
+    // run() {
+    //     this.builder.build(this);
+    //     return super.run();
     // }
 
     start(): Promise<Src[]> {
