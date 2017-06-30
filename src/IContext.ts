@@ -2,7 +2,7 @@ import { ITaskContext, Src } from 'development-core';
 import { ILoaderFactory } from './loaderFactory';
 /**
  * development context
- * 
+ *
  * @export
  * @interface IContext
  * @extends {ITaskContext}

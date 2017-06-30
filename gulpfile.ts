@@ -1,4 +1,4 @@
-// IDynamicTaskOption 
+// IDynamicTaskOption
 import * as gulp from 'gulp';
 import 'development-core';
 import { Development, ITaskOption, TaskOption } from './src/tools';
