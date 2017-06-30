@@ -2,7 +2,6 @@
 import { Gulp } from 'gulp';
 import { ITaskConfig, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { ITaskOption } from './TaskOption';
-import { IContext } from './IContext';
 import { Context } from './Context';
 /**
  * Development.
@@ -12,6 +11,7 @@ import { Context } from './Context';
  * @extends {Context}
  */
 export declare class Development extends Context {
+    private root;
     /**
      * create development tool.
      *
@@ -32,6 +32,7 @@ export declare class Development extends Context {
      * @param {IContext} [parent]
      * @memberof Development
      */
-    constructor(config: ITaskConfig, root: string, parent?: IContext);
+    constructor(config: ITaskConfig, root?: string);
+    getRootPath(): string;
     protected printHelp(help: string): void;
 }

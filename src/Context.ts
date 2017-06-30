@@ -12,19 +12,19 @@ import { ContextBuilder } from './Builder'
 const factory = new LoaderFactory();
 const builder = new ContextBuilder();
 
-/**
-* create Context instance.
-*
-* @static
-* @param {(ITaskConfig | TaskOption)} cfg
-* @param {IContext} [parent]
-* @returns {IContext}
-* @memberof Context
-*/
-export function createConextInstance(cfg: ITaskConfig | TaskOption, parent?: IContext): IContext {
-    let config: ITaskConfig = (cfg['option'] ? cfg : { option: cfg }) as ITaskConfig;
-    return new Context(config, parent);
-}
+// /**
+// * create Context instance.
+// *
+// * @static
+// * @param {(ITaskConfig | TaskOption)} cfg
+// * @param {IContext} [parent]
+// * @returns {IContext}
+// * @memberof Context
+// */
+// export function createConextInstance(cfg: ITaskConfig | TaskOption, parent?: IContext): IContext {
+//     let config: ITaskConfig = (cfg['option'] ? cfg : { option: cfg }) as ITaskConfig;
+//     return parent? parent.add(cfg) : new Context(config, parent);
+// }
 
 /**
  * Context.
@@ -37,8 +37,8 @@ export function createConextInstance(cfg: ITaskConfig | TaskOption, parent?: ICo
 export class Context extends TaskContext implements IContext {
 
     // private children: IContext[] = [];
-    constructor(cfg: ITaskConfig, parent?: IContext) {
-        super(cfg, parent);
+    constructor(cfg: ITaskConfig) {
+        super(cfg);
         this._builder = builder;
     }
 
@@ -56,12 +56,11 @@ export class Context extends TaskContext implements IContext {
      * create new context;
      *
      * @param {ITaskConfig} cfg
-     * @param {ITaskContext} [parent] default current context.
      * @returns {ITaskContext}
      * @memberof TaskContext
      */
-    createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext {
-        return createConextInstance(cfg, _.isUndefined(parent) ? this : parent as IContext);
+    protected createContext(cfg: ITaskConfig): ITaskContext {
+        return new Context(cfg);
     }
 
     addTask(...task: ITask[]) {

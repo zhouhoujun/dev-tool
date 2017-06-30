@@ -21,13 +21,13 @@ export declare class ContextBuilder implements Builder {
     protected buildContext(node: IContext): void;
     protected buildContexts(parent: IContext, taskOptions: TaskOption): void;
     /**
-        * build asserts tasks.
-        *
-        * @protected
-        * @param {ITaskContext} ctx
-        *
-        * @memberOf Builder
-        */
+    * build asserts tasks.
+    *
+    * @protected
+    * @param {ITaskContext} ctx
+    *
+    * @memberOf Builder
+    */
     protected buildAssertContext(ctx: IContext, asserts: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>, runWay?: RunWay): void;
     /**
      * build sub context.

@@ -5,7 +5,7 @@ import { IAsserts } from 'development-core';
 export interface NodeTaskOption extends IAsserts {
     /**
      * tsconfig for typescript
-     * 
+     *
      * @type {string}
      * @memberOf NodeTaskOption
      */
@@ -14,7 +14,7 @@ export interface NodeTaskOption extends IAsserts {
     tsBabelOption?: any;
     /**
      * mocha test config.
-     * 
+     *
      * @type {MochaSetupOptions}
      * @memberOf NodeTaskOption
      */
@@ -23,7 +23,7 @@ export interface NodeTaskOption extends IAsserts {
 
 /**
  * unused. please use NodeTaskOption
- * 
+ *
  * @export
  * @interface NodeBuildOption
  * @extends {NodeTaskOption}

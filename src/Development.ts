@@ -3,7 +3,7 @@ import { Gulp } from 'gulp';
 import { Operation, ITaskConfig, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { TaskOption, ITaskOption } from './TaskOption';
 import { IContext } from './IContext';
-import { Context, createConextInstance } from './Context';
+import { Context } from './Context';
 
 interface TaskSeq {
     opt: ITaskOption,
@@ -57,13 +57,17 @@ export class Development extends Context {
      * @param {IContext} [parent]
      * @memberof Development
      */
-    public constructor(config: ITaskConfig, root: string, parent?: IContext) {
-        super(config, parent);
+    public constructor(config: ITaskConfig, private root?: string) {
+        super(config);
 
         this.setConfig({
             env: { root: root },
             printHelp: this.cfg.printHelp || this.printHelp
         });
+    }
+
+    getRootPath() {
+        return this.root || super.getRootPath();
     }
 
     protected printHelp(help: string) {

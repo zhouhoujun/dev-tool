@@ -6,7 +6,7 @@ import { TaskCallback } from 'gulp';
 import { IContext } from './IContext';
 import { ITaskOption, TaskOption } from './TaskOption';
 import { ILoaderFactory, LoaderFactory } from './loaderFactory';
-import { createConextInstance, Context } from './Context';
+import { Context } from './Context';
 
 
 export class ContextBuilder implements Builder {
@@ -44,7 +44,7 @@ export class ContextBuilder implements Builder {
     protected buildContext(node: IContext) {
         let optask = node.option as ITaskOption;
         if (optask.asserts) {
-            let assertctx = createConextInstance(_.extend({ name: 'asserts', loader: [], order: optask.assertsOrder }), node);
+            let assertctx = node.add(<ITaskOption>{ name: 'asserts', loader: [], order: optask.assertsOrder }) as IContext;
             let asserts = optask.asserts;
             optask.asserts = null;
             this.buildAssertContext(assertctx, asserts, optask.assertsRunWay);
@@ -60,9 +60,11 @@ export class ContextBuilder implements Builder {
             if (optask.oper && parent.oper && (parent.oper & optask.oper) <= 0) {
                 return;
             }
-            let ctx: IContext = createConextInstance(optask, parent);
+            let ctx: IContext = parent.add(optask) as IContext;
+            ctx['__built'] = true;
             if (optask.asserts) {
-                let assertctx = createConextInstance(_.extend({ name: 'asserts', loader: [], order: optask.assertsOrder }), ctx);
+                let assertctx = ctx.add(<ITaskOption>{ name: 'asserts', loader: [], order: optask.assertsOrder })  as IContext;
+                assertctx['__built'] = true;
                 let asserts = optask.asserts;
                 optask.asserts = null;
                 this.buildAssertContext(assertctx, asserts, optask.assertsRunWay);
@@ -74,15 +76,14 @@ export class ContextBuilder implements Builder {
     }
 
     /**
-        * build asserts tasks.
-        *
-        * @protected
-        * @param {ITaskContext} ctx
-        *
-        * @memberOf Builder
-        */
+    * build asserts tasks.
+    *
+    * @protected
+    * @param {ITaskContext} ctx
+    *
+    * @memberOf Builder
+    */
     protected buildAssertContext(ctx: IContext, asserts: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>, runWay?: RunWay) {
-
         let tasks: ITaskOption[] = [];
         _.each(_.keys(asserts), name => {
             let op: ITaskOption;
@@ -112,7 +113,7 @@ export class ContextBuilder implements Builder {
             if (!op.loader) {
                 op.loader = [{ name: name, pipes: [], watch: true }]
             }
-            op.name = op.name || ctx.subTaskName(name);
+            op.name = op.name || name; // || ctx.taskName(name);
             op.src = op.src || (ctx.getSrc({ oper: Operation.default }) + '/**/*.' + name);
             // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
             op.runWay = op.runWay || runWay || RunWay.parallel;
@@ -120,7 +121,6 @@ export class ContextBuilder implements Builder {
         });
 
         this.buildContexts(ctx, tasks);
-        // this.creatContext(tasks, ctx);
     }
     /**
      * build sub context.
@@ -133,11 +133,11 @@ export class ContextBuilder implements Builder {
     protected buildSubContext(ctx: IContext) {
 
         let optask = <ITaskOption>ctx.option;
-        // console.log('task options:', optask);
         if (!optask.tasks) {
             return;
         }
         let tasks = _.isArray(optask.tasks) ? optask.tasks : [optask.tasks];
+        // let idex = 0;
         let subtasks = tasks.map(subopt => {
             if (!subopt.order) {
                 let subOrder = ctx.to(optask.subTaskOrder);
@@ -147,7 +147,7 @@ export class ContextBuilder implements Builder {
                     subopt.order = { runWay: optask.subTaskRunWay };
                 }
             }
-            subopt.name = ctx.subTaskName(subopt.name);
+            subopt.name = subopt.name || ctx.taskName(subopt.name); // ('sub' + idex++);
             return subopt;
         });
 
