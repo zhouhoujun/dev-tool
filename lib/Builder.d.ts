@@ -18,7 +18,8 @@ export declare class ContextBuilder implements Builder {
      */
     isBuilt(node: ITaskContext): boolean;
     clean(node: ITaskContext): void;
-    protected buildContext(taskOptions: TaskOption, parent: IContext): void;
+    protected buildContext(node: IContext): void;
+    protected buildContexts(parent: IContext, taskOptions: TaskOption): void;
     /**
         * build asserts tasks.
         *

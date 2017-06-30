@@ -18,11 +18,8 @@ export class ContextBuilder implements Builder {
      * @memberof Development
      */
     build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext {
-        let opt = option || (node.option as ITaskOption);
-        this.buildContext(opt, node as IContext);
-        if (!option) {
-            node['__built'] = true;
-        }
+        option ? this.buildContexts(node as IContext, option) : this.buildContext(node as IContext);
+        node['__built'] = true;
         return node;
     }
 
@@ -44,14 +41,26 @@ export class ContextBuilder implements Builder {
         }
     }
 
-    protected buildContext(taskOptions: TaskOption, parent: IContext) {
+    protected buildContext(node: IContext) {
+        let optask = node.option as ITaskOption;
+        if (optask.asserts) {
+            let assertctx = createConextInstance(_.extend({ name: 'asserts', loader: [], order: optask.assertsOrder }), node);
+            let asserts = optask.asserts;
+            optask.asserts = null;
+            this.buildAssertContext(assertctx, asserts, optask.assertsRunWay);
+        }
+        if (optask.tasks) {
+            this.buildSubContext(node);
+        }
+    }
+
+    protected buildContexts(parent: IContext, taskOptions: TaskOption) {
         let tasks: ITaskOption[] = _.isArray(taskOptions) ? taskOptions : [taskOptions];
         tasks.forEach(optask => {
             if (optask.oper && parent.oper && (parent.oper & optask.oper) <= 0) {
                 return;
             }
-            let ctx = createConextInstance(optask, parent);
-            ctx['__built'] = true;
+            let ctx: IContext = createConextInstance(optask, parent);
             if (optask.asserts) {
                 let assertctx = createConextInstance(_.extend({ name: 'asserts', loader: [], order: optask.assertsOrder }), ctx);
                 let asserts = optask.asserts;
@@ -110,7 +119,7 @@ export class ContextBuilder implements Builder {
             tasks.push(op);
         });
 
-        this.buildContext(tasks, ctx);
+        this.buildContexts(ctx, tasks);
         // this.creatContext(tasks, ctx);
     }
     /**
@@ -142,7 +151,7 @@ export class ContextBuilder implements Builder {
             return subopt;
         });
 
-        this.buildContext(subtasks, ctx);
+        this.buildContexts(ctx, subtasks);
 
     }
 }

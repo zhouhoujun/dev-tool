@@ -135,11 +135,6 @@ export class Context extends TaskContext implements IContext {
 
     // }
 
-    // run() {
-    //     this.builder.build(this);
-    //     return super.run();
-    // }
-
     start(): Promise<Src[]> {
         let gulp = this.gulp;
         let isRoot = !this.parent;
