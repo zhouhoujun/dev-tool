@@ -1,6 +1,6 @@
 {
     "name": "development-tool",
-    "version": "2.0.0-beta2",
+    "version": "2.0.0-beta3",
     "description": "development tools, tasks component, gulp task manager, tasks loader,  run tasks in sequence via Promise. easy to load tasks module, generate asserts task, compose tasks.",
     "main": "./lib/tools.js",
     "typings": "./lib/tools",
@@ -45,7 +45,7 @@
         "@types/gulp": "^3.8.32",
         "chalk": "^1.1.3",
         "checksum": "^0.1.1",
-        "development-core": "^2.0.0-beta1",
+        "development-core": "^2.0.0-beta3",
         "gulp": "^3.9.1",
         "require-dir": "^0.3.2"
     },

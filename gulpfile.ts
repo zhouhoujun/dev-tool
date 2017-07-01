@@ -9,6 +9,7 @@ import * as mocha from 'gulp-mocha';
 const del = require('del');
 Development.create(gulp, __dirname, [
     <ITaskOption>{
+        name: 'dev',
         src: 'src',
         dist: 'lib',
         buildDist: 'build',
