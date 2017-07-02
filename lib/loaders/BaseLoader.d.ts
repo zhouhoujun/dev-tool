@@ -4,8 +4,10 @@ import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
 export declare abstract class BaseLoader implements ITaskLoader {
     protected ctx: IContext;
+    name: string;
     constructor(ctx: IContext);
     readonly option: ITaskOption;
+    private _tasks;
     load(): Promise<ITask[]>;
     private _taskDef;
     protected readonly taskDef: Promise<ITaskDefine>;

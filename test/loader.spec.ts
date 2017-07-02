@@ -49,14 +49,14 @@ describe('LoaderFactory', function () {
                 src: 'src',
                 loader: <IDynamicLoaderOption>{ module: path.join(root, './tasks/task.ts'), dynamicTasks: [] }
             },
-            env: { config: 'test', group: 'test' }
+            env: { config: 'test', group: 'ts' }
         });
 
         let loader: ITaskLoader = factory.create(ctx);
 
         expect(ctx).to.not.null;
         expect(ctx).to.not.undefined;
-        expect(ctx.env.group).to.equals('test');
+        expect(ctx.env.group).to.equals('ts');
         expect(ctx.oper).to.eq(Operation.build);
 
         let option: ITaskOption = ctx.option;
@@ -66,7 +66,7 @@ describe('LoaderFactory', function () {
 
         let tasks = await loader.load();
         expect(tasks).not.null;
-        expect(tasks.length).eq(1);
+        expect(tasks.length).eq(2);
 
 
         let nogpctx = new Context({
@@ -89,7 +89,7 @@ describe('LoaderFactory', function () {
 
         let ntasks = await loader2.load();
         expect(ntasks).not.null;
-        expect(ntasks.length).eq(1);
+        expect(ntasks.length).eq(2);
     });
 
     it('create directory loader', async () => {

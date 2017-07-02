@@ -17,10 +17,9 @@ export class ContextBuilder implements Builder {
      * @protected
      * @memberof Development
      */
-    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext {
-        option ? this.buildContexts(node as IContext, option) : this.buildContext(node as IContext);
-        node['__built'] = true;
-        return node;
+    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext | Promise<ITaskContext> {
+        let ctx = node as IContext;
+        return option ? this.buildContexts(ctx, option) : this.buildContext(ctx);
     }
 
 
@@ -41,38 +40,60 @@ export class ContextBuilder implements Builder {
         }
     }
 
-    protected buildContext(node: IContext) {
-        let optask = node.option as ITaskOption;
-        if (optask.asserts) {
-            let assertctx = node.add(<ITaskOption>{ name: 'asserts', loader: [], order: optask.assertsOrder }) as IContext;
-            let asserts = optask.asserts;
-            optask.asserts = null;
-            this.buildAssertContext(assertctx, asserts, optask.assertsRunWay);
-        }
-        if (optask.tasks) {
-            this.buildSubContext(node);
+    setBuilt(node: ITaskContext) {
+        if (node) {
+            node['__built'] = true;
         }
     }
 
-    protected buildContexts(parent: IContext, taskOptions: TaskOption) {
+    protected buildContext(node: IContext): Promise<ITaskContext> {
+        return node.getLoader()
+            .load()
+            .then((tasks) => {
+                // this.setBuilt(node);
+                let component = [];
+                let optask = node.option as ITaskOption;
+                if (optask.asserts) {
+                    let assertctx = node.add(<ITaskOption>{ name: 'asserts', loader: [], order: optask.assertsOrder }) as IContext;
+                    let asserts = optask.asserts;
+                    optask.asserts = null;
+                    component.push(this.buildAssertContext(assertctx, asserts, optask.assertsRunWay));
+                }
+                if (optask.tasks) {
+                    component.push(this.buildSubContext(node));
+                }
+
+                return Promise.all(component);
+            })
+            .then(() => {
+                this.setBuilt(node);
+                return node;
+            });
+
+    }
+
+    protected buildContexts(parent: IContext, taskOptions: TaskOption): Promise<ITaskContext> {
+        return parent.getLoader()
+            .load()
+            .then(() => {
+                return this.createContexts(parent, taskOptions);
+            })
+            .then(() => {
+                this.setBuilt(parent);
+                return parent;
+
+            })
+    }
+
+    protected createContexts(node: IContext, taskOptions: TaskOption): Promise<ITaskContext[]> {
         let tasks: ITaskOption[] = _.isArray(taskOptions) ? taskOptions : [taskOptions];
-        tasks.forEach(optask => {
-            if (optask.oper && parent.oper && (parent.oper & optask.oper) <= 0) {
-                return;
+        return Promise.all(tasks.map(optask => {
+            if (optask.oper && node.oper && (node.oper & optask.oper) <= 0) {
+                return null;
             }
-            let ctx: IContext = parent.add(optask) as IContext;
-            ctx['__built'] = true;
-            if (optask.asserts) {
-                let assertctx = ctx.add(<ITaskOption>{ name: 'asserts', loader: [], order: optask.assertsOrder })  as IContext;
-                assertctx['__built'] = true;
-                let asserts = optask.asserts;
-                optask.asserts = null;
-                this.buildAssertContext(assertctx, asserts, optask.assertsRunWay);
-            }
-            if (optask.tasks) {
-                this.buildSubContext(ctx);
-            }
-        });
+            let ctx: IContext = node.add(optask) as IContext;
+            return this.buildContext(ctx);
+        }));
     }
 
     /**
@@ -120,7 +141,7 @@ export class ContextBuilder implements Builder {
             tasks.push(op);
         });
 
-        this.buildContexts(ctx, tasks);
+        return this.createContexts(ctx, tasks);
     }
     /**
      * build sub context.
@@ -134,7 +155,7 @@ export class ContextBuilder implements Builder {
 
         let optask = <ITaskOption>ctx.option;
         if (!optask.tasks) {
-            return;
+            return null;
         }
         let tasks = _.isArray(optask.tasks) ? optask.tasks : [optask.tasks];
         // let idex = 0;
@@ -151,7 +172,7 @@ export class ContextBuilder implements Builder {
             return subopt;
         });
 
-        this.buildContexts(ctx, subtasks);
+        return this.createContexts(ctx, subtasks);
 
     }
 }

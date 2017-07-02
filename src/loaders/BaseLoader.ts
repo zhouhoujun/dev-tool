@@ -6,36 +6,43 @@ import { ITaskLoader } from '../ITaskLoader';
 
 export abstract class BaseLoader implements ITaskLoader {
 
+    name = 'base';
+
     constructor(protected ctx: IContext) {
     }
 
     get option(): ITaskOption {
         return this.ctx.option as ITaskOption;
     }
+
+    private _tasks: Promise<ITask[]>;
     load(): Promise<ITask[]> {
-        return this.taskDef
-            .then((def) => {
-                if (def.loadConfig) {
-                    this.ctx.setConfig(def.loadConfig(this.ctx.option, this.ctx.env));
-                }
-                if (def['getContext']) {
-                    let cdef = def as IContextDefine;
-                    let customCtx = cdef.getContext(this.ctx.getConfig());
-                    this.ctx.setConfig(customCtx.getConfig());
-                }
-                if (def['setContext']) {
-                    let cdef = def as IContextDefine;
-                    cdef.setContext(this.ctx);
-                }
-                return def;
-            })
-            .then(def => {
-                return this.loadTasks(this.ctx, def);
-            })
-            .catch(err => {
-                console.error(err);
-                return null;
-            });
+        if (!this._tasks) {
+            this._tasks = this.taskDef
+                .then((def) => {
+                    if (def.loadConfig) {
+                        this.ctx.setConfig(def.loadConfig(this.ctx.option, this.ctx.env));
+                    }
+                    if (def['getContext']) {
+                        let cdef = def as IContextDefine;
+                        let customCtx = cdef.getContext(this.ctx.getConfig());
+                        this.ctx.setConfig(customCtx.getConfig());
+                    }
+                    if (def['setContext']) {
+                        let cdef = def as IContextDefine;
+                        cdef.setContext(this.ctx);
+                    }
+                    return def;
+                })
+                .then(def => {
+                    return this.loadTasks(this.ctx, def);
+                })
+                .catch(err => {
+                    console.error(err);
+                    return null;
+                });
+        }
+        return this._tasks;
     }
 
     private _taskDef: Promise<ITaskDefine>;

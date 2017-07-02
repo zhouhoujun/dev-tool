@@ -9,6 +9,7 @@ export class ModuleLoader extends BaseLoader {
 
     constructor(ctx: IContext) {
         super(ctx);
+        this.name = 'module';
     }
 
     protected loadTaskDefine(): ITaskDefine | Promise<ITaskDefine> {

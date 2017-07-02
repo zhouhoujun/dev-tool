@@ -7,6 +7,13 @@ import { ITask } from 'development-core';
  */
 export interface ITaskLoader {
     /**
+     * loader name.
+     *
+     * @type {string}
+     * @memberof ITaskLoader
+     */
+    name: string;
+    /**
      * load task.
      * @returns {Promise<ITask[]>}
      *

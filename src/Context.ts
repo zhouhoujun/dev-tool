@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { TaskCallback } from 'gulp';
 import { IContext } from './IContext';
 import { ITaskOption, TaskOption } from './TaskOption';
+import { ITaskLoader } from './ITaskLoader';
 import { ILoaderFactory, LoaderFactory } from './loaderFactory';
 import { ContextBuilder } from './Builder'
 
@@ -36,13 +37,11 @@ const builder = new ContextBuilder();
  */
 export class Context extends TaskContext implements IContext {
 
-    // private children: IContext[] = [];
     constructor(cfg: ITaskConfig) {
         super(cfg);
         this._builder = builder;
     }
 
-    private loading = false;
     private _loaderfactory: ILoaderFactory;
     get loaderFactory(): ILoaderFactory {
         return this._loaderfactory || factory;
@@ -63,69 +62,19 @@ export class Context extends TaskContext implements IContext {
         return new Context(cfg);
     }
 
-    addTask(...task: ITask[]) {
-        if (this.loading) {
-            super.addTask(...task);
-            return;
+    private _loader: ITaskLoader;
+    getLoader(): ITaskLoader {
+        if (!this._loader) {
+            this._loader = this.loaderFactory.create(this);
         }
-
-        this.getLoaderTasks()
-            .then(tasks => {
-                super.addTask(...task);
-            });
-
-    }
-
-    removeTask(task: ITask): ITask[] | Promise<ITask[]> {
-        if (this.loading) {
-            return super.removeTask(task);
-        }
-
-        return this.getLoaderTasks()
-            .then(tasks => {
-                return super.removeTask(task);
-            });
-
-    }
-
-    private _loaderTasks: Promise<ITask[]>;
-    protected getLoaderTasks(): Promise<ITask[]> {
-        if (!this._loaderTasks) {
-            this.loading = true;
-            this._loaderTasks = this.loaderFactory.create(this)
-                .load()
-                .then(tks => {
-                    this.loading = false;
-                    return tks;
-                }, err => {
-                    this.loading = false;
-                    console.log(err);
-                    return null;
-                });
-        }
-        return this._loaderTasks
-    }
-    /**
-     * setup tasks.
-     *
-     * @returns {Promise<Src[]>}
-     *
-     * @memberof IContext
-     */
-    setupTasks(): Promise<Src[]> {
-        return this.getLoaderTasks()
-            .then(tsq => {
-                return super.setupTasks();
-            })
-            .catch(err => {
-                console.error(err);
-                process.exit(1);
-                return null;
-            });
+        return this._loader;
     }
 
     // todo: debug.
     // setup() {
+    //     if (!this.builder.isBuilt(this)) {
+    //         this.builder.build(this);
+    //     }
     //     return super.setup()
     //         .then((data) => {
     //             console.log('task seq:', data);
@@ -137,12 +86,12 @@ export class Context extends TaskContext implements IContext {
     start(): Promise<Src[]> {
         let gulp = this.gulp;
         let isRoot = !this.parent;
-        let btsk = isRoot ? 'build' : `build-${this.toStr(this.option.name)}`;
+        let btsk = isRoot ? 'build' : `build-${this.taskName(this.toStr(this.option.name))}`;
         gulp.task(btsk, (callback: TaskCallback) => {
             return this.run();
         });
 
-        gulp.task(isRoot ? 'start' : `start-${this.toStr(this.option.name)}`, (callback: TaskCallback) => {
+        gulp.task(isRoot ? 'start' : `start-${this.taskName(this.toStr(this.option.name))}`, (callback: TaskCallback) => {
             if (!this.env.task) {
                 return Promise.reject('start task can not empty!');
             }

@@ -7,6 +7,7 @@ export class DirLoader extends ModuleLoader {
 
     constructor(ctx: IContext) {
         super(ctx);
+        this.name = 'dir';
     }
 
     loadTasks(context: ITaskContext, def: ITaskDefine): Promise<ITask[]> {

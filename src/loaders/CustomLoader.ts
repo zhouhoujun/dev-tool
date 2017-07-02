@@ -4,6 +4,7 @@ import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
 
 export class CustomLoader implements ITaskLoader {
+    name = 'custom';
     private tasks: Promise<ITask[]>;
     constructor(protected ctx: IContext, protected loader: TaskLoader) {
     }

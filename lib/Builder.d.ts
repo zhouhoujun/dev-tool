@@ -8,7 +8,7 @@ export declare class ContextBuilder implements Builder {
      * @protected
      * @memberof Development
      */
-    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext;
+    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext | Promise<ITaskContext>;
     /**
      * is built or not.
      *
@@ -18,8 +18,10 @@ export declare class ContextBuilder implements Builder {
      */
     isBuilt(node: ITaskContext): boolean;
     clean(node: ITaskContext): void;
-    protected buildContext(node: IContext): void;
-    protected buildContexts(parent: IContext, taskOptions: TaskOption): void;
+    setBuilt(node: ITaskContext): void;
+    protected buildContext(node: IContext): Promise<ITaskContext>;
+    protected buildContexts(parent: IContext, taskOptions: TaskOption): Promise<ITaskContext>;
+    protected createContexts(node: IContext, taskOptions: TaskOption): Promise<ITaskContext[]>;
     /**
     * build asserts tasks.
     *
@@ -28,7 +30,7 @@ export declare class ContextBuilder implements Builder {
     *
     * @memberOf Builder
     */
-    protected buildAssertContext(ctx: IContext, asserts: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>, runWay?: RunWay): void;
+    protected buildAssertContext(ctx: IContext, asserts: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>, runWay?: RunWay): Promise<ITaskContext[]>;
     /**
      * build sub context.
      *
@@ -37,5 +39,5 @@ export declare class ContextBuilder implements Builder {
      *
      * @memberOf Builder
      */
-    protected buildSubContext(ctx: IContext): void;
+    protected buildSubContext(ctx: IContext): Promise<ITaskContext[]>;
 }
