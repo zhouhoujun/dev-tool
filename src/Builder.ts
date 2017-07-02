@@ -134,7 +134,7 @@ export class ContextBuilder implements Builder {
             if (!op.loader) {
                 op.loader = [{ name: name, pipes: [], watch: true }]
             }
-            // op.name = op.name || name; // || ctx.taskName(name);
+            op.defaultTaskName =  name;
             op.src = op.src || (ctx.getSrc({ oper: Operation.default }) + '/**/*.' + name);
             // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
             op.runWay = op.runWay || runWay || RunWay.parallel;
