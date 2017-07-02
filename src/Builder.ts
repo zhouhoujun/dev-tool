@@ -134,7 +134,7 @@ export class ContextBuilder implements Builder {
             if (!op.loader) {
                 op.loader = [{ name: name, pipes: [], watch: true }]
             }
-            op.name = op.name || name; // || ctx.taskName(name);
+            // op.name = op.name || name; // || ctx.taskName(name);
             op.src = op.src || (ctx.getSrc({ oper: Operation.default }) + '/**/*.' + name);
             // op.dist = op.dist || ctx.getDist({ oper: Operation.build });
             op.runWay = op.runWay || runWay || RunWay.parallel;
@@ -168,7 +168,7 @@ export class ContextBuilder implements Builder {
                     subopt.order = { runWay: optask.subTaskRunWay };
                 }
             }
-            subopt.name = subopt.name || ctx.taskName(subopt.name); // ('sub' + idex++);
+            // subopt.name = subopt.name || ctx.taskName(subopt.name); // ('sub' + idex++);
             return subopt;
         });
 
