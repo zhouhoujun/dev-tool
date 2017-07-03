@@ -1,4 +1,4 @@
-import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, RunWay, IAssertOption, Src, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig } from 'development-core';
+import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, RunWay, TaskString, IAssertOption, Src, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig } from 'development-core';
 export declare type contextFactory = (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext;
 /**
  * task loader option.
@@ -130,6 +130,65 @@ export interface TaskSeq {
     opt: ITaskOption;
     seq: Src[];
 }
+export interface RefProjec {
+    /**
+     * project name.
+     *
+     * @type {TaskString}
+     * @memberof RefProjec
+     */
+    name?: TaskString;
+    /**
+     * project path
+     *
+     * @type {TaskString}
+     * @memberof RefProjec
+     */
+    path: TaskString;
+    /**
+     * cmd for this project.
+     *
+     * @type {TaskString}
+     * @memberof RefProjec
+     */
+    cmd?: TaskString;
+    /**
+     * the cmd args.
+     *
+     * @type {TaskSource}
+     * @memberof RefProjec
+     */
+    args?: TaskSource;
+}
+/**
+ * ref project.
+ *
+ * @export
+ * @interface RefProject
+ */
+export interface RefProjects {
+    /**
+     * refs project, to compile together.
+     *
+     * @type {(TaskString | RefProjec)[]}
+     * @memberof RefProject
+     */
+    refs?: (TaskString | RefProjec)[];
+    /**
+     * refs project run way.
+     *
+     * @type {RunWay}
+     * @memberof RefProject
+     */
+    refsRunWay?: RunWay;
+    /**
+     * refs project run order.
+     *
+     * @type {Order}
+     * @memberof RefProject
+     */
+    refsOrder?: Order;
+}
 /**
  * task option setting.
  *
@@ -138,7 +197,7 @@ export interface TaskSeq {
  * @extends {IAssertOption}
  * @extends {ISubTaskOption}
  */
-export interface ITaskOption extends IAssertOption, ISubTaskOption, ITaskLoaderOption {
+export interface ITaskOption extends IAssertOption, ISubTaskOption, ITaskLoaderOption, RefProjects {
 }
 /**
  * task option.

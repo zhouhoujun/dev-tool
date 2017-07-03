@@ -33,7 +33,7 @@ Development.create(gulp, __dirname, [
                 task: (ctx, dt) => del(ctx.getDist(dt))
             }
         ]
-    }]);
+    }]).start();
 
 
 // import * as mocha from 'gulp-mocha';

@@ -13,14 +13,6 @@ export interface IContext extends ITaskContext {
     loaderFactory: ILoaderFactory;
 
     /**
-     * start.
-     *
-     * @returns {Promise<Src[]>}
-     * @memberof IContext
-     */
-    start(): Promise<Src[]>;
-
-    /**
      * get current context loader.
      *
      * @returns {ITaskLoader}

@@ -11,12 +11,12 @@ let root = __dirname;
 import * as path from 'path';
 
 describe('LoaderFactory', function () {
-    var factory: ILoaderFactory;
+    // var factory: ILoaderFactory;
     this.timeout(3000);
 
-    beforeEach(() => {
-        factory = new LoaderFactory();
-    })
+    // beforeEach(() => {
+    //     factory = new LoaderFactory();
+    // })
 
     it('create dynamic loader', async () => {
         let ctx = new Context({
@@ -27,8 +27,8 @@ describe('LoaderFactory', function () {
             env: { config: 'test', watch: true }
         });
 
-
-        let loader: ITaskLoader = factory.create(ctx);
+        let tasks = await ctx.load();
+        // let loader: ITaskLoader = factory.create(ctx);
         expect(ctx).to.not.null;
         expect(ctx).to.not.undefined;
         expect(ctx.env.config).to.equals('test');
@@ -38,7 +38,7 @@ describe('LoaderFactory', function () {
         expect(Array.isArray(option.loader)).to.false;
         expect(Array.isArray(option.loader['dynamicTasks'])).to.true;
 
-        let tasks = await loader.load();
+
         expect(tasks).not.null;
         expect(tasks.length).eq(0);
     });
@@ -52,7 +52,7 @@ describe('LoaderFactory', function () {
             env: { config: 'test', group: 'ts' }
         });
 
-        let loader: ITaskLoader = factory.create(ctx);
+        let tasks = await ctx.load();
 
         expect(ctx).to.not.null;
         expect(ctx).to.not.undefined;
@@ -62,11 +62,8 @@ describe('LoaderFactory', function () {
         let option: ITaskOption = ctx.option;
         expect(Array.isArray(option.loader)).to.false;
         expect(Array.isArray(option.loader['dynamicTasks'])).to.true;
-
-
-        let tasks = await loader.load();
         expect(tasks).not.null;
-        expect(tasks.length).eq(2);
+        expect(tasks.length).eq(1);
 
 
         let nogpctx = new Context({
@@ -76,7 +73,7 @@ describe('LoaderFactory', function () {
             },
             env: { config: 'test' }
         });
-        let loader2: ITaskLoader = factory.create(nogpctx);
+        let ntasks = await nogpctx.load();
 
         expect(nogpctx).to.not.null;
         expect(nogpctx).to.not.undefined;
@@ -86,10 +83,8 @@ describe('LoaderFactory', function () {
         let option2: ITaskOption = ctx.option;
         expect(Array.isArray(option2.loader)).to.false;
         expect(Array.isArray(option2.loader['dynamicTasks'])).to.true;
-
-        let ntasks = await loader2.load();
         expect(ntasks).not.null;
-        expect(ntasks.length).eq(2);
+        expect(ntasks.length).eq(1);
     });
 
     it('create directory loader', async () => {
@@ -100,8 +95,8 @@ describe('LoaderFactory', function () {
                 loader: <IDirLoaderOption>{ dir: path.join(root, './tasks') }
             },
             env: { config: 'test', deploy: true }
-        })
-        let loader: ITaskLoader = factory.create(ctx);
+        });
+        let tasks = await ctx.load();
 
         expect(ctx).to.not.null;
         expect(ctx).to.not.undefined;
@@ -109,7 +104,6 @@ describe('LoaderFactory', function () {
         expect(ctx.oper & Operation.deploy).eq(Operation.deploy);
         expect(ctx.option.src).to.eq('src');
 
-        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(2);
     });
@@ -126,14 +120,13 @@ describe('LoaderFactory', function () {
                 release: true
             }
         });
-        let loader: ITaskLoader = factory.create(ctx);
+        let tasks = await ctx.load();
 
         expect(ctx).to.not.null;
         expect(ctx).to.not.undefined;
         expect(ctx.env.config).to.equals('test');
         expect(ctx.oper).eq(Operation.release);
 
-        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(2);
     });
@@ -161,14 +154,13 @@ describe('LoaderFactory', function () {
             },
             env: { config: 'test', release: true }
         });
-        let loader: ITaskLoader = factory.create(ctx);
+        let tasks = await ctx.load();
 
         expect(ctx).to.not.null;
         expect(ctx).to.not.undefined;
         expect(ctx.env.config).to.equals('test');
         expect(ctx.oper).to.eq(Operation.release);
 
-        let tasks = await loader.load();
         expect(tasks).not.null;
         expect(tasks.length).eq(0);
 

@@ -1,13 +1,19 @@
 import * as _ from 'lodash';
-import { Gulp } from 'gulp';
-import { Operation, ITaskConfig, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
+import { Gulp, TaskCallback } from 'gulp';
+import { Operation, ITaskConfig, ITaskContext, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { TaskOption, ITaskOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
 
-interface TaskSeq {
-    opt: ITaskOption,
-    seq: Src[]
+
+export interface IDevelopment extends IContext {
+    /**
+     * start.
+     *
+     * @returns {Src}
+     * @memberof IDevelopment
+     */
+    start(): Src;
 }
 
 /**
@@ -17,7 +23,7 @@ interface TaskSeq {
  * @class Development
  * @extends {Context}
  */
-export class Development extends Context {
+export class Development extends Context implements IDevelopment {
 
     /**
      * create development tool.
@@ -46,7 +52,7 @@ export class Development extends Context {
         }
 
         let devtool = new Development(config, root);
-        devtool.start();
+        devtool.gulp = gulp;
         return devtool;
     }
 
@@ -68,6 +74,48 @@ export class Development extends Context {
 
     getRootPath() {
         return this.root || super.getRootPath();
+    }
+
+    // setup(): Promise<Src[]> {
+    //     if (this.parent) {
+    //         return Promise.resolve([this.start()]);
+    //     } else {
+    //         return super.setup();
+    //     }
+    // }
+
+    // protected setupChildren(): Promise<ITaskContext[]> {
+    //     if (this.parent) {
+    //         return Promise.resolve([]);
+    //     } else {
+    //         return super.setupChildren();
+    //     }
+    // }
+
+    start(): Src {
+        let gulp = this.gulp;
+        let isRoot = !this.parent;
+        let btsk = isRoot ? 'build' : `build-${this.taskName(this.toStr(this.option.name))}`;
+        gulp.task(btsk, (callback: TaskCallback) => {
+            return this.run();
+        });
+
+        gulp.task(isRoot ? 'start' : `start-${this.taskName(this.toStr(this.option.name))}`, (callback: TaskCallback) => {
+            if (!this.env.task) {
+                return Promise.reject('start task can not empty!');
+            }
+            let tasks = this.env.task.split(',');
+            return this.find<Context>(ctx => tasks.indexOf(ctx.toStr(ctx.option.name)) >= 0)
+                .run();
+        });
+
+        if (!this.parent) {
+            gulp.task('default', () => {
+                gulp.start(btsk);
+            });
+        }
+
+        return btsk;
     }
 
     protected printHelp(help: string) {

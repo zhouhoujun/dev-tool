@@ -3,11 +3,11 @@ import {
 } from 'development-core';
 import * as _ from 'lodash';
 import { TaskCallback } from 'gulp';
+import * as path from 'path';
 import { IContext } from './IContext';
 import { ITaskOption, TaskOption } from './TaskOption';
 import { ILoaderFactory, LoaderFactory } from './loaderFactory';
 import { Context } from './Context';
-
 
 export class ContextBuilder implements Builder {
 
@@ -53,6 +53,68 @@ export class ContextBuilder implements Builder {
                 // this.setBuilt(node);
                 let component = [];
                 let optask = node.option as ITaskOption;
+                let env = node.env;
+                if (optask.refs && optask.refs.length > 0) {
+                    let refsctx = node.add(<ITaskOption>{
+                        name: 'refs',
+                        loader: (ctx) => {
+                            return ctx.generateTask(optask.refs.map(rf => {
+                                let name: string, pjpath: string, cmd, args: string[];
+                                if (_.isString(rf)) {
+                                    name = path.basename(rf);
+                                    pjpath = ctx.toRootPath(rf);
+                                } else if (_.isFunction(rf)) {
+                                    pjpath = ctx.toRootPath(ctx.toStr(rf));
+                                    name = path.basename(pjpath);
+                                } else {
+                                    name = ctx.toStr(rf.name);
+                                    pjpath = ctx.toRootPath(ctx.toStr(rf.path));
+                                    cmd = ctx.toStr(rf.cmd);
+                                    let srcArgs = ctx.toSrc(rf.args);
+                                    if (srcArgs) {
+                                        if (_.isArray(srcArgs) && srcArgs.length > 0) {
+                                            args = srcArgs;
+                                        } else if (srcArgs && _.isString(srcArgs)) {
+                                            args = [srcArgs];
+                                        }
+                                    }
+                                }
+                                return <IDynamicTaskOption>{
+                                    name: name,
+                                    runWay: optask.refsRunWay || RunWay.parallel,
+                                    shell: (ctx) => {
+                                        cmd = cmd || 'gulp build';
+                                        let cmds = '';
+                                        if (/^[C-Z]:/.test(pjpath)) {
+                                            cmds = _.first(pjpath.split(':')) + ': & ';
+                                        }
+                                        cmds += `cd ${pjpath} & ${cmd}`;
+                                        if (!args) {
+                                            args = [];
+                                            _.keys(env).map(k => {
+                                                if (k === 'root' || !/^[a-zA-Z]/.test(k)) {
+                                                    return;
+                                                }
+                                                let val = env[k];
+                                                if (_.isBoolean(val)) {
+                                                    if (val) {
+                                                        args.push(`--${k}`);
+                                                    }
+                                                } else if (val) {
+                                                    args.push(`--${k} ${val}`);
+                                                }
+
+                                            });
+                                        }
+                                        cmds += ` ${args.join(' ')}`;
+                                        return cmds;
+                                    }
+                                }
+                            }));
+                        }, order: optask.refsOrder
+                    }) as IContext;
+
+                }
                 if (optask.asserts) {
                     let assertctx = node.add(<ITaskOption>{ name: 'asserts', loader: [], order: optask.assertsOrder }) as IContext;
                     let asserts = optask.asserts;
@@ -134,7 +196,7 @@ export class ContextBuilder implements Builder {
             if (!op.loader) {
                 op.loader = [{ name: name, pipes: [], watch: true }]
             }
-            op.defaultTaskName =  name;
+            op.defaultTaskName = name;
             op.src = op.src || (ctx.getSrc() + '/**/*.' + name);
             // op.dist = op.dist || ctx.getDist();
             op.runWay = op.runWay || runWay || RunWay.parallel;

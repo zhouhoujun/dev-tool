@@ -1,8 +1,18 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { ITaskConfig, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
+import { ITaskConfig, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { ITaskOption } from './TaskOption';
+import { IContext } from './IContext';
 import { Context } from './Context';
+export interface IDevelopment extends IContext {
+    /**
+     * start.
+     *
+     * @returns {Src}
+     * @memberof IDevelopment
+     */
+    start(): Src;
+}
 /**
  * Development.
  *
@@ -10,7 +20,7 @@ import { Context } from './Context';
  * @class Development
  * @extends {Context}
  */
-export declare class Development extends Context {
+export declare class Development extends Context implements IDevelopment {
     private root;
     /**
      * create development tool.
@@ -34,5 +44,6 @@ export declare class Development extends Context {
      */
     constructor(config: ITaskConfig, root?: string);
     getRootPath(): string;
+    start(): Src;
     protected printHelp(help: string): void;
 }

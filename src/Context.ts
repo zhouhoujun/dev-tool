@@ -83,30 +83,4 @@ export class Context extends TaskContext implements IContext {
 
     // }
 
-    start(): Promise<Src[]> {
-        let gulp = this.gulp;
-        let isRoot = !this.parent;
-        let btsk = isRoot ? 'build' : `build-${this.taskName(this.toStr(this.option.name))}`;
-        gulp.task(btsk, (callback: TaskCallback) => {
-            return this.run();
-        });
-
-        gulp.task(isRoot ? 'start' : `start-${this.taskName(this.toStr(this.option.name))}`, (callback: TaskCallback) => {
-            if (!this.env.task) {
-                return Promise.reject('start task can not empty!');
-            }
-            let tasks = this.env.task.split(',');
-            return this.find<Context>(ctx => tasks.indexOf(ctx.toStr(ctx.option.name)) >= 0)
-                .run();
-        });
-
-        if (!this.parent) {
-            gulp.task('default', () => {
-                gulp.start(btsk);
-            });
-        }
-
-        return Promise.resolve([btsk]);
-    }
-
 }

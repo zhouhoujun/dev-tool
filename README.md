@@ -39,10 +39,96 @@ import  { Development } from 'development-tool';
 
 ```
 
+## Componse Context
+
+ ```ts
+
+import * as gulp from 'gulp';
+import  { Development } from 'development-tool';
+
+// create project.
+let projectA = new Development({...});
+// or
+let projectA = Development.create(gulp, __dirname, [...]);
+
+//add context component.
+projectA.add(component);
+// or
+projectA.add(ITaskConfig);
+// or
+projectA.add(ITaskOption);
+
+...
+projectA.start();
+
+```
+
+## Refs Project compile together
+
+ ```ts
+import * as gulp from 'gulp';
+import { Pipe, Operation, IMap, ITaskContext, IDynamicTaskOption, RunWay, IOrder } from 'development-core';
+import { Development, ITaskOption } from 'development-tool';
+
+
+export function createWebGui() {
+    return Development.create(gulp, __dirname, [
+        <ITaskOption>{
+            name: 'serv',
+            src: 'server',
+            dist: 'dist',
+            testSrc: 'server/test/**/*.spec.ts',
+            cleanSrc: ['dist/!(development|production)'],
+            refs: [
+                // another project.
+                '../subSystem',
+                {name: 'project_name', path:'_', cmd:TaskString, args:TaskSource }
+            ],
+            // default run parallel.
+            refsRunWay: RunWay.parallel,
+            // set refs projec run order.
+            //refsOrder: Order,
+            asserts: {
+                css: '', less: '',
+                jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
+                ttf: Operation.default, woff: Operation.default, eot: Operation.default, xlsx: Operation.default,
+                pdf: Operation.default,
+                template: {
+                    src: ['server/views/**/*.html', 'server/views/**/*.ejs'],
+                    dist: 'dist/views'
+                },
+                copys: { src: ['package.json', 'start.bat'], oper: Operation.deploy },
+                pm2: {
+                    src: 'pm2.json',
+                    oper: Operation.deploy,
+                    loader: [{
+                        pipes: [(ctx) => replace('"script": "dist/index.js",', '"script": "index.js",')]
+                    }]
+
+                }
+            },
+            tasks: [
+                {
+                    src: 'dist/config/*',
+                    dist: 'dist/config',
+                    loader: <IDynamicTaskOption>{
+                        name: 'server-config',
+                        oper: Operation.release | Operation.deploy,
+                        pipes: [(ctx) => replace('./development', './production')]
+                    }
+                }
+            ],
+            loader: 'development-tool-node'
+        }
+    ]).start();
+
+ ```
+
 
 ## Demo for angular2 web site and server, docker build and publish.
 
 ```ts
+
 import * as gulp from 'gulp';
 import * as _ from 'lodash';
 import { Pipe, Operation, IMap, IDynamicTaskOption } from 'development-core';
@@ -135,14 +221,13 @@ Development.create(gulp, __dirname, [
             files: ['node_modules/**/*']
         },
         karma: {
-            jspm: {
+            systemjs: {
                 systemjs: ['systemjs/dist/system-polyfills', 'systemjs/dist/system'],
                 config: ['systemjs.config.js'],
                 resource: 'assets'
             }
         },
         loader: 'development-tool-web',
-        assertsOrder: total => 1 / total,
         asserts: {
             css: '', // less: '',
             jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
@@ -415,7 +500,9 @@ Development.create(gulp, __dirname, [
                 loader: 'development-tool-docker'
             }]
     }
-]);
+])
+.start();
+
 ```
 
 ## add special pipe work via pipes ctx, add special output by ctx output in loader option
@@ -423,6 +510,7 @@ Development.create(gulp, __dirname, [
 only dynamic task and IPipeTask (base class PipeTask) can add special pipe work.
 
 ```ts
+
 import * as gulp from 'gulp';
 import  { Development, IAssertOption, ITaskOption } from 'development-tool';
 Development.create(gulp, __dirname, [
@@ -469,12 +557,15 @@ Development.create(gulp, __dirname, [
         },
         loader: 'development-tool-node'
     }
-]);
+])
+.start();
+
 ```
 
 ## Create development tool with addation sub tasks
 
 ```ts
+
 Development.create(gulp, __dirname, {
     tasks:{
         src: 'src',
@@ -540,12 +631,15 @@ Development.create(gulp, __dirname, {
             ...
         ]
     }
-});
+})
+.start();
+
 ```
 
 ## Create development tool with dynamic tasks
 
 ```ts
+
 import * as gulp from 'gulp';
 import { Development } from 'development-tool';
 import { ITaskOption, Src, Operation, IDynamicTaskOption } from 'development-core';
@@ -589,7 +683,8 @@ Development.create(gulp, __dirname, {
             }
         ]
     }
-});
+})
+.start();
 
 ```
 
@@ -599,6 +694,7 @@ Dynamic task can set special src filter, dist path, build path, release path,
 test path, deploy path, e2e path. detail see `IDynamicTaskOption`  interface.
 
 ```ts
+
 // or with task from module and asserts.
 Development.create(gulp, __dirname, {
     tasks: {
@@ -648,7 +744,8 @@ Development.create(gulp, __dirname, {
             ]
         }
     }
-});
+})
+.start();
 
 // Dynamic task can set special src filter, dist path, build path,
 // release path, test path, deploy path, e2e path. detail see  IDynamicTaskOption  interface
@@ -708,7 +805,9 @@ Development.create(gulp, __dirname, [
             }
         ]
     }
-]);
+])
+.start();
+
 ```
 
 https://github.com/zhouhoujun/development-tool.git

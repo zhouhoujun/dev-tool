@@ -1,5 +1,5 @@
 import {
-    Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation
+    Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation, TaskString
     , IAssertOption, IMap, Src, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
 } from 'development-core'
 
@@ -152,6 +152,71 @@ export interface TaskSeq {
     seq: Src[]
 }
 
+
+export interface RefProjec {
+    /**
+     * project name.
+     *
+     * @type {TaskString}
+     * @memberof RefProjec
+     */
+    name?: TaskString;
+    /**
+     * project path
+     *
+     * @type {TaskString}
+     * @memberof RefProjec
+     */
+    path: TaskString;
+
+    /**
+     * cmd for this project.
+     *
+     * @type {TaskString}
+     * @memberof RefProjec
+     */
+    cmd?: TaskString;
+    /**
+     * the cmd args.
+     *
+     * @type {TaskSource}
+     * @memberof RefProjec
+     */
+    args?: TaskSource;
+}
+
+/**
+ * ref project.
+ *
+ * @export
+ * @interface RefProject
+ */
+export interface RefProjects {
+    /**
+     * refs project, to compile together.
+     *
+     * @type {(TaskString | RefProjec)[]}
+     * @memberof RefProject
+     */
+    refs?: (TaskString | RefProjec)[];
+
+    /**
+     * refs project run way.
+     *
+     * @type {RunWay}
+     * @memberof RefProject
+     */
+    refsRunWay?: RunWay;
+
+    /**
+     * refs project run order.
+     *
+     * @type {Order}
+     * @memberof RefProject
+     */
+    refsOrder?: Order;
+}
+
 /**
  * task option setting.
  *
@@ -160,7 +225,7 @@ export interface TaskSeq {
  * @extends {IAssertOption}
  * @extends {ISubTaskOption}
  */
-export interface ITaskOption extends IAssertOption, ISubTaskOption, ITaskLoaderOption {
+export interface ITaskOption extends IAssertOption, ISubTaskOption, ITaskLoaderOption, RefProjects {
 
 }
 

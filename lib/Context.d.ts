@@ -1,4 +1,4 @@
-import { ITaskContext, TaskContext, ITaskConfig, Src } from 'development-core';
+import { ITaskContext, TaskContext, ITaskConfig } from 'development-core';
 import { IContext } from './IContext';
 import { ITaskLoader } from './ITaskLoader';
 import { ILoaderFactory } from './loaderFactory';
@@ -24,5 +24,4 @@ export declare class Context extends TaskContext implements IContext {
     protected createContext(cfg: ITaskConfig): ITaskContext;
     private _loader;
     getLoader(): ITaskLoader;
-    start(): Promise<Src[]>;
 }
