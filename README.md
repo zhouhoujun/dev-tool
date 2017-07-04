@@ -71,56 +71,57 @@ import { Pipe, Operation, IMap, ITaskContext, IDynamicTaskOption, RunWay, IOrder
 import { Development, ITaskOption } from 'development-tool';
 
 
-export function createWebGui() {
-    return Development.create(gulp, __dirname, [
-        <ITaskOption>{
-            name: 'serv',
-            src: 'server',
-            dist: 'dist',
-            testSrc: 'server/test/**/*.spec.ts',
-            cleanSrc: ['dist/!(development|production)'],
-            refs: [
-                // another project.
-                '../subSystem',
-                {name: 'project_name', path:'_', cmd:TaskString, args:TaskSource }
-            ],
-            // default run parallel.
-            refsRunWay: RunWay.parallel,
-            // set refs projec run order.
-            //refsOrder: Order,
-            asserts: {
-                css: '', less: '',
-                jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
-                ttf: Operation.default, woff: Operation.default, eot: Operation.default, xlsx: Operation.default,
-                pdf: Operation.default,
-                template: {
-                    src: ['server/views/**/*.html', 'server/views/**/*.ejs'],
-                    dist: 'dist/views'
-                },
-                copys: { src: ['package.json', 'start.bat'], oper: Operation.deploy },
-                pm2: {
-                    src: 'pm2.json',
-                    oper: Operation.deploy,
-                    loader: [{
-                        pipes: [(ctx) => replace('"script": "dist/index.js",', '"script": "index.js",')]
-                    }]
-
-                }
+Development.create(gulp, __dirname, [
+    <ITaskOption>{
+        name: 'serv',
+        src: 'server',
+        dist: 'dist',
+        testSrc: 'server/test/**/*.spec.ts',
+        cleanSrc: ['dist/!(development|production)'],
+        refs: [
+            // another project.
+            (ctx) =>  pathstring;
+            '../subSystem',
+            {name: 'project_name', path:'_', cmd:'gulp build', args: '--release' },
+            {name: (ctx) => 'project_name', path: (ctx) => 'path', cmd:(ctx) => 'gulp build', args: (ctx) => ['...'] }
+        ],
+        // default run parallel.
+        refsRunWay: RunWay.parallel,
+        // set refs projec run order.
+        //refsOrder: Order,
+        asserts: {
+            css: '', less: '',
+            jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
+            ttf: Operation.default, woff: Operation.default, eot: Operation.default, xlsx: Operation.default,
+            pdf: Operation.default,
+            template: {
+                src: ['server/views/**/*.html', 'server/views/**/*.ejs'],
+                dist: 'dist/views'
             },
-            tasks: [
-                {
-                    src: 'dist/config/*',
-                    dist: 'dist/config',
-                    loader: <IDynamicTaskOption>{
-                        name: 'server-config',
-                        oper: Operation.release | Operation.deploy,
-                        pipes: [(ctx) => replace('./development', './production')]
-                    }
+            copys: { src: ['package.json', 'start.bat'], oper: Operation.deploy },
+            pm2: {
+                src: 'pm2.json',
+                oper: Operation.deploy,
+                loader: [{
+                    pipes: [(ctx) => replace('"script": "dist/index.js",', '"script": "index.js",')]
+                }]
+
+            }
+        },
+        tasks: [
+            {
+                src: 'dist/config/*',
+                dist: 'dist/config',
+                loader: <IDynamicTaskOption>{
+                    name: 'server-config',
+                    oper: Operation.release | Operation.deploy,
+                    pipes: [(ctx) => replace('./development', './production')]
                 }
-            ],
-            loader: 'development-tool-node'
-        }
-    ]).start();
+            }
+        ],
+        loader: 'development-tool-node'
+    }
+]).start();
 
  ```
 
