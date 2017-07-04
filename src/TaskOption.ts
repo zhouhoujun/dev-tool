@@ -1,5 +1,5 @@
 import {
-    Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation, TaskString
+    Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation, TaskString, IOperate
     , IAssertOption, IMap, Src, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
 } from 'development-core'
 
@@ -152,8 +152,13 @@ export interface TaskSeq {
     seq: Src[]
 }
 
-
-export interface RefProjec {
+/**
+ * Ref project
+ *
+ * @export
+ * @interface RefProject
+ */
+export interface RefProject extends IOperate {
     /**
      * project name.
      *
@@ -198,7 +203,7 @@ export interface RefProjects {
      * @type {(TaskString | RefProjec)[]}
      * @memberof RefProject
      */
-    refs?: (TaskString | RefProjec)[];
+    refs?: (TaskString | RefProject)[];
 
     /**
      * refs project run way.

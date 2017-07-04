@@ -1,4 +1,4 @@
-import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, RunWay, TaskString, IAssertOption, Src, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig } from 'development-core';
+import { Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, RunWay, TaskString, IOperate, IAssertOption, Src, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig } from 'development-core';
 export declare type contextFactory = (cfg: ITaskConfig, parent?: ITaskContext) => ITaskContext;
 /**
  * task loader option.
@@ -130,7 +130,13 @@ export interface TaskSeq {
     opt: ITaskOption;
     seq: Src[];
 }
-export interface RefProjec {
+/**
+ * Ref project
+ *
+ * @export
+ * @interface RefProject
+ */
+export interface RefProject extends IOperate {
     /**
      * project name.
      *
@@ -173,7 +179,7 @@ export interface RefProjects {
      * @type {(TaskString | RefProjec)[]}
      * @memberof RefProject
      */
-    refs?: (TaskString | RefProjec)[];
+    refs?: (TaskString | RefProject)[];
     /**
      * refs project run way.
      *

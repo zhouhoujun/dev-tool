@@ -59,14 +59,14 @@ export class ContextBuilder implements Builder {
                         name: 'refs',
                         loader: (ctx) => {
                             return ctx.generateTask(optask.refs.map(rf => {
-                                let name: string, pjpath: string, cmd, args: string[];
+                                let name: string, pjpath: string, cmd, args: string[], opt;
                                 if (_.isString(rf)) {
                                     name = path.basename(rf);
                                     pjpath = ctx.toRootPath(rf);
                                 } else if (_.isFunction(rf)) {
                                     pjpath = ctx.toRootPath(ctx.toStr(rf));
                                     name = path.basename(pjpath);
-                                } else {
+                                } else if (rf) {
                                     name = ctx.toStr(rf.name);
                                     pjpath = ctx.toRootPath(ctx.toStr(rf.path));
                                     cmd = ctx.toStr(rf.cmd);
@@ -78,13 +78,18 @@ export class ContextBuilder implements Builder {
                                             args = [srcArgs];
                                         }
                                     }
+                                    opt = _.pick(rf, 'oper', 'order', 'nonePipe', 'noneOutput');
                                 }
-                                return <IDynamicTaskOption>{
+                                if (!pjpath) {
+                                    return null;
+                                }
+                                return <IDynamicTaskOption>_.extend(opt || {}, {
                                     name: name,
                                     runWay: optask.refsRunWay || RunWay.parallel,
                                     shell: (ctx) => {
                                         cmd = cmd || 'gulp build';
                                         let cmds = '';
+
                                         if (/^[C-Z]:/.test(pjpath)) {
                                             cmds = _.first(pjpath.split(':')) + ': & ';
                                         }
@@ -109,8 +114,8 @@ export class ContextBuilder implements Builder {
                                         cmds += ` ${args.join(' ')}`;
                                         return cmds;
                                     }
-                                }
-                            }));
+                                });
+                            }).filter(t => !!t));
                         }, order: optask.refsOrder
                     }) as IContext;
 
