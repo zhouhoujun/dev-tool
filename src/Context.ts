@@ -39,7 +39,7 @@ export class Context extends TaskContext implements IContext {
 
     constructor(cfg: ITaskConfig) {
         super(cfg);
-        this._builder = builder;
+        this.builder = builder;
     }
 
     private _loaderfactory: ILoaderFactory;
