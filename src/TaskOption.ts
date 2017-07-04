@@ -188,6 +188,14 @@ export interface RefProject extends IOperate {
      * @memberof RefProjec
      */
     args?: TaskSource;
+
+    /**
+     * extra args.
+     *
+     * @type {Src}
+     * @memberof RefProject
+     */
+    extraArgs?: Src;
 }
 
 /**

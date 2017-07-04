@@ -59,7 +59,7 @@ export class ContextBuilder implements Builder {
                         name: 'refs',
                         loader: (ctx) => {
                             return ctx.generateTask(optask.refs.map(rf => {
-                                let name: string, pjpath: string, cmd, args: string[], opt;
+                                let name: string, pjpath: string, cmd, args: string[], opt, extraArgs: string[];
                                 if (_.isString(rf)) {
                                     name = path.basename(rf);
                                     pjpath = ctx.toRootPath(rf);
@@ -77,6 +77,9 @@ export class ContextBuilder implements Builder {
                                         } else if (srcArgs && _.isString(srcArgs)) {
                                             args = [srcArgs];
                                         }
+                                    }
+                                    if (rf.extraArgs) {
+                                        extraArgs = _.isArray(rf.extraArgs) ? rf.extraArgs : [rf.extraArgs];
                                     }
                                     opt = _.pick(rf, 'oper', 'order', 'nonePipe', 'noneOutput');
                                 }
@@ -110,6 +113,9 @@ export class ContextBuilder implements Builder {
                                                 }
 
                                             });
+                                        }
+                                        if (extraArgs) {
+                                            args = args.concat(extraArgs);
                                         }
                                         cmds += ` ${args.join(' ')}`;
                                         return cmds;
