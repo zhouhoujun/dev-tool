@@ -1,5 +1,5 @@
 import {
-    Order, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation, TaskString, IOperate
+    Order, TaskOperation, IPipeOption, ICustomPipe, ITaskDefine, ITask, IAsserts, RunWay, Operation, TaskString, IOperate
     , IAssertOption, IMap, Src, IContextDefine, TaskSource, IDynamicTaskOption, ITaskContext, ITaskConfig
 } from 'development-core'
 
@@ -158,7 +158,7 @@ export interface TaskSeq {
  * @export
  * @interface RefProject
  */
-export interface RefProject extends IOperate {
+export interface RefProject { // extends ISubTaskOption {
     /**
      * project name.
      *
@@ -166,6 +166,23 @@ export interface RefProject extends IOperate {
      * @memberof RefProjec
      */
     name?: TaskString;
+
+    /**
+     * operation
+     *
+     * enmu flags.
+     * @type {TaskOperation}
+     * @memberof RefProject
+     */
+    oper?: TaskOperation;
+    /**
+     * order index.
+     *
+     * @type {Order}
+     * @memberof RefProject
+     */
+    order?: Order;
+
     /**
      * project path
      *
@@ -196,6 +213,14 @@ export interface RefProject extends IOperate {
      * @memberof RefProject
      */
     extraArgs?: Src;
+
+    /**
+     * exclude args.
+     *
+     * @type {Src}
+     * @memberof RefProject
+     */
+    excludeArgs?: Src;
 }
 
 /**

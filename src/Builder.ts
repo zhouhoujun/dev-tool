@@ -59,7 +59,7 @@ export class ContextBuilder implements Builder {
                         name: 'refs',
                         loader: (ctx) => {
                             return ctx.generateTask(optask.refs.map(rf => {
-                                let name: string, pjpath: string, cmd, args: string[], opt, extraArgs: string[];
+                                let name: string, pjpath: string, cmd, args: string[], extraArgs: string[], excludeArgs: string[];
                                 if (_.isString(rf)) {
                                     name = path.basename(rf);
                                     pjpath = ctx.toRootPath(rf);
@@ -81,12 +81,37 @@ export class ContextBuilder implements Builder {
                                     if (rf.extraArgs) {
                                         extraArgs = _.isArray(rf.extraArgs) ? rf.extraArgs : [rf.extraArgs];
                                     }
-                                    opt = _.pick(rf, 'oper', 'order', 'nonePipe', 'noneOutput');
+                                    if (rf.excludeArgs) {
+                                        excludeArgs = _.isArray(rf.excludeArgs) ? rf.excludeArgs : [rf.excludeArgs];
+                                    }
                                 }
                                 if (!pjpath) {
                                     return null;
                                 }
-                                return <IDynamicTaskOption>_.extend(opt || {}, {
+
+                                if (!args) {
+                                    args = [];
+                                    _.keys(env).map(k => {
+                                        if (k === 'root' || !/^[a-zA-Z]/.test(k)) {
+                                            return;
+                                        }
+                                        let val = env[k];
+                                        if (_.isBoolean(val)) {
+                                            if (val) {
+                                                args.push(`--${k}`);
+                                            }
+                                        } else if (val) {
+                                            args.push(`--${k} ${val}`);
+                                        }
+
+                                    });
+                                }
+
+                                if (excludeArgs && excludeArgs.length > 0) {
+                                    args = args.filter(it => excludeArgs.lastIndexOf(it) < 0);
+                                }
+
+                                return <IDynamicTaskOption>_.extend(rf || {}, {
                                     name: name,
                                     runWay: optask.refsRunWay || RunWay.parallel,
                                     shell: (ctx) => {
@@ -97,23 +122,6 @@ export class ContextBuilder implements Builder {
                                             cmds = _.first(pjpath.split(':')) + ': & ';
                                         }
                                         cmds += `cd ${pjpath} & ${cmd}`;
-                                        if (!args) {
-                                            args = [];
-                                            _.keys(env).map(k => {
-                                                if (k === 'root' || !/^[a-zA-Z]/.test(k)) {
-                                                    return;
-                                                }
-                                                let val = env[k];
-                                                if (_.isBoolean(val)) {
-                                                    if (val) {
-                                                        args.push(`--${k}`);
-                                                    }
-                                                } else if (val) {
-                                                    args.push(`--${k} ${val}`);
-                                                }
-
-                                            });
-                                        }
                                         if (extraArgs) {
                                             args = args.concat(extraArgs);
                                         }
@@ -161,7 +169,7 @@ export class ContextBuilder implements Builder {
     protected createContexts(node: IContext, taskOptions: TaskOption): Promise<ITaskContext[]> {
         let tasks: ITaskOption[] = _.isArray(taskOptions) ? taskOptions : [taskOptions];
         return Promise.all(tasks.map(optask => {
-            if (optask.oper && node.oper && (node.oper & optask.oper) <= 0) {
+            if (optask.oper && node.oper && (node.oper & node.to(optask.oper)) <= 0) {
                 return null;
             }
             let ctx: IContext = node.add(optask) as IContext;
@@ -232,7 +240,8 @@ export class ContextBuilder implements Builder {
         }
         let tasks = _.isArray(optask.tasks) ? optask.tasks : [optask.tasks];
         // let idex = 0;
-        let subtasks = tasks.map(subopt => {
+        let subtasks = tasks.map(opt => {
+            let subopt = opt as ITaskOption;
             if (!subopt.order) {
                 let subOrder = ctx.to(optask.subTaskOrder);
                 if (!_.isNumber(subOrder) && subOrder) {
@@ -240,6 +249,9 @@ export class ContextBuilder implements Builder {
                 } else if (optask.subTaskRunWay) {
                     subopt.order = { runWay: optask.subTaskRunWay };
                 }
+            }
+            if (!subopt.loader && subopt.src && subopt.name) {
+                subopt.loader =  [<IDynamicTaskOption>{ pipes: [], watch: true }];
             }
             // subopt.name = subopt.name || ctx.taskName(subopt.name); // ('sub' + idex++);
             return subopt;
