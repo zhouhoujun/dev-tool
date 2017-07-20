@@ -55,66 +55,71 @@ export class ContextBuilder implements Builder {
                 let optask = node.option as ITaskOption;
                 let env = node.env;
                 if (optask.refs && optask.refs.length > 0) {
+
                     let refsctx = node.add(<ITaskOption>{
                         name: 'refs',
-                        loader: (ctx) => {
-                            return ctx.generateTask(optask.refs.map(rf => {
-                                let name: string, pjpath: string, cmd, args: string[], extraArgs: string[], excludeArgs: string[];
-                                if (_.isString(rf)) {
-                                    name = path.basename(rf);
-                                    pjpath = ctx.toRootPath(rf);
-                                } else if (_.isFunction(rf)) {
-                                    pjpath = ctx.toRootPath(ctx.toStr(rf));
-                                    name = path.basename(pjpath);
-                                } else if (rf) {
-                                    name = ctx.toStr(rf.name);
-                                    pjpath = ctx.toRootPath(ctx.toStr(rf.path));
-                                    cmd = ctx.toStr(rf.cmd);
-                                    let srcArgs = ctx.toSrc(rf.args);
-                                    if (srcArgs) {
-                                        if (_.isArray(srcArgs) && srcArgs.length > 0) {
-                                            args = srcArgs;
-                                        } else if (srcArgs && _.isString(srcArgs)) {
-                                            args = [srcArgs];
-                                        }
-                                    }
-                                    if (rf.extraArgs) {
-                                        extraArgs = _.isArray(rf.extraArgs) ? rf.extraArgs : [rf.extraArgs];
-                                    }
-                                    if (rf.excludeArgs) {
-                                        excludeArgs = _.isArray(rf.excludeArgs) ? rf.excludeArgs : [rf.excludeArgs];
-                                    }
-                                }
-                                if (!pjpath) {
-                                    return null;
-                                }
+                        loader: [],
+                        order: optask.refsOrder,
+                        runWay: optask.refsRunWay
+                    }) as IContext;
 
-                                if (!args) {
-                                    args = [];
-                                    _.keys(env).map(k => {
-                                        if (k === 'root' || !/^[a-zA-Z]/.test(k)) {
-                                            return;
-                                        }
-                                        let val = env[k];
-                                        if (_.isBoolean(val)) {
-                                            if (val) {
-                                                args.push(`--${k}`);
-                                            }
-                                        } else if (val) {
-                                            args.push(`--${k} ${val}`);
-                                        }
-
-                                    });
+                    optask.refs.forEach(rf => {
+                        let name: string, pjpath: string, cmd, args: string[], extraArgs: string[], excludeArgs: string[];
+                        if (_.isString(rf)) {
+                            name = path.basename(rf);
+                            pjpath = refsctx.toRootPath(rf);
+                        } else if (_.isFunction(rf)) {
+                            pjpath = refsctx.toRootPath(refsctx.toStr(rf));
+                            name = path.basename(pjpath);
+                        } else if (rf) {
+                            pjpath = refsctx.toRootPath(refsctx.toStr(rf.path));
+                            name = rf.name ? refsctx.toStr(rf.name) : path.basename(pjpath);
+                            cmd = refsctx.toStr(rf.cmd);
+                            let srcArgs = refsctx.toSrc(rf.args);
+                            if (srcArgs) {
+                                if (_.isArray(srcArgs) && srcArgs.length > 0) {
+                                    args = srcArgs;
+                                } else if (srcArgs && _.isString(srcArgs)) {
+                                    args = [srcArgs];
                                 }
+                            }
+                            if (rf.extraArgs) {
+                                extraArgs = _.isArray(rf.extraArgs) ? rf.extraArgs : [rf.extraArgs];
+                            }
+                            if (rf.excludeArgs) {
+                                excludeArgs = _.isArray(rf.excludeArgs) ? rf.excludeArgs : [rf.excludeArgs];
+                            }
+                        }
+                        if (!pjpath) {
+                            return null;
+                        }
 
-                                if (excludeArgs && excludeArgs.length > 0) {
-                                    args = args.filter(it => excludeArgs.lastIndexOf(it) < 0);
-                                }
-
-                                return <IDynamicTaskOption>_.extend(rf || {}, {
-                                    name: name,
-                                    runWay: optask.refsRunWay || RunWay.parallel,
+                        let task = _.extend(rf || {}, {
+                            name: name,
+                            loader: [
+                                {
                                     shell: (ctx) => {
+                                        if (!args) {
+                                            args = [];
+                                            _.keys(env).map(k => {
+                                                if (k === 'root' || !/^[a-zA-Z]/.test(k)) {
+                                                    return;
+                                                }
+                                                let val = env[k];
+                                                if (_.isBoolean(val)) {
+                                                    if (val) {
+                                                        args.push(`--${k}`);
+                                                    }
+                                                } else if (val) {
+                                                    args.push(`--${k} ${val}`);
+                                                }
+
+                                            });
+                                        }
+
+                                        if (excludeArgs && excludeArgs.length > 0) {
+                                            args = args.filter(it => excludeArgs.lastIndexOf(it) < 0);
+                                        }
                                         cmd = cmd || 'gulp build';
                                         let cmds = '';
 
@@ -128,12 +133,15 @@ export class ContextBuilder implements Builder {
                                         cmds += ` ${args.join(' ')}`;
                                         return cmds;
                                     }
-                                });
-                            }).filter(t => !!t));
-                        }, order: optask.refsOrder
-                    }) as IContext;
+                                }
+                            ]
+                        });
 
+                        refsctx.add(task);
+
+                    });
                 }
+
                 if (optask.asserts) {
                     let assertctx = node.add(<ITaskOption>{ name: 'asserts', loader: [], order: optask.assertsOrder }) as IContext;
                     let asserts = optask.asserts;
@@ -145,6 +153,7 @@ export class ContextBuilder implements Builder {
                 }
 
                 return Promise.all(component);
+
             })
             .then(() => {
                 this.setBuilt(node);
@@ -251,7 +260,7 @@ export class ContextBuilder implements Builder {
                 }
             }
             if (!subopt.loader && subopt.src && subopt.name) {
-                subopt.loader =  [<IDynamicTaskOption>{ pipes: [], watch: true }];
+                subopt.loader = [<IDynamicTaskOption>{ pipes: [], watch: true }];
             }
             // subopt.name = subopt.name || ctx.taskName(subopt.name); // ('sub' + idex++);
             return subopt;
