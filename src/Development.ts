@@ -92,21 +92,46 @@ export class Development extends Context implements IDevelopment {
     //     }
     // }
 
+    allTasks() {
+        return this.map((t) => {
+            t.getRunSequence();
+        })
+    }
+
     start(): Src {
         let gulp = this.gulp;
         let isRoot = !this.parent;
-        let btsk = isRoot ? 'build' : `build-${this.taskName(this.toStr(this.option.name))}`;
+        let btsk = isRoot ? 'build' : `build-${this.taskName(this.option.name)}`;
         gulp.task(btsk, (callback: TaskCallback) => {
             return this.run();
         });
 
-        gulp.task(isRoot ? 'start' : `start-${this.taskName(this.toStr(this.option.name))}`, (callback: TaskCallback) => {
+        gulp.task(isRoot ? 'start' : `start-${this.taskName(this.option.name)}`, (callback: TaskCallback) => {
             if (!this.env.task) {
                 return Promise.reject('start task can not empty!');
             }
             let tasks = this.env.task.split(',');
-            return this.find<Context>(ctx => tasks.indexOf(ctx.toStr(ctx.option.name)) >= 0)
-                .run();
+            let contextname: string = this.env['context'];
+            let runCtx = contextname ? this.find<Context>(ctx => ctx.toStr(ctx.option.name) === contextname) : this;
+
+            if (tasks && tasks.length > 0) {
+                return runCtx.setup()
+                    .then(() => {
+                        let excTasks = [];
+                        tasks.forEach(tk => {
+                            runCtx.each(c => {
+                                _.each(_.flatten(c.getRunSequence()), t => {
+                                    if (t.endsWith(tk) && excTasks.indexOf(t) < 0) {
+                                        excTasks.push(t)
+                                    }
+                                });
+                            })
+                        });
+                        this.runSequence(excTasks);
+                    });
+            } else {
+                return runCtx.run();
+            }
         });
 
         if (!this.parent) {
