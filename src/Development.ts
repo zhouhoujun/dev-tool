@@ -107,10 +107,7 @@ export class Development extends Context implements IDevelopment {
         });
 
         gulp.task(isRoot ? 'start' : `start-${this.taskName(this.option.name)}`, (callback: TaskCallback) => {
-            if (!this.env.task) {
-                return Promise.reject('start task can not empty!');
-            }
-            let tasks = this.env.task.split(',');
+            let tasks = this.env.task ? this.env.task.split(',') : [];
             let contextname: string = this.env['context'];
             let runCtx = contextname ? this.find<Context>(ctx => ctx.toStr(ctx.option.name) === contextname) : this;
 
