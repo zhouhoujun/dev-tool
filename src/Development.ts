@@ -111,8 +111,9 @@ export class Development extends Context implements IDevelopment {
             let contextname: string = this.env['context'];
             let runCtx = contextname ? this.find<Context>(ctx => ctx.toStr(ctx.option.name) === contextname) : this;
 
+            let tskprocess: Promise<any>;
             if (tasks && tasks.length > 0) {
-                return runCtx.setup()
+                tskprocess = runCtx.setup()
                     .then(() => {
                         let excTasks = [];
                         tasks.forEach(tk => {
@@ -127,8 +128,13 @@ export class Development extends Context implements IDevelopment {
                         this.runSequence(excTasks);
                     });
             } else {
-                return runCtx.run();
+                tskprocess = runCtx.run();
             }
+
+            return tskprocess
+                .catch(err => {
+                    process.exit(_.isNumber(err) ? err : 1);
+                })
         });
 
         if (!this.parent) {
