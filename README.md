@@ -1,5 +1,7 @@
 # packaged development-tool
 
+`development-tool` is an automation tools kit, for Web Front end and nodejs development. It is a module bundler. It's main purpose is to bundle JavaScript files for usage in a browser or nodejs, yet it is also capable of transforming, bundling, or packaging just about any resource or asset.
+
 This repo is for distribution on `npm`. The source for this module is in the
 [main repo](https://github.com/zhouhoujun/development-tool/src/mastert).
 Please file issues and pull requests against that repo.
@@ -11,9 +13,9 @@ dynamic load task and run task by command evn:
 
 ```shell
 
-gulp [build] [--build]  [--test] [--e2e]  [--release] [--depoly] [--server] [--watch]
+gulp start  [--build]  [--test] [--e2e]  [--release] [--depoly] [--server][--watch] [--task task1,task2]
 
-gulp start --task task1,task2 [--build]  [--test] [--e2e]  [--release] [--depoly] [--server] [--watch]
+gulp build [--build]  [--test] [--e2e]  [--release] [--depoly] [--server] [--watch]
 
 ```
 
@@ -21,13 +23,31 @@ gulp start --task task1,task2 [--build]  [--test] [--e2e]  [--release] [--depoly
 
 You can install this package either with `npm`.
 
+for nodejs develop, need install [development-tool-node](https://www.npmjs.com/package/development-tool-node)
+
+for front-end develop install [development-tool-web](https://www.npmjs.com/package/development-tool-web)
+
+you can bundle angularjs, angular, react, knockout, Vue, etc. ...
+easy to packag your project in any modular.
+use [development-tool-systemjs](https://www.npmjs.com/package/development-tool-systemjs) for bundle project, alse can
+use [development-tool-jspm](https://www.npmjs.com/package/development-tool-jspm) for bundle project.
+
 ### npm
 
 ```shell
 
 npm install development-tool
 
+// for nodejs develop
+npm install development-tool-node
+
+// for front end develop
+npm install development-tool-web
+
+
 ```
+
+
 
 You can `import` modules:
 

@@ -3,6 +3,13 @@ import { IDirLoaderOption } from '../TaskOption';
 import { ModuleLoader } from './ModuleLoader';
 import { IContext } from '../IContext';
 
+/**
+ * load task in directies.
+ *
+ * @export
+ * @class DirLoader
+ * @extends {ModuleLoader}
+ */
 export class DirLoader extends ModuleLoader {
 
     constructor(ctx: IContext) {

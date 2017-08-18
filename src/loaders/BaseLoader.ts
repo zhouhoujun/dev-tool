@@ -4,6 +4,14 @@ import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
 
 
+/**
+ * base loader.
+ *
+ * @export
+ * @abstract
+ * @class BaseLoader
+ * @implements {ITaskLoader}
+ */
 export abstract class BaseLoader implements ITaskLoader {
 
     name = 'base';

@@ -76,28 +76,21 @@ export class Development extends Context implements IDevelopment {
         return this.root || super.getRootPath();
     }
 
-    // setup(): Promise<Src[]> {
-    //     if (this.parent) {
-    //         return Promise.resolve([this.start()]);
-    //     } else {
-    //         return super.setup();
-    //     }
-    // }
-
-    // protected setupChildren(): Promise<ITaskContext[]> {
-    //     if (this.parent) {
-    //         return Promise.resolve([]);
-    //     } else {
-    //         return super.setupChildren();
-    //     }
-    // }
-
+    /**
+     * get all tasks sequence
+     */
     allTasks() {
         return this.map((t) => {
             t.getRunSequence();
         })
     }
 
+    /**
+     * start task.
+     *
+     * @returns {Src}
+     * @memberof Development
+     */
     start(): Src {
         let gulp = this.gulp;
         let isRoot = !this.parent;
@@ -151,7 +144,7 @@ export class Development extends Context implements IDevelopment {
 
             console.log(`
                 /**
-                 * gulp [build] [--env production|development] [--context name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
+                 * gulp [start] [--env production|development] [--context name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
                  * @params
                  *  --env  development or production;
                  *  --context app setting
@@ -161,14 +154,14 @@ export class Development extends Context implements IDevelopment {
                  *  --test  need auto load test file to node service.
                  *  --deploy run deploy tasks to deploy project.
                  *  --serve start node web service or not.
-                 *  --task taskname  spruce task taskname
+                 *  --task taskname  spruce task taskname, etc: --task task1,task2
                  **/`);
 
         } else {
 
             console.log(`
                 /**
-                 * gulp [build] [--env production|development] [--context name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
+                 * gulp [start] [--env production|development] [--context name] [--root path] [--watch] [--test] [--serve] [--release] [--task taskname]
                  * @params
                  *  --env 发布环境 默认开发环境development;
                  *  --context 设置配置文件;
@@ -178,7 +171,7 @@ export class Development extends Context implements IDevelopment {
                  *  --test  启动自动化测试
                  *  --deploy 运行加载deploy tasks, 编译发布项目。
                  *  --serve  是否在开发模式下 开启node web服务
-                 *  --task taskname  运行单独任务taskname
+                 *  --task taskname  运行单独任务taskname, etc: --task task1,task2
                  **/`);
 
         }

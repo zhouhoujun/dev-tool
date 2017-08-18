@@ -13,20 +13,6 @@ import { ContextBuilder } from './Builder'
 const factory = new LoaderFactory();
 const builder = new ContextBuilder();
 
-// /**
-// * create Context instance.
-// *
-// * @static
-// * @param {(ITaskConfig | TaskOption)} cfg
-// * @param {IContext} [parent]
-// * @returns {IContext}
-// * @memberof Context
-// */
-// export function createConextInstance(cfg: ITaskConfig | TaskOption, parent?: IContext): IContext {
-//     let config: ITaskConfig = (cfg['option'] ? cfg : { option: cfg }) as ITaskConfig;
-//     return parent? parent.add(cfg) : new Context(config, parent);
-// }
-
 /**
  * Context.
  *
@@ -80,7 +66,5 @@ export class Context extends TaskContext implements IContext {
     //             console.log('task seq:', data);
     //             return data;
     //         })
-
     // }
-
 }

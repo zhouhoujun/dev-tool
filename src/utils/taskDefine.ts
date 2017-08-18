@@ -1,6 +1,9 @@
 import { ITask, ITaskContext, ITaskDefine, } from 'development-core';
 import { IDynamicLoaderOption, ITaskOption } from '../TaskOption';
 
+/**
+ * create dynamic task define.
+ */
 export default (modules) => {
     return <ITaskDefine>{
         tasks(context: ITaskContext): Promise<ITask[]> {

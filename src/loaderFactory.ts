@@ -38,6 +38,11 @@ export class LoaderFactory implements ILoaderFactory {
 
     constructor() {
     }
+
+    /**
+     * create loader via config in context.
+     * @param context
+     */
     create(context: IContext): ITaskLoader {
         let option = context.option as ITaskOption;
         if (_.isString(option.loader)) {

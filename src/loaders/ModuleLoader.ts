@@ -5,6 +5,13 @@ import { IContext } from '../IContext';
 import taskDefine from '../utils/taskDefine';
 import * as chalk from 'chalk';
 
+/**
+ * load task from module or npm package.
+ *
+ * @export
+ * @class ModuleLoader
+ * @extends {BaseLoader}
+ */
 export class ModuleLoader extends BaseLoader {
 
     constructor(ctx: IContext) {

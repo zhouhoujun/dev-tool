@@ -3,6 +3,13 @@ import { ITaskOption, TaskLoader } from '../TaskOption';
 import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
 
+/**
+ * custom loader.
+ *
+ * @export
+ * @class CustomLoader
+ * @implements {ITaskLoader}
+ */
 export class CustomLoader implements ITaskLoader {
     name = 'custom';
     private tasks: Promise<ITask[]>;
