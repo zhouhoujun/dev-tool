@@ -44,7 +44,16 @@ export declare class Development extends Context implements IDevelopment {
      */
     constructor(config: ITaskConfig, root?: string);
     getRootPath(): string;
+    /**
+     * get all tasks sequence
+     */
     allTasks(): void[];
+    /**
+     * start task.
+     *
+     * @returns {Src}
+     * @memberof Development
+     */
     start(): Src;
     protected printHelp(help: string): void;
 }

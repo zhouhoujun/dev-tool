@@ -26,5 +26,9 @@ export interface ILoaderFactory {
  */
 export declare class LoaderFactory implements ILoaderFactory {
     constructor();
+    /**
+     * create loader via config in context.
+     * @param context
+     */
     create(context: IContext): ITaskLoader;
 }
