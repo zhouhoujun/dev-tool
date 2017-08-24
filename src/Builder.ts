@@ -196,6 +196,7 @@ export class ContextBuilder implements Builder {
     */
     protected buildAssertContext(ctx: IContext, asserts: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>, runWay?: RunWay) {
         let tasks: ITaskOption[] = [];
+        runWay = runWay || RunWay.parallel;
         _.each(_.keys(asserts), name => {
             let op: ITaskOption;
             let sr = asserts[name];
@@ -227,7 +228,15 @@ export class ContextBuilder implements Builder {
             op.defaultTaskName = name;
             op.src = op.src || (ctx.getSrc() + '/**/*.' + name);
             // op.dist = op.dist || ctx.getDist();
-            op.runWay = op.runWay || runWay || RunWay.parallel;
+
+            if (_.isUndefined(op.order) || _.isNull(op.order)) {
+                op.order = { runWay: runWay }
+            } else {
+                op.order = ctx.to(op.order);
+                if (_.isNumber(op.order)) {
+                    op.order = { value: op.order, runWay: runWay };
+                }
+            }
             tasks.push(op);
         });
 
