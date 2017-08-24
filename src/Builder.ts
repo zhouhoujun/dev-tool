@@ -120,13 +120,13 @@ export class ContextBuilder implements Builder {
                                         if (excludeArgs && excludeArgs.length > 0) {
                                             args = args.filter(it => excludeArgs.lastIndexOf(it) < 0);
                                         }
-                                        cmd = cmd || 'gulp build';
+                                        cmd = cmd || 'gulp start';
                                         let cmds = '';
 
                                         if (/^[C-Z]:/.test(pjpath)) {
-                                            cmds = _.first(pjpath.split(':')) + ': & ';
+                                            cmds = _.first(pjpath.split(':')) + ': && ';
                                         }
-                                        cmds += `cd ${pjpath} & ${cmd}`;
+                                        cmds += `cd ${pjpath} && ${cmd}`;
                                         if (extraArgs) {
                                             args = args.concat(extraArgs);
                                         }
