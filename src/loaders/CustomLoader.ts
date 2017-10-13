@@ -1,7 +1,8 @@
 import { ITask, IEnvOption, ITaskContext, bindingConfig, ITaskConfig } from 'development-core';
-import { ITaskOption, TaskLoader } from '../TaskOption';
+import { ITaskOption } from '../TaskOption';
 import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
+import { TaskLoader } from '../types';
 
 /**
  * custom loader.

@@ -1,5 +1,6 @@
 import { ITask, ITaskContext, ITaskDefine, } from 'development-core';
-import { IDynamicLoaderOption, ITaskOption } from '../TaskOption';
+import { ITaskOption } from '../TaskOption';
+import { IDynamicLoaderOption } from '../IDynamicLoaderOption';
 
 /**
  * create dynamic task define.

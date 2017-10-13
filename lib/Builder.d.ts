@@ -1,6 +1,6 @@
 import { ITaskContext, IMap, IAsserts, Src, IDynamicTaskOption, Operation, RunWay, Builder } from 'development-core';
 import { IContext } from './IContext';
-import { TaskOption } from './TaskOption';
+import { TaskOption } from './types';
 export declare class ContextBuilder implements Builder {
     /**
      * build context component.

@@ -1,9 +1,9 @@
 import * as _ from 'lodash';
 import { Gulp, TaskCallback } from 'gulp';
-import { Operation, ITaskConfig, ITaskContext, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
-import { TaskOption, ITaskOption } from './TaskOption';
+import { ITaskOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
+import { Src, ITaskConfig, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 
 
 export interface IDevelopment extends IContext {

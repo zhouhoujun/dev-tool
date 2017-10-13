@@ -1,13 +1,11 @@
-import {
-    ITaskContext, TaskContext, ITaskConfig, IAssertOption, Src, ITask, IDynamicTaskOption, Operation, RunWay, Builder
-} from 'development-core';
 import * as _ from 'lodash';
 import { TaskCallback } from 'gulp';
 import { IContext } from './IContext';
-import { ITaskOption, TaskOption } from './TaskOption';
+import { ITaskOption } from './TaskOption';
 import { ITaskLoader } from './ITaskLoader';
 import { ILoaderFactory, LoaderFactory } from './loaderFactory';
 import { ContextBuilder } from './Builder'
+import { TaskContext, ITaskConfig, ITaskContext } from 'development-core';
 
 
 const factory = new LoaderFactory();

@@ -1,7 +1,7 @@
 // IDynamicTaskOption
 import * as gulp from 'gulp';
 import 'development-core';
-import { Development, ITaskOption, TaskOption } from './src/tools';
+import { Development, ITaskOption, TaskOption } from './src/index';
 import { Operation, Pipe } from 'development-core';
 
 import * as mocha from 'gulp-mocha';

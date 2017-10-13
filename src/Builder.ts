@@ -1,13 +1,14 @@
 import {
-    ITaskContext, IMap, IAsserts, TaskContext, ITaskConfig, Src, ITask, IDynamicTaskOption, Operation, RunWay, Builder
+    ITaskContext, IMap, IAsserts, TaskContext, ITaskConfig, Src, ITask, IDynamicTaskOption, Operation, RunWay, Builder, Order, IOrder
 } from 'development-core';
 import * as _ from 'lodash';
 import { TaskCallback } from 'gulp';
 import * as path from 'path';
 import { IContext } from './IContext';
-import { ITaskOption, TaskOption } from './TaskOption';
+import { ITaskOption } from './TaskOption';
 import { ILoaderFactory, LoaderFactory } from './loaderFactory';
 import { Context } from './Context';
+import { TaskOption } from './types';
 
 export class ContextBuilder implements Builder {
 
@@ -232,7 +233,7 @@ export class ContextBuilder implements Builder {
             if (_.isUndefined(op.order) || _.isNull(op.order)) {
                 op.order = { runWay: runWay }
             } else {
-                op.order = ctx.to(op.order);
+                op.order = ctx.to<Order>(op.order);
                 if (_.isNumber(op.order)) {
                     op.order = { value: op.order, runWay: runWay };
                 }
@@ -261,9 +262,9 @@ export class ContextBuilder implements Builder {
         let subtasks = tasks.map(opt => {
             let subopt = opt as ITaskOption;
             if (!subopt.order) {
-                let subOrder = ctx.to(optask.subTaskOrder);
+                let subOrder = ctx.to<Order>(optask.subTaskOrder);
                 if (!_.isNumber(subOrder) && subOrder) {
-                    optask.order = optask.order || subOrder.runWay;
+                    optask.order = optask.order || (<IOrder>subOrder).runWay;
                 } else if (optask.subTaskRunWay) {
                     subopt.order = { runWay: optask.subTaskRunWay };
                 }

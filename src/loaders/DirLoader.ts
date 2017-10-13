@@ -1,7 +1,7 @@
 import { ITask, ITaskDefine, ITaskContext } from 'development-core';
-import { IDirLoaderOption } from '../TaskOption';
 import { ModuleLoader } from './ModuleLoader';
 import { IContext } from '../IContext';
+import { IDirLoaderOption } from '../IDirLoaderOption';
 
 /**
  * load task in directies.

@@ -4,11 +4,13 @@ import { expect, assert } from 'chai';
 import { ILoaderFactory, LoaderFactory } from '../src/loaderFactory';
 import { Operation, ITask, ITaskConfig } from 'development-core';
 import { ITaskLoader } from '../src/ITaskLoader';
-import { IDirLoaderOption, IDynamicLoaderOption, ITaskOption } from '../src/TaskOption';
+import { ITaskOption } from '../src/TaskOption';
 import { Context } from '../src/Context';
 
 let root = __dirname;
 import * as path from 'path';
+import { IDynamicLoaderOption } from '../src/IDynamicLoaderOption';
+import { IDirLoaderOption } from '../src/IDirLoaderOption';
 
 describe('LoaderFactory', function () {
     // var factory: ILoaderFactory;

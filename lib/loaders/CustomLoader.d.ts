@@ -1,7 +1,7 @@
 import { ITask } from 'development-core';
-import { TaskLoader } from '../TaskOption';
 import { IContext } from '../IContext';
 import { ITaskLoader } from '../ITaskLoader';
+import { TaskLoader } from '../types';
 /**
  * custom loader.
  *

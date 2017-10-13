@@ -1,12 +1,15 @@
 import { ITaskLoader } from './ITaskLoader';
 import { DirLoader } from './loaders/DirLoader';
 import { IContext } from './IContext';
-import { ITaskOption, TaskLoader, ILoaderOption, IDynamicLoaderOption } from './TaskOption'
+import { ITaskOption } from './TaskOption'
 import { ModuleLoader } from './loaders/ModuleLoader';
 import { DynamicLoader } from './loaders/DynamicLoader';
 import { CustomLoader } from './loaders/CustomLoader';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
+import { TaskLoader } from './types';
+import { IDynamicLoaderOption } from './IDynamicLoaderOption';
+import { ILoaderOption } from './ILoaderOption';
 
 /**
  * loader factory.

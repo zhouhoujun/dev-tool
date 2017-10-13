@@ -1,9 +1,9 @@
 import { ITaskDefine } from 'development-core';
-import { ILoaderOption } from '../TaskOption';
 import { BaseLoader } from './BaseLoader';
 import { IContext } from '../IContext';
 import taskDefine from '../utils/taskDefine';
 import * as chalk from 'chalk';
+import { ILoaderOption } from '../ILoaderOption';
 
 /**
  * load task from module or npm package.

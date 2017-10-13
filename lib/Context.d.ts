@@ -1,7 +1,7 @@
-import { ITaskContext, TaskContext, ITaskConfig } from 'development-core';
 import { IContext } from './IContext';
 import { ITaskLoader } from './ITaskLoader';
 import { ILoaderFactory } from './loaderFactory';
+import { TaskContext, ITaskConfig, ITaskContext } from 'development-core';
 /**
  * Context.
  *

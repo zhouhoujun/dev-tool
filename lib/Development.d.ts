@@ -1,9 +1,9 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { ITaskConfig, Src, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 import { ITaskOption } from './TaskOption';
 import { IContext } from './IContext';
 import { Context } from './Context';
+import { Src, ITaskConfig, IAssertOption, IDynamicTaskOption, RunWay } from 'development-core';
 export interface IDevelopment extends IContext {
     /**
      * start.
