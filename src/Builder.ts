@@ -178,6 +178,18 @@ export class ContextBuilder implements Builder {
 
     protected createContexts(node: IContext, taskOptions: TaskOption): Promise<ITaskContext[]> {
         let tasks: ITaskOption[] = _.isArray(taskOptions) ? taskOptions : [taskOptions];
+        if (node.env['exclude']) {
+            let excludes = _.filter(node.env['exclude'].split(','), it => !!it);
+            if (excludes.length > 0) {
+                tasks = tasks.filter(t => {
+                    if (t.name) {
+                        return excludes.indexOf(t.name) < 0;
+                    }
+                    return true;
+                });
+            }
+
+        }
         return Promise.all(tasks.map(optask => {
             if (optask.oper && node.oper && (node.oper & node.to(optask.oper)) <= 0) {
                 return null;
