@@ -214,7 +214,11 @@ export class ContextBuilder implements Builder {
             let op: ITaskOption;
             let sr = asserts[name];
             if (_.isString(sr)) {
-                op = <ITaskOption>{ src: sr };
+                if (sr.indexOf('development-') === 0 || ctx.hasNpmModule(sr)) {
+                    op = <ITaskOption>{ loader: sr };
+                } else {
+                    op = <ITaskOption>{ src: sr };
+                }
             } else if (_.isNumber(sr)) {
                 // watch with Operation.autoWatch.
                 op = <ITaskOption>{ loader: [{ oper: sr, name: name, pipes: [] }] };

@@ -15,7 +15,7 @@ Development.create(gulp, __dirname, [
         buildDist: 'build',
         testSrc: 'test/**/*.spec.ts',
         asserts: {
-            ts: { loader: 'development-assert-ts' }
+            ts: 'development-assert-ts'
         },
         loader: [
             {
