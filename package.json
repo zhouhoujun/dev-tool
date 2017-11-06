@@ -1,6 +1,6 @@
 {
     "name": "development-tool",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "description": "development-tool is an automation tools kit, for Web Front end and nodejs development. It is a module bundler. It's main purpose is to bundle JavaScript files for usage in a browser or nodejs, yet it is also capable of transforming, bundling, or packaging just about any resource or asset.",
     "main": "./lib/index.js",
     "typings": "./lib/index.d.ts",
