@@ -110,9 +110,9 @@ Development.create(gulp, __dirname, [
         // set refs projec run order.
         //refsOrder: Order,
         asserts: {
-            css: '', less: '',
-            jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
-            ttf: Operation.default, woff: Operation.default, eot: Operation.default, xlsx: Operation.default,
+            // default config.
+            // css:  Operation.default, jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,ttf: Operation.default, woff: Operation.default, eot: Operation.default, ts:'development-asserts--ts'
+            xlsx: Operation.default,
             pdf: Operation.default,
             template: {
                 src: ['server/views/**/*.html', 'server/views/**/*.ejs'],
@@ -152,7 +152,7 @@ Development.create(gulp, __dirname, [
 
 import * as gulp from 'gulp';
 import * as _ from 'lodash';
-import { Pipe, Operation, IMap, IDynamicTaskOption } from 'development-core';
+import { Pipe, Operation, IMap, ITaskContext, IDynamicTaskOption, RunWay, IOrder } from 'development-core';
 import { Development, ITaskOption } from 'development-tool';
 import { IBundlesConfig, IBundleGroup } from 'development-tool-systemjs';
 import { IWebTaskOption } from 'development-tool-web';
@@ -165,12 +165,14 @@ const jeditor = require('gulp-json-editor');
 const through = require('through2');
 const JSONC = require('json-comments');
 const replace = require('gulp-replace');
-// const babel = require('gulp-babel');
 const del = require('del');
+import * as htmlreplace from 'gulp-html-replace';
 const htmlMin = require('gulp-minify-html');
 const uglify = require('gulp-uglify');
-// const inlineNg2Template = require('gulp-inline-ng2-template');
 const sass = require('gulp-sass');
+const less = require('gulp-less');
+const targz = require('tar.gz');
+const zip = require('gulp-zip');
 
 interface Packages {
     name: string;
@@ -186,9 +188,9 @@ Development.create(gulp, __dirname, [
         testSrc: 'server/test/**/*.spec.ts',
         cleanSrc: 'dist/!(development|production)',
         asserts: {
-            css: '', less: '',
-            jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
-            ttf: Operation.default, woff: Operation.default, eot: Operation.default, xlsx: Operation.default,
+            // default config.
+            // css:  Operation.default, jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,ttf: Operation.default, woff: Operation.default, eot: Operation.default, ts:'development-asserts--ts'
+            xlsx: Operation.default,
             pdf: Operation.default,
             template: {
                 src: ['server/views/**/*.html', 'server/views/**/*.ejs'],
@@ -201,7 +203,6 @@ Development.create(gulp, __dirname, [
                 loader: [{
                     pipes: [(ctx) => replace('"script": "dist/index.js",', '"script": "index.js",')]
                 }]
-
             }
         },
         tasks: [
@@ -220,6 +221,7 @@ Development.create(gulp, __dirname, [
     <IWebTaskOption>{
         name: 'web',
         src: 'client',
+        test: false,
         dist: 'dist/development',
         releaseDist: 'dist/production',
         cleanSrc: (ctx) => {
@@ -239,35 +241,70 @@ Development.create(gulp, __dirname, [
             }
         },
         browsersync: {
+            // serverBaseDir: ctx => [ctx.env.root, ctx.getDist()],
             files: ['node_modules/**/*']
+            // , filesByCtx: ctx => {
+            //     if (ctx.env['all']) {
+            //         return ctx.toRootPath('../ism-client/node_modules/**/*')
+            //     }
+            //     return [];
+            // }
         },
         karma: {
-            systemjs: {
+            // karmaBasePath: '', // ctx.getRootPath(), // 'dist/development',
+            jspm: {
                 systemjs: ['systemjs/dist/system-polyfills', 'systemjs/dist/system'],
                 config: ['systemjs.config.js'],
                 resource: 'assets'
             }
         },
         loader: 'development-tool-web',
+        assertsOrder: total => 1 / total,
+        // assertsRunWay: RunWay.sequence,
+        // name: 'web',
         asserts: {
-            css: '', // less: '',
-            jpeg: Operation.default, jpg: Operation.default, png: Operation.default, svg: Operation.default,
-            ttf: Operation.default, woff: Operation.default, eot: Operation.default, xlsx: Operation.default,
+            // default config.
+            // css:  Operation.default | Operation.autoWatch, jpeg: Operation.default | Operation.autoWatch, jpg: Operation.default | Operation.autoWatch, png: Operation.default | Operation.autoWatch, svg: Operation.default | Operation.autoWatch,ttf: Operation.default | Operation.autoWatch, woff: Operation.default | Operation.autoWatch, eot: Operation.default | Operation.autoWatch, ts:'development-asserts--ts'
+            xlsx: Operation.default,
             pdf: Operation.default,
             bootstrapfonts: {
-                src: 'node_modules/bootstrap-sass/assets/fonts/**',
-                dist: ctx => ctx.parent.toDistPath('./fonts')
+                src: 'node_modules/bootstrap/fonts/**',
+                dist: ctx => ctx.parent.toDistPath('./assets/fonts')
+            },
+            awesomeFonts: {
+                src: 'node_modules/font-awesome/fonts/**',
+                dist: ctx => ctx.parent.toDistPath('./assets/fonts')
+            },
+            ioniconsFonts: {
+                src: 'node_modules/ionicons/dist/fonts/**',
+                dist: ctx => ctx.parent.toDistPath('./assets/fonts')
+            },
+            less: {
+                src: 'client/**/*.less',
+                loader: [{
+                    oper: Operation.default | Operation.autoWatch,
+                    pipes: [
+                        (ctx) => less({
+                            paths: [
+                                ctx.toRootPath('client'),
+                                ctx.toRootPath('node_modules')
+                            ]
+                        }).on('error', console.log),
+                        ctx => replace('@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic);', '')
+                    ]
+                }]
             },
             scss: {
                 src: 'client/**/*.scss',
                 loader: [{
                     oper: Operation.default | Operation.autoWatch,
                     pipes: [
+                        // () => cache('sass_files'),
                         (ctx) => sass({
                             outputStyle: 'compressed',
                             includePaths: [
-                                ctx.toDistPath('asserts'),
-                                ctx.toRootPath('node_modules/bootstrap-sass/assets/stylesheets')
+                                ctx.toRootPath('client'),
+                                ctx.toRootPath('node_modules')
                             ]
                         }).on('error', sass.logError)
                     ]
@@ -301,13 +338,14 @@ Development.create(gulp, __dirname, [
             config: {
                 src(ctx) {
                     if (ctx.env.config) {
-                        return `client/config-${ctx.env.config}.json`;
+                        return `client/${ctx.env.config}.json`;
                     } else {
-                        return 'client/config.json';
+                        return ctx.env.deploy ? 'client/config-deploy.json' : 'client/config.json';
                     }
                 },
                 loader: [
                     {
+                        // name: 'config',
                         oper: Operation.default | Operation.autoWatch,
                         pipes: [
                             () => cache('config_json'),
@@ -326,7 +364,10 @@ Development.create(gulp, __dirname, [
                                 callback();
                             }),
                             () => rename('config.json'),
-                            () => jeditor({})
+                            (ctx) => jeditor((json: any) => {
+                                json.version = ctx.env['version'];
+                                return json;
+                            })
                         ]
                     }
                 ]
@@ -350,21 +391,10 @@ Development.create(gulp, __dirname, [
                 }]
             },
             ts: {
+                uglify: true,
+                sourceMaps: (ctx) => (ctx.oper & Operation.deploy) <= 0,
                 src: ['client/**/*.ts', 'test/**/*.ts'],
-                // will run after anthor assert complete.
                 order: <IOrder>{ value: 1, runWay: RunWay.sequence },
-                tsPipes: <Pipe[]>[
-                     (ctx: ITaskContext) =>  inlineNg2Template({ base:  '/app' }),
-                     () => tslint()
-                     // { toTransform: (ctx) => { console.log('/-------------------\ninlineNg2Template'); return inlineNg2Template({ base:  ctx.toDistPath('./app') , target: 'es5' })}, order: total => 1 / total },
-                     // { toTransform: () => tslint(), order: total => 2 / total }
-                ],
-                // pipes: [
-                     //... js pipe task.
-                // ],
-                loader: 'development-assert-ts'
-            },
-            tsx: {
                 loader: 'development-assert-ts'
             },
             js: 'client/**/*.js'
@@ -379,14 +409,8 @@ Development.create(gulp, __dirname, [
                 systemConfig: 'dist/production/systemjs.config.js',
                 mainfile: 'boot.js',
                 loader: 'development-tool-systemjs',
-                bust: (ctx) => <string>ctx.getPackage()['version'],
+                bust: (ctx) => ctx.env['version'] || ctx.getPackage()['version'],
                 baseURL: (ctx) => {
-                    let val = ctx.env['aspnet'];
-                    if (_.isString(val)) {
-                        return val;
-                    } else if (val) {
-                        return 'app/dist/production';
-                    }
                     return './';
                 },
                 includePackageFiles: [
@@ -401,8 +425,9 @@ Development.create(gulp, __dirname, [
                     let routes: Packages[] = [
                         { name: 'core', pattern: 'app/core/**/!(routing).module.js' },
                         { name: 'shared', pattern: 'app/shared/**/!(routing).module.js' },
-                        { name: 'dashboard', pattern: 'app/dashboard/**/!(routing).module.js' },
-                        { name: 'app', items: ['app/app.module.js', 'app/boot.js'] }
+                        { name: 'layout', pattern: 'app/layout/**/!(routing).module.js' },
+                        { name: 'source', pattern: 'app/data-source/**/!(routing).module.js' },
+                        { name: 'app', items: ['app/app.module.js', 'app/main.js'] }
                     ];
                     let dist = ctx.parent.getDist();
                     return Promise.all(_.map(routes, r => {
@@ -438,14 +463,15 @@ Development.create(gulp, __dirname, [
                         return bundle;
                     });
                 },
-                depsExclude: ['angular-i18n', 'jquery', 'rxjs', 'app', 'ag-grid', '@angularclass', 'plugin-babel', 'systemjs-babel-build', 'ts', 'typescript'],
+                depsExclude: ['angular-i18n', 'rxjs', 'app', 'raphael', 'ag-grid', 'ionicons', 'font-awesome', 'plugin-babel', 'systemjs-babel-build', 'ts', 'typescript'],
                 bundleDeps: (ctx, deps) => {
-                    let libs = ['css', 'json', 'lodash', 'text', 'zone.js', 'reflect-metadata', 'moment', 'core-js-shim', 'url'];
+                    let libs = ['css', 'json', 'text',
+                        'lodash', 'zone.js', 'reflect-metadata', 'moment', 'core-js-shim', 'url'];
                     let angularlibs = _.filter(deps, it => {
                         return it.indexOf('@angular') === 0 && it.indexOf('@angularclass') < 0;
                     });
 
-                    let ngtools = ['angular2-grid', 'highcharts', 'angular2-highcharts', 'ng2-validation', 'ng2-file-upload', 'ng2-translate', 'ng2-bootstrap'];
+                    let ngtools = ['angular2-highcharts', 'ng2-validation', 'ng2-file-upload', '@ngx-translate/core', '@ngx-translate/http-loader', '@ng-bootstrap/ng-bootstrap'];
 
                     return {
                         libs: {
@@ -460,7 +486,7 @@ Development.create(gulp, __dirname, [
                         tools: {
                             combine: true,
                             items: _.filter(deps, function (d) {
-                                return skslibs.indexOf(d) < 0 && libs.indexOf(d) < 0 && angularlibs.indexOf(d) < 0 && ngtools.indexOf(d) < 0;
+                                return libs.indexOf(d) < 0 && angularlibs.indexOf(d) < 0 && ngtools.indexOf(d) < 0;
                             }),
                             exclude: ['libs', 'angularlibs']
                         },
@@ -469,9 +495,13 @@ Development.create(gulp, __dirname, [
                             items: ngtools,
                             exclude: ['libs', 'angularlibs', 'tools']
                         }
+                        // ...
                     };
-                },
-                pipes: [
+                }
+                , pipes: [
+                    () => replace(/\/{0,1}(\.\.\/)*node_modules\/bootstrap\/fonts/gi, '(/assets/fonts'),
+                    () => replace(/\/{0,1}(\.\.\/)*node_modules\/font-awesome\/fonts/gi, '/assets/fonts'),
+                    () => replace(/\/{0,1}(\.\.\/)*node_modules\/ionicons\/dist\/fonts/gi, '/assets/fonts')
                     () => uglify()
                 ]
                 , mainfilePipes: [
@@ -483,7 +513,7 @@ Development.create(gulp, __dirname, [
                     {
                         name: 'clean-production',
                         oper: Operation.release,
-                        task: (ctx) => del(ctx.toDistSrc(['app', 'common', 'jspm-config', 'assets/**/*.less']))
+                        task: (ctx) => del(ctx.toDistSrc(['app', 'common', 'jspm-config', 'assets/**/*.less', 'assets/**/*.scss']))
                     },
                     {
                         name: 'copy-index',
@@ -493,6 +523,39 @@ Development.create(gulp, __dirname, [
                         pipes: []
                     }
                 ]
+            }
+        ]
+    },
+    <ITaskOption>{
+        name: 'publishHtml',
+        oper: Operation.deploy,
+        loader: [
+            {
+                name: 'copy',
+                src: 'dist/production/**',
+                dist: 'publish/html'
+            },
+            {
+                name: 'zip',
+                src: 'publish/html/**/*',
+                dist: 'publish',
+                pipes: [
+                    (ctx) => zip('html.zip')
+                ]
+            },
+            {
+                name: 'gztar',
+                task: (ctx) => {
+                    // let version = ctx.env['version'] || ctx.getPackage()['version'];
+                    return targz().compress(ctx.toRootPath('publish/html'), ctx.toRootPath(`publish/html.tar.gz`))
+                        .catch(err => {
+                            console.log(err);
+                        })
+                }
+            },
+            {
+                name: 'clear',
+                task: (ctx) => del(ctx.toRootPath('publish/html'))
             }
         ]
     },
@@ -514,15 +577,17 @@ Development.create(gulp, __dirname, [
                 src: 'docker-compose.yml',
                 dist: './publish',
                 exportImage: true,
-                images: ['test_webapp', 'test_nginx'],
-                service: 'www.yourserver.com',
-                user: 'test',
-                psw: 'test',
+                version: (ctx) => ctx.env['version'] || ctx.getPackage()['version'],
+                images: ['project_web', 'project_nginx'],
+                service: 'www.project.com',
+                user: 'user',
+                psw: 'password',
                 loader: 'development-tool-docker'
             }]
     }
 ])
-.start();
+    .start();
+
 
 ```
 
